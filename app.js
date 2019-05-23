@@ -12,7 +12,8 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use('/api/users', users)
-app.use('/static', express.static(path.join(__dirname, 'public')))
+app.use('*/css',express.static(path.join(__dirname, 'public/css')))
+app.use('*/js',express.static(path.join(__dirname, 'public/js')))
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')))
 
 app.listen(port, () => console.log('the server has started'))
