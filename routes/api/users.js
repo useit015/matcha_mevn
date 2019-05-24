@@ -20,10 +20,18 @@ router.post('/login', (req, res) => {
 	const sql = `SELECT * FROM users WHERE users.username = '${req.body.username}' AND verified = 1`
 	db.query(sql, (err, rows) => {
 		if (err) throw err
-		jwt.sign({ user: rows[0] }, 'secretkey', { expiresIn: '30s' }, (err, token) => {
-			if (err) throw err
-			res.json({ token })
-		})
+		bcrypt.compare(req.body.password, rows[0].password)
+			.then((err, result) => {
+				if (err) throw err
+				if (result) {
+					jwt.sign({ user: rows[0] }, 'secretkey', { expiresIn: '30s' }, (err, token) => {
+						if (err) throw err
+						res.json({ token })
+					})
+				} else {
+					res.json({ status: false })
+				}
+			})
 	})
 })
 
@@ -38,6 +46,7 @@ router.post('/add', (req, res) => {
 		vkey: bcrypt.genSaltSync(10)
 	}
 	// MUST VALIDATE USER !!!!
+	// AND MUST SEND VALIDATION EMAIL !!!!
 	const sql = `INSERT INTO users (first_name, last_name, username, email, password, vkey)
 		VALUES ('${user.first_name}', '${user.last_name}', '${user.username}', '${user.email}', '${user.password}', '${user.vkey}')`
 	db.query(sql, err => {
