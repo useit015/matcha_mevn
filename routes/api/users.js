@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken')
 const db = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
-	password: '0O*ussama',
+	password: 'root',
 	database: 'slim'
 })
 
@@ -18,10 +18,10 @@ db.connect(err => {
 
 router.post('/login', (req, res) => {
 	// MUST VALIDATE INPUT !!!!
-	const sql = `SELECT * FROM users WHERE username = '${req.body.username}' AND verifierd = 1`
+	const sql = `SELECT * FROM users WHERE username = '${req.body.username}'`
 	db.query(sql, (err, rows) => {
 		if (err) throw err
-		if (bcrypt.compare(req.body.password, rows[0].password)) {
+		if (rows[0].verified && bcrypt.compare(req.body.password, rows[0].password)) {
 			jwt.sign({ user: rows[0] }, 'secretkey', (err, token) => {
 				if (err) throw err
 				res.json({ token })
