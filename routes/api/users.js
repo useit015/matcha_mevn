@@ -20,8 +20,7 @@ router.post('/login', (req, res) => {
 	const sql = `SELECT * FROM users WHERE users.username = '${req.body.username}' AND verified = 1`
 	db.query(sql, (err, rows) => {
 		if (err) throw err
-		bcrypt.compare(req.body.password, rows[0].password)
-			.then((err, result) => {
+		bcrypt.compare(req.body.password, rows[0].password, (err, result) => {
 				if (err) throw err
 				if (result) {
 					jwt.sign({ user: rows[0] }, 'secretkey', { expiresIn: '30s' }, (err, token) => {
@@ -55,7 +54,7 @@ router.post('/add', (req, res) => {
 	})
 })
 
-router.get('/api/users', (req, res) => {
+router.get('/', (req, res) => {
 	db.query('SELECT * FROM users, images WHERE users.id = images.user_id AND images.profile = 1', (err, rows, fields) => {
 		if (err) throw err
 		res.json(rows)

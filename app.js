@@ -15,6 +15,6 @@ app.use('/api/users', users)
 app.use('*/css',express.static(__dirname + '/public/css'))
 app.use('*/js',express.static(__dirname + '/public/js'))
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')))
+app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')))
 
 app.listen(port, () => console.log(`The server has started on port -> ${port}`))
