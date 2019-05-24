@@ -21,16 +21,14 @@ router.post('/login', (req, res) => {
 	const sql = `SELECT * FROM users WHERE username = '${req.body.username}' AND verifierd = 1`
 	db.query(sql, (err, rows) => {
 		if (err) throw err
-		bcrypt.compare(req.body.password, rows[0].password, (err, result) => {
-			if (result) {
-				jwt.sign({ user: rows[0] }, 'secret', (err, token) => {
-					if (err) throw err
-					res.json({ token })
-				})
-			} else {
-				res.json({ status: false })
-			}
-		})
+		if (bcrypt.compare(req.body.password, rows[0].password)) {
+			jwt.sign({ user: rows[0] }, 'secretkey', (err, token) => {
+				if (err) throw err
+				res.json({ token })
+			})
+		} else {
+			res.json({ status: false })
+		}
 	})
 })
 
