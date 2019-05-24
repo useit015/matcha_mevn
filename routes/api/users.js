@@ -17,21 +17,25 @@ db.connect(err => {
 })
 
 router.post('/login', (req, res) => {
+	// MUST VALIDATE INPUT !!!!
 	const sql = `SELECT * FROM users WHERE username = '${req.body.username}' AND verifierd = 1`
 	db.query(sql, (err, rows) => {
 		if (err) throw err
-		if (bcrypt.compareSync(req.body.password, rows[0].password)) {
-			jwt.sign({ user: rows[0] }, 'secretkey', (err, token) => {
-				if (err) throw err
-				res.json({ token })
-			})
-		} else {
-			res.json({ status: false })
-		}
+		bcrypt.compare(req.body.password, rows[0].password, (err, result) => {
+			if (result) {
+				jwt.sign({ user: rows[0] }, 'secret', (err, token) => {
+					if (err) throw err
+					res.json({ token })
+				})
+			} else {
+				res.json({ status: false })
+			}
+		})
 	})
 })
 
 router.post('/add', (req, res) => {
+	// MUST VALIDATE INPUT !!!!
 	const salt = bcrypt.genSaltSync(10)
 	const user = {
 		first_name: req.body.first_name,
