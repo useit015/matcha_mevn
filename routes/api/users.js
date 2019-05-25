@@ -18,6 +18,40 @@ db.connect(err => {
 	console.log('MySql Connected...');
 })
 
+router.post('/getmatches', (req, res) => {
+	const sql = `SELECT
+					matches.matched as matched_id,
+					matches.created_at as match_date,
+					users.username as username,
+					images.name as profile_image
+				FROM matches
+				INNER JOIN users
+				ON matches.matched = users.id
+				INNER JOIN images
+				ON matches.matched = images.user_id
+				where matches.matcher = ${req.body.id}
+				AND images.profile = 1`
+	db.query(sql, (err, following) => {
+		if (err) throw err
+		const sql = `SELECT
+						matches.matcher as matcher_id,
+						matches.created_at as match_date,
+						users.username as username,
+						images.name as profile_image
+					FROM matches
+					INNER JOIN users
+					ON matches.matcher = users.id
+					INNER JOIN images
+					ON matches.matcher = images.user_id
+					where matches.matched = ${req.body.id}
+					AND images.profile = 1`
+		db.query(sql, (err, followers) => {
+			if (err) throw err
+			res.json([...following, ...followers])
+		})
+	})
+})
+
 router.post('/isloggedin', (req, res) => {
 	// MUST VALIDATE INPUT !!!!
 	const sql = `SELECT * FROM users WHERE token = '${req.body.token}' AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
@@ -35,7 +69,6 @@ router.post('/isloggedin', (req, res) => {
 				// 	if (err) throw err
 				// })
 			})
-			res.json(user)
 		} else {
 			res.json({ status: 'not logged in' })
 		}
