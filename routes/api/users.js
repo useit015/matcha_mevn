@@ -52,6 +52,48 @@ router.post('/getmatches', (req, res) => {
 	})
 })
 
+router.post('/gethistory', (req, res) => {
+	const sql = `SELECT
+					history.visitor as visitor_id,
+					history.created_at as visit_date,
+					users.username as username,
+					images.name as profile_image
+				FROM history
+				INNER JOIN users 
+				ON history.visitor = users.id
+				INNER JOIN images
+				ON history.visitor = images.user_id
+				WHERE history.visited = ${req.body.id}
+				AND images.profile = 1`
+	db.query(sql, (err, visitors) => {
+		if (err) throw err
+		const sql = `SELECT
+						history.visited as visited_id,
+						history.created_at as visit_date,
+						users.username as username,
+						images.name as profile_image
+					FROM history
+					INNER JOIN users 
+					ON history.visited = users.id
+					INNER JOIN images
+					ON history.visited = images.user_id
+					WHERE history.visitor = ${req.body.id}
+					AND images.profile = 1`
+		db.query(sql, (err, visited) => {
+			if (err) throw err
+			res.json([...visitors, ...visited])
+		})
+	})
+})
+
+router.post('/getblocked', (req, res) => {
+	const sql = `SELECT * FROM blocked where blocker = ${req.body.id} OR blocked = ${req.body.id}`
+	db.query(sql, (err, blacklist) => {
+		if (err) throw err
+		res.json(blacklist)
+	})
+})
+
 router.post('/isloggedin', (req, res) => {
 	// MUST VALIDATE INPUT !!!!
 	const sql = `SELECT * FROM users WHERE token = '${req.body.token}' AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
