@@ -278,13 +278,13 @@ router.post('/block/:id', (req, res) => {
 
 router.post('/match/:id', (req, res) => {
 	if (req.body.liked) {
-		const sql = `DELETE FROM matches where matcher = ${req.body.matcher} AND matched = ${req.param.id}`
+		const sql = `DELETE FROM matches where matcher = ${req.body.matcher} AND matched = ${req.params.id}`
 		db.query(sql, err => {
 			if (err) throw err
 			res.json('User unMatched')
 		})
 	} else {
-		const sql = `SELECT * FROM matches where matcher = '${req.body.matcher}' AND matched = '${req.param.id}'`
+		const sql = `SELECT * FROM matches where matcher = '${req.body.matcher}' AND matched = '${req.params.id}'`
 		db.query(sql, (err, rows) => {
 			if (err) throw err
 			if (!rows.length) {
