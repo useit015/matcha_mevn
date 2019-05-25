@@ -9,7 +9,7 @@ const moment = require('moment')
 const db = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
-	password: '0O*ussama',
+	password: 'root',
 	database: 'slim'
 })
 
@@ -178,10 +178,31 @@ router.post('/add', (req, res) => {
 	})
 })
 
-router.get('/', (req, res) => {
-	db.query('SELECT * FROM users, images WHERE users.id = images.user_id AND images.profile = 1', (err, rows, fields) => {
+router.get('/show', (req, res) => {
+	const sql = 'SELECT * FROM users, images WHERE users.id = images.user_id AND images.profile = 1'
+	db.query(sql, (err, rows) => {
 		if (err) throw err
 		res.json(rows)
+	})
+})
+
+router.post('/show/:id', (req, res) => {
+	const sql = `SELECT * FROM users WHERE id = ${req.params.id}`
+	db.query(sql, (err, rows) => {
+		if (err) throw err
+		if (rows.length) {
+			const user = rows[0]
+			const sql = `SELECT * FROM images WHERE user_id = ${req.params.id}`
+			db.query(sql, (err, rows) => {
+				if (err) throw err
+				user.images = rows
+				const sql = `INSERT INTO history (visitor, visited) VALUES (${req.body.visitor}, ${req.params.id})`
+				db.query(sql, err => {
+					if (err) throw err
+					res.json(user)
+				})
+			})
+		}
 	})
 })
 
