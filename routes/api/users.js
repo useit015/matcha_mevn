@@ -101,7 +101,7 @@ router.post('/position/:id', (req, res) => {
 				WHERE id = ${req.params.id}`
 	db.query(sql, err => {
 		if (err) throw err
-		res.json({ status: 'synced position' })
+		res.json('synced position')
 	})
 })
 
@@ -123,7 +123,7 @@ router.post('/isloggedin', (req, res) => {
 				// })
 			})
 		} else {
-			res.json({ status: 'not logged in' })
+			res.status(400).json('not logged in')
 		}
 	})
 })
@@ -149,11 +149,11 @@ router.post('/login', (req, res) => {
 						// })
 					})
 				} else {
-					res.json({ status: 'wrong pass' })
+					res.status(400).json('wrong pass')
 				}
 			})
 		} else {
-			res.json({ status: 'wrong username' })
+			res.status(400).json('wrong username')
 		}
 	})
 })
@@ -254,6 +254,8 @@ router.post('/show/:id', (req, res) => {
 					res.json(user)
 				})
 			})
+		} else {
+			res.status(400).json('User doesnt exist')
 		}
 	})
 })
@@ -268,8 +270,34 @@ router.post('/block/:id', (req, res) => {
 				if (err) throw err
 				res.json('User Blocked')
 			})
+		} else {
+			res.status(400).json('User already Blocked')
 		}
 	})
+})
+
+router.post('/match/:id', (req, res) => {
+	if (req.body.liked) {
+		const sql = `DELETE FROM matches where matcher = ${req.body.matcher} AND matched = ${req.param.id}`
+		db.query(sql, err => {
+			if (err) throw err
+			res.json('User unMatched')
+		})
+	} else {
+		const sql = `SELECT * FROM matches where matcher = ${req.body.matcher} AND matched = ${req.param.id}`
+		db.query(sql, (err, rows) => {
+			if (err) throw err
+			if (!rows.length) {
+				const sql = `INSERT INTO matches (matcher, matched) VALUES (${req.body.matcher}, ${req.params.id})`
+				db.query(sql, err => {
+					if (err) throw err
+					res.json('User Matched')
+				})
+			} else {
+				res.status(400).json('User already Matched')
+			}
+		})
+	}
 })
 
 module.exports = router
