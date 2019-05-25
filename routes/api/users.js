@@ -261,7 +261,7 @@ router.post('/show/:id', (req, res) => {
 })
 
 router.post('/block/:id', (req, res) => {
-	const sql = `SELECT * FROM blocked where blocker = ${req.body.blocker} AND blocked = ${req.params.id}`
+	const sql = `SELECT * FROM blocked where blocker = '${req.body.blocker}' AND blocked = '${req.params.id}'`
 	db.query(sql, (err, rows) => {
 		if (err) throw err
 		if (!rows.length) {
@@ -284,7 +284,7 @@ router.post('/match/:id', (req, res) => {
 			res.json('User unMatched')
 		})
 	} else {
-		const sql = `SELECT * FROM matches where matcher = ${req.body.matcher} AND matched = ${req.param.id}`
+		const sql = `SELECT * FROM matches where matcher = '${req.body.matcher}' AND matched = '${req.param.id}'`
 		db.query(sql, (err, rows) => {
 			if (err) throw err
 			if (!rows.length) {
