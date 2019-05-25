@@ -178,6 +178,58 @@ router.post('/add', (req, res) => {
 	})
 })
 
+router.post('/update/:id', (req, res) => {
+	const sql = `SELECT * FROM users WHERE id = ${req.params.id}`
+	db.query(sql, (err, rows) => {
+		if (err) throw err
+		if (rows.length) {
+			// MUST VALIDATE INPUT !!!!
+			// MUST VALIDATE USER !!!!
+			const user = {
+				id: req.params.id,
+				first_name: req.body.first_name,
+				last_name: req.body.last_name,
+				username: req.body.username,
+				email: req.body.email,
+				gender: req.body.gender,
+				looking: req.body.looking,
+				birthdate: req.body.birthdate,
+				biography: req.body.biography,
+				tags: req.body.tags,
+				address: req.body.address,
+				city: req.body.city,
+				country: req.body.country,
+				rating: req.body.rating,
+				postal_code: req.body.postal_code,
+				phone: req.body.phone
+			}
+			const sql = `UPDATE users SET
+							first_name = ${user.first_name},
+							last_name = ${user.last_name},
+							username = ${user.username},
+							email = ${user.email},
+							gender = ${user.gender},
+							looking = ${user.looking},
+							birthdate = ${user.birthdate},
+							biography = ${user.biography},
+							tags = ${user.tags},
+							\`address\` = ${user.address},
+							city = ${user.city},
+							country = ${user.country},
+							rating = ${user.rating},
+							postal_code = ${user.postal_code},
+							phone = ${user.phone}
+						WHERE id = ${user.id}`
+			db.query(sql, err => {
+				if (err) throw err
+				res.json('User Updated')
+			})
+		} else {
+			res.status(400).json({ status: 'User not found' })
+		}
+	})
+})
+
 router.get('/show', (req, res) => {
 	const sql = 'SELECT * FROM users, images WHERE users.id = images.user_id AND images.profile = 1'
 	db.query(sql, (err, rows) => {
