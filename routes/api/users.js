@@ -3,6 +3,8 @@ const mysql = require('mysql')
 const router = express.Router()
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
+const moment = require('moment')
 
 const db = mysql.createConnection({
 	host: 'localhost',
@@ -22,12 +24,19 @@ router.post('/login', (req, res) => {
 	db.query(sql, (err, rows) => {
 		if (err) throw err
 		if (rows.length && rows[0].verified) {
-			bcrypt.compare(req.body.password, rows[0].password, (err, result) => {
+			const user = rows[0]
+			bcrypt.compare(req.body.password, user.password, (err, result) => {
 				if (err) throw err
 				if (result) {
-					jwt.sign({ user: rows[0] }, 'secret', (err, token) => {
+					user.token = crypto.randomBytes(10).toString('hex')
+					user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD ßHH:mm:ss')
+					const sql = `UPDATE users SET token = '${user.token}', tokenExpiration = '${user.tokenExpiration}' WHERE id = ${user.id}`
+					db.query(sql, err => {
 						if (err) throw err
-						res.json({ token })
+						res.json(user)
+						// jwt.sign({ user: user }, 'secret', (err, token) => {
+						// 	if (err) throw err
+						// })
 					})
 				} else {
 					res.json({ status: 'wrong pass' })
@@ -45,8 +54,8 @@ router.post('/add', (req, res) => {
 		first_name: req.body.first_name,
 		last_name: req.body.last_name,
 		username: req.body.username,
-		password: bcrypt.hashSync(req.body.password, 10),
 		email: req.body.email,
+		password: bcrypt.hashSync(req.body.password, 10),
 		vkey: bcrypt.genSaltSync(10)
 	}
 	// MUST VALIDATE USER !!!!
