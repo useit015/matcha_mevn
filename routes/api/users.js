@@ -94,6 +94,17 @@ router.post('/getblocked', (req, res) => {
 	})
 })
 
+router.post('/position/:id', (req, res) => {
+	const sql = `UPDATE users SET
+					lat = ${req.body.lat},
+					lng = ${req.body.lng}
+				WHERE id = ${req.params.id}`
+	db.query(sql, err => {
+		if (err) throw err
+		res.json({ status: 'synced position' })
+	})
+})
+
 router.post('/isloggedin', (req, res) => {
 	// MUST VALIDATE INPUT !!!!
 	const sql = `SELECT * FROM users WHERE token = '${req.body.token}' AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
