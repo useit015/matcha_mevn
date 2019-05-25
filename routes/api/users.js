@@ -277,8 +277,7 @@ router.post('/block/:id', (req, res) => {
 })
 
 router.post('/match/:id', (req, res) => {
-	return res.json(req.body)
-	if (req.body.liked !== false) {
+	if (req.body.liked) {
 		const sql = `DELETE FROM matches where matcher = ${req.body.matcher} AND matched = ${req.params.id}`
 		db.query(sql, err => {
 			if (err) throw err
