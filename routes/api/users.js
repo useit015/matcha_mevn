@@ -20,11 +20,22 @@ db.connect(err => {
 
 router.post('/isloggedin', (req, res) => {
 	// MUST VALIDATE INPUT !!!!
-	const sql = `SELECT * FROM users WHERE token = ${req.body.token} AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
+	const sql = `SELECT * FROM users WHERE token = '${req.body.token}' AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
 	db.query(sql, (err, rows) => {
 		if (err) throw err
 		if (rows.length) {
-			res.json(rows[0])
+			const user = rows[0]
+			user.token = crypto.randomBytes(10).toString('hex')
+			user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
+			const sql = `UPDATE users SET token = '${user.token}', tokenExpiration = '${user.tokenExpiration}' WHERE id = ${user.id}`
+			db.query(sql, err => {
+				if (err) throw err
+				res.json(user)
+				// jwt.sign({ user: user }, 'secret', (err, token) => {
+				// 	if (err) throw err
+				// })
+			})
+			res.json(user)
 		} else {
 			res.json({ status: 'not logged in' })
 		}
