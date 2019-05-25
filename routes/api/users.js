@@ -204,21 +204,21 @@ router.post('/update/:id', (req, res) => {
 				phone: req.body.phone
 			}
 			const sql = `UPDATE users SET
-							first_name = ${user.first_name},
-							last_name = ${user.last_name},
-							username = ${user.username},
-							email = ${user.email},
-							gender = ${user.gender},
-							looking = ${user.looking},
-							birthdate = ${user.birthdate},
-							biography = ${user.biography},
-							tags = ${user.tags},
-							\`address\` = ${user.address},
-							city = ${user.city},
-							country = ${user.country},
-							rating = ${user.rating},
-							postal_code = ${user.postal_code},
-							phone = ${user.phone}
+							first_name = '${user.first_name}',
+							last_name = '${user.last_name}',
+							username = '${user.username}',
+							email = '${user.email}',
+							gender = '${user.gender}',
+							looking = '${user.looking}',
+							birthdate = '${user.birthdate}',
+							biography = '${user.biography}',
+							tags = '${user.tags}',
+							\`address\` = '${user.address}',
+							city = '${user.city}',
+							country = '${user.country}',
+							rating = '${user.rating}',
+							postal_code = '${user.postal_code}',
+							phone = '${user.phone}'
 						WHERE id = ${user.id}`
 			db.query(sql, err => {
 				if (err) throw err
