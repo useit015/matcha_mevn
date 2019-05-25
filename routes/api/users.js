@@ -9,7 +9,7 @@ const moment = require('moment')
 const db = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
-	password: 'root',
+	password: '0O*ussama',
 	database: 'slim'
 })
 
