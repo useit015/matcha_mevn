@@ -1,13 +1,13 @@
 const express = require('express')
 const mysql = require('mysql')
 const router = express.Router()
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
 const db = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
-	password: '0O*ussama',
+	password: 'root',
 	database: 'slim'
 })
 
@@ -21,25 +21,31 @@ router.post('/login', (req, res) => {
 	const sql = `SELECT * FROM users WHERE username = '${req.body.username}'`
 	db.query(sql, (err, rows) => {
 		if (err) throw err
-		if (rows[0].verified && bcrypt.compare(req.body.password, rows[0].password)) {
-			jwt.sign({ user: rows[0] }, 'secretkey', (err, token) => {
+		if (rows.length && rows[0].verified) {
+			bcrypt.compare(req.body.password, rows[0].password, (err, result) => {
 				if (err) throw err
-				res.json({ token })
+				if (result) {
+					jwt.sign({ user: rows[0] }, 'secret', (err, token) => {
+						if (err) throw err
+						res.json({ token })
+					})
+				} else {
+					res.json({ status: 'wrong pass' })
+				}
 			})
 		} else {
-			res.json({ status: false })
+			res.json({ status: 'wrong username' })
 		}
 	})
 })
 
 router.post('/add', (req, res) => {
 	// MUST VALIDATE INPUT !!!!
-	const salt = bcrypt.genSaltSync(10)
 	const user = {
 		first_name: req.body.first_name,
 		last_name: req.body.last_name,
 		username: req.body.username,
-		password: bcrypt.hashSync(req.body.password, salt),
+		password: bcrypt.hashSync(req.body.password, 10),
 		email: req.body.email,
 		vkey: bcrypt.genSaltSync(10)
 	}
