@@ -29,6 +29,7 @@ db.connect(err => {
 })
 
 router.post('/getmatches', (req, res) => {
+	if (!req.body.id) return res.status(400).json('must include user id')
 	const sql = `SELECT
 					matches.matched as matched_id,
 					matches.created_at as match_date,
@@ -63,6 +64,7 @@ router.post('/getmatches', (req, res) => {
 })
 
 router.post('/gethistory', (req, res) => {
+	if (!req.body.id) return res.status(400).json('must include user id')
 	const sql = `SELECT
 					history.visitor as visitor_id,
 					history.created_at as visit_date,
@@ -97,6 +99,7 @@ router.post('/gethistory', (req, res) => {
 })
 
 router.post('/getblocked', (req, res) => {
+	if (!req.body.id) return res.status(400).json('must include user id')
 	const sql = `SELECT * FROM blocked where blocker = ${req.body.id} OR blocked = ${req.body.id}`
 	db.query(sql, (err, blacklist) => {
 		if (err) throw err
