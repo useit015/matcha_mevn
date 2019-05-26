@@ -153,7 +153,12 @@ router.post('/login', (req, res) => {
 					const sql = `UPDATE users SET token = '${user.token}', tokenExpiration = '${user.tokenExpiration}' WHERE id = ${user.id}`
 					db.query(sql, err => {
 						if (err) throw err
-						res.json(user)
+						const sql = `SELECT * FROM images WHERE user_id = ${user.id}`
+						db.query(sql, (err, rows) => {
+							if (err) throw err
+							user.images = rows
+							res.json(user)
+						})
 						// jwt.sign({ user: user }, 'secret', (err, token) => {
 						// 	if (err) throw err
 						// })
@@ -276,7 +281,7 @@ router.post('/show/:id', (req, res) => {
 		if (err) throw err
 		if (rows.length) {
 			const user = rows[0]
-			const sql = `SELECT * FROM images WHERE user_id = ${req.params.id}`
+			const sql = `SELECT * FROM images WHERE user_id = ${req.params.id}`c
 			db.query(sql, (err, rows) => {
 				if (err) throw err
 				user.images = rows
