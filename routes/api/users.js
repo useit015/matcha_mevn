@@ -8,7 +8,13 @@ const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const multer = require('multer')
-const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
+const upload = multer({ 
+	limits: { fileSize: 4 * 1024 * 1024 },
+	storage: {
+		destination: (req, file, cb) => cb(null, 'uploads'),
+		filename: (req, file, cb) => cb(null, file.fieldname + '-' + Date.now())
+	}
+})
 
 const db = mysql.createConnection({
 	host: 'localhost',
