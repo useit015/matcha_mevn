@@ -1,10 +1,11 @@
+const fs = require('fs')
 const express = require('express')
 const mysql = require('mysql')
 const router = express.Router()
+const moment = require('moment')
+const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
-const moment = require('moment')
 
 const db = mysql.createConnection({
 	host: 'localhost',
@@ -226,6 +227,33 @@ router.post('/update/:id', (req, res) => {
 			})
 		} else {
 			res.status(400).json({ status: 'User not found' })
+		}
+	})
+})
+
+router.post('/image/:id', (req, res) => {
+	// const base64Data = req.body.replace(/^data:image\/png;base64,/, '')
+	const uploadDir = path.dirname(__dirname)
+	return res.json(uploadDir)
+	const imgPath = `${req.params.id}-${crypto.randomBytes(10).toString('hex')}.png`
+	fs.writeFile(imgPath, base64Data, 'base64', err => console.log(err))
+	const sql = `SELECT * FROM users WHERE id = ${req.params.id}`
+	db.query(sql, (err, rows) => {
+		if (err) throw err
+		if (rows.length) {
+			const user = rows[0]
+			const sql = `SELECT * FROM images WHERE user_id = ${req.params.id}`
+			db.query(sql, (err, rows) => {
+				if (err) throw err
+				user.images = rows
+				const sql = `INSERT INTO history (visitor, visited) VALUES (${req.body.visitor}, ${req.params.id})`
+				db.query(sql, err => {
+					if (err) throw err
+					res.json(user)
+				})
+			})
+		} else {
+			res.status(400).json('User doesnt exist')
 		}
 	})
 })
