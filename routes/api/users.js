@@ -7,6 +7,8 @@ const moment = require('moment')
 const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const multer = require('multer')
+const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
 
 const db = mysql.createConnection({
 	host: 'localhost',
@@ -232,8 +234,8 @@ router.post('/update/:id', (req, res) => {
 	})
 })
 
-router.post('/image/:id', (req, res) => {
-	return res.json(req.body)
+router.post('/image/:id', upload.single('image'), (req, res) => {
+	return res.json(req.file)
 	const base64Data = req.body.replace(/^data:image\/png;base64,/, '')
 	const uploadDir = `${path.dirname(path.dirname(__dirname))}/public/uploads/`
 	const imgName = `${req.params.id}-${crypto.randomBytes(10).toString('hex')}.png`
