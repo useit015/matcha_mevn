@@ -284,17 +284,17 @@ router.get('/show', (req, res) => {
 })
 
 router.post('/show/:id', (req, res) => {
-	const sql = `SELECT * FROM users WHERE id = ${req.params.id}`
-	db.query(sql, (err, rows) => {
+	const sql = `SELECT * FROM users WHERE id = ?`
+	db.query(sql, [req.params.id], (err, rows) => {
 		if (err) throw err
 		if (rows.length) {
 			const user = rows[0]
-			const sql = `SELECT * FROM images WHERE user_id = ${req.params.id}`
-			db.query(sql, (err, rows) => {
+			const sql = `SELECT * FROM images WHERE user_id = ?`
+			db.query(sql, [req.params.id], (err, rows) => {
 				if (err) throw err
 				user.images = rows
-				const sql = `INSERT INTO history (visitor, visited) VALUES (${req.body.visitor}, ${req.params.id})`
-				db.query(sql, err => {
+				const sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
+				db.query(sql, [req.body.visitor, req.params.id], err => {
 					if (err) throw err
 					res.json(user)
 				})
