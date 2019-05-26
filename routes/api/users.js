@@ -250,7 +250,7 @@ router.post('/image/:id', upload.single('image'), (req, res) => {
 		db.query(sql, err => {
 			if (err) throw err
 			const sql = `INSERT INTO images (user_id, name, profile)
-							VALUES (${req.params.id}, ${imgName}, 1)`
+							VALUES (${req.params.id}, '${imgName}', 1)`
 			db.query(sql, err => {
 				if (err) throw err
 				res.json({
