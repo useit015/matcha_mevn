@@ -234,7 +234,7 @@ router.post('/update/:id', (req, res) => {
 
 router.post('/image/:id', (req, res) => {
 	// const base64Data = req.body.replace(/^data:image\/png;base64,/, '')
-	const uploadDir = `${path.dirname(path.dirname(__dirname))}/uploads/`
+	const uploadDir = `${path.dirname(path.dirname(__dirname))}/public/uploads/`
 	return res.json(uploadDir)
 	const imgPath = `${req.params.id}-${crypto.randomBytes(10).toString('hex')}.png`
 	fs.writeFile(imgPath, base64Data, 'base64', err => console.log(err))
