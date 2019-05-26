@@ -281,7 +281,7 @@ router.post('/show/:id', (req, res) => {
 		if (err) throw err
 		if (rows.length) {
 			const user = rows[0]
-			const sql = `SELECT * FROM images WHERE user_id = ${req.params.id}`c
+			const sql = `SELECT * FROM images WHERE user_id = ${req.params.id}`
 			db.query(sql, (err, rows) => {
 				if (err) throw err
 				user.images = rows
