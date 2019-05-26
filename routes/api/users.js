@@ -233,29 +233,24 @@ router.post('/update/:id', (req, res) => {
 })
 
 router.post('/image/:id', (req, res) => {
-	// const base64Data = req.body.replace(/^data:image\/png;base64,/, '')
+	const base64Data = req.body.replace(/^data:image\/png;base64,/, '')
 	const uploadDir = `${path.dirname(path.dirname(__dirname))}/public/uploads/`
-	return res.json(uploadDir)
-	const imgPath = `${req.params.id}-${crypto.randomBytes(10).toString('hex')}.png`
-	fs.writeFile(imgPath, base64Data, 'base64', err => console.log(err))
-	const sql = `SELECT * FROM users WHERE id = ${req.params.id}`
-	db.query(sql, (err, rows) => {
+	const imgName = `${req.params.id}-${crypto.randomBytes(10).toString('hex')}.png`
+	fs.writeFile(uploadDir + imgName, base64Data, 'base64', err => {
 		if (err) throw err
-		if (rows.length) {
-			const user = rows[0]
-			const sql = `SELECT * FROM images WHERE user_id = ${req.params.id}`
-			db.query(sql, (err, rows) => {
+		const sql = `UPDATE images SET profile = 0 WHERE user_id = ${req.params.id}`
+		db.query(sql, err => {
+			if (err) throw err
+			const sql = `INSERT INTO images (user_id, name, profile)
+							VALUES (${req.params.id}, ${imgName}, 1)`
+			db.query(sql, err => {
 				if (err) throw err
-				user.images = rows
-				const sql = `INSERT INTO history (visitor, visited) VALUES (${req.body.visitor}, ${req.params.id})`
-				db.query(sql, err => {
-					if (err) throw err
-					res.json(user)
+				res.json({
+					ok: true,
+					name: imgName
 				})
 			})
-		} else {
-			res.status(400).json('User doesnt exist')
-		}
+		})
 	})
 })
 
