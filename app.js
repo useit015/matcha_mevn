@@ -13,8 +13,6 @@ app.use(bodyParser.json())
 
 app.use('/api/users', users)
 app.use('/static', express.static(`${__dirname}/public`))
-// app.use('*/css', express.static(__dirname + '/public/css'))
-// app.use('*/js', express.static(__dirname + '/public/js'))
 
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')))
 

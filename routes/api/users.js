@@ -125,7 +125,7 @@ router.post('/isloggedin', (req, res) => {
 				// })
 			})
 		} else {
-			res.status(400).json('not logged in')
+			res.json('not logged in')
 		}
 	})
 })
@@ -233,6 +233,7 @@ router.post('/update/:id', (req, res) => {
 })
 
 router.post('/image/:id', (req, res) => {
+	return res.json(req.body)
 	const base64Data = req.body.replace(/^data:image\/png;base64,/, '')
 	const uploadDir = `${path.dirname(path.dirname(__dirname))}/public/uploads/`
 	const imgName = `${req.params.id}-${crypto.randomBytes(10).toString('hex')}.png`
