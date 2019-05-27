@@ -306,12 +306,12 @@ router.post('/show/:id', (req, res) => {
 })
 
 router.post('/block/:id', (req, res) => {
-	const sql = `SELECT * FROM blocked where blocker = '${req.body.blocker}' AND blocked = '${req.params.id}'`
-	db.query(sql, (err, rows) => {
+	const sql = `SELECT * FROM blocked where blocker = ? AND blocked = ?`
+	db.query(sql, [req.body.blocker, req.params.id], (err, rows) => {
 		if (err) throw err
 		if (!rows.length) {
-			const sql = `INSERT INTO blocked (blocker, blocked) VALUES (${req.body.blocker}, ${req.params.id})`
-			db.query(sql, err => {
+			const sql = `INSERT INTO blocked (blocker, blocked) VALUES (?, ?)`
+			db.query(sql, [req.body.blocker, req.params.id], err => {
 				if (err) throw err
 				res.json('User Blocked')
 			})
