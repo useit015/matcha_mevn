@@ -209,7 +209,6 @@ router.post('/update/:id', (req, res) => {
 			// MUST VALIDATE INPUT !!!!
 			// MUST VALIDATE USER !!!!
 			const user = {
-				id: req.params.id,
 				first_name: req.body.first_name,
 				last_name: req.body.last_name,
 				username: req.body.username,
@@ -224,26 +223,16 @@ router.post('/update/:id', (req, res) => {
 				country: req.body.country,
 				rating: req.body.rating,
 				postal_code: req.body.postal_code,
-				phone: req.body.phone
+				phone: req.body.phone,
+				id: req.params.id
 			}
 			const sql = `UPDATE users SET
-							first_name = '${user.first_name}',
-							last_name = '${user.last_name}',
-							username = '${user.username}',
-							email = '${user.email}',
-							gender = '${user.gender}',
-							looking = '${user.looking}',
-							birthdate = '${user.birthdate}',
-							biography = '${user.biography}',
-							tags = '${user.tags}',
-							\`address\` = '${user.address}',
-							city = '${user.city}',
-							country = '${user.country}',
-							rating = '${user.rating}',
-							postal_code = '${user.postal_code}',
-							phone = '${user.phone}'
-						WHERE id = ${user.id}`
-			db.query(sql, err => {
+							first_name = ?, last_name = ?, username = ?,
+							email = ?, gender = ?, looking = ?, birthdate = ?,
+							biography = ?, tags = ?, \`address\` = ?, city = ?,
+							country = ?, rating = ?, postal_code = ?, phone = ?
+						WHERE id = ?`
+			db.query(sql, [...user], err => {
 				if (err) throw err
 				res.json('User Updated')
 			})
