@@ -40,9 +40,9 @@ router.post('/getmatches', (req, res) => {
 				ON matches.matched = users.id
 				INNER JOIN images
 				ON matches.matched = images.user_id
-				where matches.matcher = ${req.body.id}
+				where matches.matcher = ?
 				AND images.profile = 1`
-	db.query(sql, (err, following) => {
+	db.query(sql, [req.body.id], (err, following) => {
 		if (err) throw err
 		const sql = `SELECT
 						matches.matcher as matcher_id,
@@ -54,9 +54,9 @@ router.post('/getmatches', (req, res) => {
 					ON matches.matcher = users.id
 					INNER JOIN images
 					ON matches.matcher = images.user_id
-					where matches.matched = ${req.body.id}
+					where matches.matched = ?
 					AND images.profile = 1`
-		db.query(sql, (err, followers) => {
+		db.query(sql, [req.body.id], (err, followers) => {
 			if (err) throw err
 			res.json([...following, ...followers])
 		})
@@ -75,9 +75,9 @@ router.post('/gethistory', (req, res) => {
 				ON history.visitor = users.id
 				INNER JOIN images
 				ON history.visitor = images.user_id
-				WHERE history.visited = ${req.body.id}
+				WHERE history.visited = ?
 				AND images.profile = 1`
-	db.query(sql, (err, visitors) => {
+	db.query(sql, [req.body.id], (err, visitors) => {
 		if (err) throw err
 		const sql = `SELECT
 						history.visited as visited_id,
@@ -89,9 +89,9 @@ router.post('/gethistory', (req, res) => {
 					ON history.visited = users.id
 					INNER JOIN images
 					ON history.visited = images.user_id
-					WHERE history.visitor = ${req.body.id}
+					WHERE history.visitor = ?
 					AND images.profile = 1`
-		db.query(sql, (err, visited) => {
+		db.query(sql, [req.body.id], (err, visited) => {
 			if (err) throw err
 			res.json([...visitors, ...visited])
 		})
@@ -100,19 +100,16 @@ router.post('/gethistory', (req, res) => {
 
 router.post('/getblocked', (req, res) => {
 	if (!req.body.id) return res.json('must include user id')
-	const sql = `SELECT * FROM blocked where blocker = ${req.body.id} OR blocked = ${req.body.id}`
-	db.query(sql, (err, blacklist) => {
+	const sql = `SELECT * FROM blocked where blocker = ? OR blocked = ?`
+	db.query(sql, [req.body.id, req.body.id], (err, blacklist) => {
 		if (err) throw err
 		res.json(blacklist)
 	})
 })
 
 router.post('/position/:id', (req, res) => {
-	const sql = `UPDATE users SET
-					lat = ${req.body.lat},
-					lng = ${req.body.lng}
-				WHERE id = ${req.params.id}`
-	db.query(sql, err => {
+	const sql = `UPDATE users SET lat = ?, lng = ? WHERE id = ?`
+	db.query(sql, [req.body.lat, req.body.lng, req.params.id], err => {
 		if (err) throw err
 		res.json('synced position')
 	})
@@ -120,18 +117,18 @@ router.post('/position/:id', (req, res) => {
 
 router.post('/isloggedin', (req, res) => {
 	// MUST VALIDATE INPUT !!!!
-	const sql = `SELECT * FROM users WHERE token = '${req.body.token}' AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
-	db.query(sql, (err, rows) => {
+	const sql = `SELECT * FROM users WHERE token = ? AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
+	db.query(sql, [req.body.token], (err, rows) => {
 		if (err) throw err
 		if (rows.length) {
 			const user = rows[0]
 			user.token = crypto.randomBytes(10).toString('hex')
 			user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
-			const sql = `UPDATE users SET token = '${user.token}', tokenExpiration = '${user.tokenExpiration}' WHERE id = ${user.id}`
-			db.query(sql, err => {
+			const sql = `UPDATE users SET token = ?, tokenExpiration = '? WHERE id = ?`
+			db.query(sql, [user.token, user.tokenExpiration, user.id], err => {
 				if (err) throw err
-				const sql = `SELECT * FROM images WHERE user_id = ${user.id}`
-				db.query(sql, (err, rows) => {
+				const sql = `SELECT * FROM images WHERE user_id = ?`
+				db.query(sql, [user.id], (err, rows) => {
 					if (err) throw err
 					user.images = rows
 					res.json(user)
@@ -147,9 +144,9 @@ router.post('/isloggedin', (req, res) => {
 })
 
 router.post('/login', (req, res) => {
-	// MUST VALIDATE INPUT !!!!
-	const sql = `SELECT * FROM users WHERE username = '${req.body.username}'`
-	db.query(sql, (err, rows) => {
+	// ! MUST VALIDATE INPUT !!!!
+	const sql = `SELECT * FROM users WHERE username = ?`
+	db.query(sql, [req.body.username], (err, rows) => {
 		if (err) throw err
 		if (rows.length && rows[0].verified) {
 			const user = rows[0]
@@ -158,11 +155,11 @@ router.post('/login', (req, res) => {
 				if (result) {
 					user.token = crypto.randomBytes(10).toString('hex')
 					user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
-					const sql = `UPDATE users SET token = '${user.token}', tokenExpiration = '${user.tokenExpiration}' WHERE id = ${user.id}`
-					db.query(sql, err => {
+					const sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
+					db.query(sql, [user.token, user.tokenExpiration, user.id], err => {
 						if (err) throw err
-						const sql = `SELECT * FROM images WHERE user_id = ${user.id}`
-						db.query(sql, (err, rows) => {
+						const sql = `SELECT * FROM images WHERE user_id = ?`
+						db.query(sql, [user.id], (err, rows) => {
 							if (err) throw err
 							user.images = rows
 							res.json(user)
@@ -182,7 +179,7 @@ router.post('/login', (req, res) => {
 })
 
 router.post('/add', (req, res) => {
-	// MUST VALIDATE INPUT !!!!
+	// ! MUST VALIDATE INPUT !!!!
 	const user = {
 		first_name: req.body.first_name,
 		last_name: req.body.last_name,
@@ -191,12 +188,34 @@ router.post('/add', (req, res) => {
 		password: bcrypt.hashSync(req.body.password, 10),
 		vkey: bcrypt.genSaltSync(10)
 	}
-	// MUST VALIDATE USER !!!!
-	// AND MUST SEND VALIDATION EMAIL !!!!
+	// TODO AND MUST SEND VALIDATION EMAIL !!!!
 	const sql = `INSERT INTO users (first_name, last_name, username, email, password, vkey)
-		VALUES ('${user.first_name}', '${user.last_name}', '${user.username}', '${user.email}', '${user.password}', '${user.vkey}')`
-	db.query(sql, err => {
+					VALUES (?, ?, ?, ?, ?, ?)`
+	db.query(sql, Object.values(user), err => {
 		if (err) throw err
+		let testAccount = await nodemailer.createTestAccount()
+		// create reusable transporter object using the default SMTP transport
+		let transporter = nodemailer.createTransport({
+			host: 'smtp.gmail.com',
+			port: 587,
+			secure: false, // true for 465, false for other ports
+			auth: {
+			user: 'ousstest015@gmail.com', // generated ethereal user
+			pass: 'fuck3dupsh17' // generated ethereal password
+			}
+		})
+
+		// send mail with defined transport object
+		let info = await transporter.sendMail({
+			from: '"Fred Foo 👻" <foo@example.com>', // sender address
+			to: "bar@example.com, baz@example.com", // list of receivers
+			subject: "Hello ✔", // Subject line
+			text: "Hello world?", // plain text body
+			html: "<b>Hello world?</b>" // html body
+		})
+
+		console.log("Message sent: %s", info.messageId)
+		console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info))
 		res.json('User Added')
 	})
 })
@@ -206,8 +225,7 @@ router.post('/update/:id', (req, res) => {
 	db.query(sql, (err, rows) => {
 		if (err) throw err
 		if (rows.length) {
-			// MUST VALIDATE INPUT !!!!
-			// MUST VALIDATE USER !!!!
+			// ! MUST VALIDATE INPUT !!!!
 			const user = {
 				first_name: req.body.first_name,
 				last_name: req.body.last_name,
@@ -248,12 +266,11 @@ router.post('/image/:id', upload.single('image'), (req, res) => {
 	const imgName = `${req.params.id}-${crypto.randomBytes(10).toString('hex')}.png`
 	fs.writeFile(uploadDir + imgName, base64Data, 'base64', err => {
 		if (err) throw err
-		const sql = `UPDATE images SET profile = 0 WHERE user_id = ${req.params.id}`
-		db.query(sql, err => {
+		const sql = `UPDATE images SET profile = 0 WHERE user_id = ?`
+		db.query(sql, [req.params.id], err => {
 			if (err) throw err
-			const sql = `INSERT INTO images (user_id, name, profile)
-							VALUES (${req.params.id}, '${imgName}', 1)`
-			db.query(sql, err => {
+			const sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, 1)`
+			db.query(sql, [req.params.id, imgName], err => {
 				if (err) throw err
 				res.json({
 					ok: true,
@@ -311,19 +328,20 @@ router.post('/block/:id', (req, res) => {
 })
 
 router.post('/match/:id', (req, res) => {
+	const match = [req.body.matcher, req.params.id]
 	if (req.body.liked) {
-		const sql = `DELETE FROM matches where matcher = '${req.body.matcher}' AND matched = '${req.params.id}'`
-		db.query(sql, err => {
+		const sql = `DELETE FROM matches where matcher = ? AND matched = ?`
+		db.query(sql, match, err => {
 			if (err) throw err
 			res.json('User unMatched')
 		})
 	} else {
-		const sql = `SELECT * FROM matches where matcher = '${req.body.matcher}' AND matched = '${req.params.id}'`
-		db.query(sql, (err, rows) => {
+		const sql = `SELECT * FROM matches where matcher = ? AND matched = ?`
+		db.query(sql, match, (err, rows) => {
 			if (err) throw err
 			if (!rows.length) {
-				const sql = `INSERT INTO matches (matcher, matched) VALUES (${req.body.matcher}, ${req.params.id})`
-				db.query(sql, err => {
+				const sql = `INSERT INTO matches (matcher, matched) VALUES (?, ?)`
+				db.query(sql, match, err => {
 					if (err) throw err
 					res.json('User Matched')
 				})
