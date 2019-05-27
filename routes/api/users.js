@@ -179,30 +179,30 @@ router.post('/login', (req, res) => {
 	})
 })
 
-async function sendMail () {
-	// create reusable transporter object using the default SMTP transport
-	let transporter = nodemailer.createTransport({
-		host: 'smtp.gmail.com',
-		port: 587,
-		secure: false, // true for 465, false for other ports
-		auth: {
-			user: 'ousstest015@gmail.com', // generated ethereal user
-			pass: 'fuck3dupsh17' // generated ethereal password
-		}
-	})
+// async function sendMail () {
+// 	// create reusable transporter object using the default SMTP transport
+// 	let transporter = nodemailer.createTransport({
+// 		host: 'smtp.gmail.com',
+// 		port: 587,
+// 		secure: false, // true for 465, false for other ports
+// 		auth: {
+// 			user: 'ousstest015@gmail.com', // generated ethereal user
+// 			pass: 'fuck3dupsh17' // generated ethereal password
+// 		}
+// 	})
 
-	// send mail with defined transport object
-	let info = await transporter.sendMail({
-		from: '"Fred Foo 👻" <foo@example.com>', // sender address
-		to: "useit015@gmail.com", // list of receivers
-		subject: "Hello ✔", // Subject line
-		text: "Hello world?", // plain text body
-		html: "<b>Hello world?</b>" // html body
-	})
+// 	// send mail with defined transport object
+// 	let info = await transporter.sendMail({
+// 		from: '"Fred Foo 👻" <foo@example.com>', // sender address
+// 		to: "useit015@gmail.com", // list of receivers
+// 		subject: "Hello ✔", // Subject line
+// 		text: "Hello world?", // plain text body
+// 		html: "<b>Hello world?</b>" // html body
+// 	})
 
-	console.log("Message sent: %s", info.messageId)
-	console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info))
-}
+// 	console.log("Message sent: %s", info.messageId)
+// 	console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info))
+// }
 
 router.post('/add', (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
@@ -288,7 +288,23 @@ router.get('/show', (req, res) => {
 	const sql = 'SELECT * FROM users, images WHERE users.id = images.user_id AND images.profile = 1'
 	db.query(sql, (err, rows) => {
 		if (err) throw err
-		sendMail().catch(err => console.log(err))
+		var mailOptions = {
+			to: 'useit015@gmail.com',
+			subject: 'Email from SMTP sever',
+			user: {  // data to view template, you can access as - user.name
+				name: 'Arjun PHP',
+				message: 'Welcome to arjunphp.com'
+			}
+		  }
+		 
+		// Send email.
+		app.mailer.send('email', mailOptions, function (err, message) {
+			if (err) {
+				console.log(err)
+				return res.send('There was an error sending the email')
+			}
+			return res.send('Email has been sent!')
+		})
 		res.json(rows)
 	})
 })
