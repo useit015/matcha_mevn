@@ -218,6 +218,52 @@ router.post('/add', (req, res) => {
 	})
 })
 
+router.post('/install', (req, res) => {
+	const user = {
+		first_name: req.body.first_name,
+		last_name: req.body.last_name,
+		username: req.body.username,
+		email: req.body.email,
+		password: bcrypt.hashSync(req.body.password, 10),
+		vkey: crypto.randomBytes(10).toString('hex'),
+		gender: req.body.gender,
+		looking: req.body.looking,
+		birthdate: req.body.birthdate,
+		biography: req.body.biography,
+		tags: req.body.tags,
+		address: req.body.address,
+		city: req.body.city,
+		country: req.body.country,
+		rating: req.body.rating,
+		postal_code: req.body.postal_code,
+		phone: req.body.phone,
+		lat: req.body.lat,
+		lng: req.body.lng
+	}
+	// // AND MUST SEND VALIDATION EMAIL !!!!
+	const sql = `INSERT INTO users (first_name, last_name, username, email, password, vkey, verified, gender, looking, birthdate, biography, tags, address, city, country, rating, postal_code, phone, lat, lng)
+					VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	db.query(sql, Object.values(user), err => {
+		if (err) throw err
+		const sql = `SELECT id FROM users WHERE username = ?`
+		db.query(sql, user.username, (err, rows) => {
+			if (err) throw err
+			if (rows.length) {
+				const sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
+				const data = {
+					id: rows[0].id,
+					name: req.body.image,
+					profile: 1
+				}
+				db.query(sql, Object.values(data), (err, rows) => {
+					if (err) throw err
+					res.json('user added !!')
+				})
+			}
+		})
+	})
+})
+
 router.get('/verify/:key', (req, res) => {
 	if (!req.params.key) return res.json('Cant validate')
 	const sql = `SELECT verified FROM users WHERE vkey = ?`
