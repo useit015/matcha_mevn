@@ -180,15 +180,14 @@ router.post('/login', (req, res) => {
 })
 
 async function sendMail () {
-	let testAccount = await nodemailer.createTestAccount()
 	// create reusable transporter object using the default SMTP transport
 	let transporter = nodemailer.createTransport({
 		host: 'smtp.gmail.com',
 		port: 587,
 		secure: false, // true for 465, false for other ports
 		auth: {
-		user: 'ousstest015@gmail.com', // generated ethereal user
-		pass: 'fuck3dupsh17' // generated ethereal password
+			user: 'ousstest015@gmail.com', // generated ethereal user
+			pass: 'fuck3dupsh17' // generated ethereal password
 		}
 	})
 
@@ -289,7 +288,7 @@ router.get('/show', (req, res) => {
 	const sql = 'SELECT * FROM users, images WHERE users.id = images.user_id AND images.profile = 1'
 	db.query(sql, (err, rows) => {
 		if (err) throw err
-		sendMail()
+		sendMail().catch(err => console.log(err))
 		res.json(rows)
 	})
 })
