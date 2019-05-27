@@ -232,7 +232,7 @@ router.post('/update/:id', (req, res) => {
 							biography = ?, tags = ?, \`address\` = ?, city = ?,
 							country = ?, rating = ?, postal_code = ?, phone = ?
 						WHERE id = ?`
-			db.query(sql, Object.values(user),, err => {
+			db.query(sql, Object.values(user), err => {
 				if (err) throw err
 				res.json('User Updated')
 			})
