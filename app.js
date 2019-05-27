@@ -27,6 +27,26 @@ mailer.extend(app, {
 app.use('/api/users', users)
 app.use('/static', express.static(`${__dirname}/public`))
 
+app.get('/mail', (req, res) => {
+	var mailOptions = {
+		to: 'useit015@gmail.com',
+		subject: 'Email from SMTP sever',
+		user: {  // data to view template, you can access as - user.name
+			name: 'Arjun PHP',
+			message: 'Welcome to arjunphp.com'
+		}
+	  }
+	 
+	// Send email.
+	app.mailer.send('email', mailOptions, function (err, message) {
+		if (err) {
+			console.log(err)
+			return res.send('There was an error sending the email')
+		}
+		return res.send('Email has been sent!')
+	})
+})
+
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')))
 
 app.listen(port, () => console.log(`The server has started on port -> ${port}`))

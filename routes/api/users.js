@@ -288,23 +288,6 @@ router.get('/show', (req, res) => {
 	const sql = 'SELECT * FROM users, images WHERE users.id = images.user_id AND images.profile = 1'
 	db.query(sql, (err, rows) => {
 		if (err) throw err
-		var mailOptions = {
-			to: 'useit015@gmail.com',
-			subject: 'Email from SMTP sever',
-			user: {  // data to view template, you can access as - user.name
-				name: 'Arjun PHP',
-				message: 'Welcome to arjunphp.com'
-			}
-		  }
-		 
-		// Send email.
-		app.mailer.send('email', mailOptions, function (err, message) {
-			if (err) {
-				console.log(err)
-				return res.send('There was an error sending the email')
-			}
-			return res.send('Email has been sent!')
-		})
 		res.json(rows)
 	})
 })
