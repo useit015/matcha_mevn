@@ -178,6 +178,32 @@ router.post('/login', (req, res) => {
 	})
 })
 
+async function sendMail () {
+	let testAccount = await nodemailer.createTestAccount()
+	// create reusable transporter object using the default SMTP transport
+	let transporter = nodemailer.createTransport({
+		host: 'smtp.gmail.com',
+		port: 587,
+		secure: false, // true for 465, false for other ports
+		auth: {
+		user: 'ousstest015@gmail.com', // generated ethereal user
+		pass: 'fuck3dupsh17' // generated ethereal password
+		}
+	})
+
+	// send mail with defined transport object
+	let info = await transporter.sendMail({
+		from: '"Fred Foo 👻" <foo@example.com>', // sender address
+		to: "bar@example.com, baz@example.com", // list of receivers
+		subject: "Hello ✔", // Subject line
+		text: "Hello world?", // plain text body
+		html: "<b>Hello world?</b>" // html body
+	})
+
+	console.log("Message sent: %s", info.messageId)
+	console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info))
+}
+
 router.post('/add', (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
 	const user = {
@@ -193,29 +219,7 @@ router.post('/add', (req, res) => {
 					VALUES (?, ?, ?, ?, ?, ?)`
 	db.query(sql, Object.values(user), err => {
 		if (err) throw err
-		let testAccount = await nodemailer.createTestAccount()
-		// create reusable transporter object using the default SMTP transport
-		let transporter = nodemailer.createTransport({
-			host: 'smtp.gmail.com',
-			port: 587,
-			secure: false, // true for 465, false for other ports
-			auth: {
-			user: 'ousstest015@gmail.com', // generated ethereal user
-			pass: 'fuck3dupsh17' // generated ethereal password
-			}
-		})
-
-		// send mail with defined transport object
-		let info = await transporter.sendMail({
-			from: '"Fred Foo 👻" <foo@example.com>', // sender address
-			to: "bar@example.com, baz@example.com", // list of receivers
-			subject: "Hello ✔", // Subject line
-			text: "Hello world?", // plain text body
-			html: "<b>Hello world?</b>" // html body
-		})
-
-		console.log("Message sent: %s", info.messageId)
-		console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info))
+		sendMail()
 		res.json('User Added')
 	})
 })
