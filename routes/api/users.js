@@ -180,7 +180,6 @@ router.post('/login', (req, res) => {
 })
 
 async function sendMail () {
-	// create reusable transporter object using the default SMTP transport
 	let transporter = nodemailer.createTransport({
 		host: 'smtp.gmail.com',
 		port: 587,
@@ -190,8 +189,6 @@ async function sendMail () {
 			pass: 'fuck3dupsh17' // generated ethereal password
 		}
 	})
-
-	// send mail with defined transport object
 	let info = await transporter.sendMail({
 		from: '"Fred Foo 👻" <foo@example.com>', // sender address
 		to: "useit015@gmail.com", // list of receivers
@@ -199,13 +196,11 @@ async function sendMail () {
 		text: "Hello world?", // plain text body
 		html: "<b>Hello world?</b>" // html body
 	})
-
-	console.log("Message sent: %s", info.messageId)
-	console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info))
 }
 
 router.get('/mail', (req, res) => {
 	sendMail()
+	res.json('success')
 })
 
 router.post('/add', (req, res) => {
