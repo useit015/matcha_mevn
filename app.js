@@ -9,8 +9,12 @@ const mailer = require('express-mailer')
 
 app.use(cors())
 
+app.set('views', __dirname + '/views')
+app.set('view engine', 'pug')
+
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+
 
 mailer.extend(app, {
 	from: 'ousstest015@gmail.com',
@@ -31,7 +35,7 @@ app.get('/mail', (req, res) => {
 	var mailOptions = {
 		to: 'useit015@gmail.com',
 		subject: 'Email from SMTP sever',
-		user: {  // data to view template, you can access as - user.name
+		user: {
 			name: 'Arjun PHP',
 			message: 'Welcome to arjunphp.com'
 		}
