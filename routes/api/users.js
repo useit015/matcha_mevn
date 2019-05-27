@@ -206,15 +206,29 @@ router.post('/add', (req, res) => {
 		username: req.body.username,
 		email: req.body.email,
 		password: bcrypt.hashSync(req.body.password, 10),
-		vkey: bcrypt.genSaltSync(10)
+		vkey: crypto.randomBytes(10).toString('hex')
 	}
-	// TODO AND MUST SEND VALIDATION EMAIL !!!!
+	// // AND MUST SEND VALIDATION EMAIL !!!!
 	const sql = `INSERT INTO users (first_name, last_name, username, email, password, vkey)
 					VALUES (?, ?, ?, ?, ?, ?)`
 	db.query(sql, Object.values(user), err => {
 		if (err) throw err
 		sendMail(user.email, user.vkey)
 		res.json('User Added')
+	})
+})
+
+router.get('/verify/:key', (req, res) => {
+	if (!req.params.key) return res.json('Cant validate')
+	const sql = `SELECT verified FROM users WHERE vkey = ?`
+	db.query(sql, req.params.key, (err, rows) => {
+		if (err) throw err
+		if (rows[0].verified) return res.json('User already verified')
+		const sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
+		db.query(sql, req.params.key, err => {
+			if (err) throw err
+			res.json('User Verified')
+		})
 	})
 })
 
