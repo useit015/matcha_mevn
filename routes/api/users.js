@@ -179,29 +179,24 @@ router.post('/login', (req, res) => {
 	})
 })
 
-async function sendMail () {
+const sendMail = async (to, key) => {
 	let transporter = nodemailer.createTransport({
 		host: 'smtp.gmail.com',
 		port: 587,
-		secure: false, // true for 465, false for other ports
+		secure: false,
 		auth: {
-			user: 'ousstest015@gmail.com', // generated ethereal user
-			pass: 'fuck3dupsh17' // generated ethereal password
+			user: 'ousstest015@gmail.com',
+			pass: 'fuck3dupsh17'
 		}
 	})
-	let info = await transporter.sendMail({
-		from: '👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻', // sender address
-		to: "useit015@gmail.com", // list of receivers
-		subject: "Hello ✔", // Subject line
-		text: "Hello world?", // plain text body
-		html: "<b>👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻</b>" // html body
+	transporter.sendMail({
+		from: 'Matcha team',
+		to,
+		subject: "Hello ✔",
+		text: "Hello world?",
+		html: `<a href="http://134.209.195.36/api/users/verify/${key}">Click here</a>`
 	})
 }
-
-router.get('/mail', (req, res) => {
-	sendMail()
-	res.json('success')
-})
 
 router.post('/add', (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
@@ -218,6 +213,7 @@ router.post('/add', (req, res) => {
 					VALUES (?, ?, ?, ?, ?, ?)`
 	db.query(sql, Object.values(user), err => {
 		if (err) throw err
+		sendMail(user.email, user.vkey)
 		res.json('User Added')
 	})
 })
