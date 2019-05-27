@@ -7,6 +7,7 @@ const moment = require('moment')
 const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const nodemailer = require('nodemailer')
 const multer = require('multer')
 const upload = multer({ 
 	limits: { fileSize: 4 * 1024 * 1024 },
