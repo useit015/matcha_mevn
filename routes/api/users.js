@@ -219,7 +219,6 @@ router.post('/add', (req, res) => {
 					VALUES (?, ?, ?, ?, ?, ?)`
 	db.query(sql, Object.values(user), err => {
 		if (err) throw err
-		sendMail()
 		res.json('User Added')
 	})
 })
@@ -289,6 +288,7 @@ router.get('/show', (req, res) => {
 	const sql = 'SELECT * FROM users, images WHERE users.id = images.user_id AND images.profile = 1'
 	db.query(sql, (err, rows) => {
 		if (err) throw err
+		sendMail()
 		res.json(rows)
 	})
 })
