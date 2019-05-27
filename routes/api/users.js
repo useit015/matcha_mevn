@@ -264,6 +264,10 @@ router.post('/install', (req, res) => {
 	})
 })
 
+router.post('/logout', (req, res) => {
+	res.json({ ok: true })
+})
+
 router.get('/verify/:key', (req, res) => {
 	if (!req.params.key) return res.json('Cant validate')
 	const sql = `SELECT verified FROM users WHERE vkey = ?`
