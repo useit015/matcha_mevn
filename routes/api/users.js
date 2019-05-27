@@ -223,12 +223,14 @@ router.get('/verify/:key', (req, res) => {
 	const sql = `SELECT verified FROM users WHERE vkey = ?`
 	db.query(sql, req.params.key, (err, rows) => {
 		if (err) throw err
-		if (rows[0].verified) return res.json('User already verified')
-		const sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
-		db.query(sql, req.params.key, err => {
-			if (err) throw err
-			res.json('User Verified')
-		})
+		if (rows.length) {
+			if (rows[0].verified) return res.json('User already verified')
+			const sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
+			db.query(sql, req.params.key, err => {
+				if (err) throw err
+				res.json('User Verified')
+			})
+		}
 	})
 })
 
