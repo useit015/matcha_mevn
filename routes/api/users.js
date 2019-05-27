@@ -189,7 +189,7 @@ const sendMail = async (to, key) => {
 			pass: 'fuck3dupsh17'
 		}
 	})
-	transporter.sendMail({
+	await transporter.sendMail({
 		from: 'Matcha team',
 		to,
 		subject: "Hello ✔",
