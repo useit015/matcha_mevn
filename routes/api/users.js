@@ -230,6 +230,8 @@ router.get('/verify/:key', (req, res) => {
 				if (err) throw err
 				res.json('User Verified')
 			})
+		} else {
+			res.status(400).json('invalid key')
 		}
 	})
 })
