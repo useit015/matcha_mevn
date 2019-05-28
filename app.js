@@ -39,7 +39,7 @@ io.on('connection', socket => {
 		console.log('users are', users)
 	})
 	socket.on('disconnect', () => {
-		users = users.filter(cur => cur.socketId !== socket.id)
+		delete users[id]
 		console.log('Client disconnected')
 	})
 })
