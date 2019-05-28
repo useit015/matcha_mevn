@@ -24,7 +24,7 @@ const server = http.createServer(app)
 
 const io = socketIo(server)
 
-const users = []
+let users = []
 
 io.on('connection', socket => {
 	console.log('New client connected', socket.id)
