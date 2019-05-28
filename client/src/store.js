@@ -106,7 +106,7 @@ export const store = new Vuex.Store({
 				socket.on('connect', () => console.log('connected -->'))
 				socket.on('event', data => console.log('event -->', data))
 				socket.on('disconnect', () => console.log('disconnected -->'))
-				socket.emit('chat', 'data')
+				socket.emit('auth', user.id)
 			}
 		},
 		logout: (context) => {
