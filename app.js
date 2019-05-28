@@ -30,7 +30,10 @@ io.on('connection', socket => {
 	console.log('New client connected', socket.id)
 	socket.on('chat', data => console.log(data))
 	socket.on('auth', id => {
-		users.push(id)
+		users.push({
+			socketId: socket.id,
+			userId: id
+		})
 		console.log('users are', users)
 	})
 	socket.on('disconnect', () => console.log('Client disconnected'))
