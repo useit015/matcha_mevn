@@ -24,18 +24,18 @@ const server = http.createServer(app)
 
 const io = socketIo(server)
 
-let users = []
+let users = {}
 
 io.on('connection', socket => {
 	console.log('New client connected', socket.id)
 	socket.on('chat', data => {
 		console.log(data)
+		io.emit('chat', {
+			to: 
+		})
 	})
 	socket.on('auth', id => {
-		users.push({
-			socketId: socket.id,
-			userId: id
-		})
+		users[socket.id] = id
 		console.log('users are', users)
 	})
 	socket.on('disconnect', () => {
