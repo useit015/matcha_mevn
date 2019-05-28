@@ -1,7 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 const express = require('express')
-const mysql = require('mysql')
 const router = express.Router()
 const moment = require('moment')
 const crypto = require('crypto')
@@ -9,24 +8,13 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
 const multer = require('multer')
+const db = require('../../utility/database')
 const upload = multer({ 
 	limits: { fileSize: 4 * 1024 * 1024 },
 	storage: {
 		destination: (req, file, cb) => cb(null, 'uploads'),
 		filename: (req, file, cb) => cb(null, file.fieldname + '-' + Date.now())
 	}
-})
-
-const db = mysql.createConnection({
-	host: 'localhost',
-	user: 'root',
-	password: '0O*ussama',
-	database: 'slim'
-})
-
-db.connect(err => {
-	if (err) throw err;
-	console.log('MySql Connected...');
 })
 
 router.post('/getmatches', (req, res) => {
