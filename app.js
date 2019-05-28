@@ -35,7 +35,7 @@ io.on('connection', socket => {
 		})
 	})
 	socket.on('auth', id => {
-		users[socket.id] = id
+		users[id] = socket.id
 		console.log('users are', users)
 	})
 	socket.on('disconnect', () => {
