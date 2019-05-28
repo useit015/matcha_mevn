@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import io from 'socket.io-client'
 import Vuex, { mapGetters } from 'vuex'
 import utility from './utility.js'
 
@@ -101,6 +102,11 @@ export const store = new Vuex.Store({
 				context.dispatch('syncHistory', user.id)
 				localStorage.setItem('token', user.token)
 				context.commit('login', user)
+				const socket = io('http://134.209.195.36')
+				socket.on('connect', () => console.log('connected -->'))
+				socket.on('event', data => console.log('event -->', data))
+				socket.on('disconnect', () => console.log('disconnected -->'))
+				socket.emit('chat', 'data')
 			}
 		},
 		logout: (context) => {
