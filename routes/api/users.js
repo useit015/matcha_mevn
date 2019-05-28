@@ -1,14 +1,15 @@
 const fs = require('fs')
 const path = require('path')
 const express = require('express')
-const router = express.Router()
 const moment = require('moment')
 const crypto = require('crypto')
+const multer = require('multer')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
-const multer = require('multer')
 const db = require('../../utility/database')
+
+const router = express.Router()
 const upload = multer({ 
 	limits: { fileSize: 4 * 1024 * 1024 },
 	storage: {
