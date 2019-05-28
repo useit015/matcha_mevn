@@ -31,7 +31,7 @@ io.on('connection', socket => {
 	socket.on('chat', data => {
 		console.log(data)
 		io.emit('chat', {
-			to: 
+			to: users[data.to]
 		})
 	})
 	socket.on('auth', id => {
