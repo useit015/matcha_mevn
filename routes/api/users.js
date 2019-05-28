@@ -125,7 +125,7 @@ router.post('/isloggedin', (req, res) => {
 			const user = rows[0]
 			user.token = crypto.randomBytes(10).toString('hex')
 			user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
-			const sql = `UPDATE users SET token = ?, tokenExpiration = '? WHERE id = ?`
+			const sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
 			db.query(sql, [user.token, user.tokenExpiration, user.id], err => {
 				if (err) throw err
 				const sql = `SELECT * FROM images WHERE user_id = ?`
