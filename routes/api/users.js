@@ -111,9 +111,11 @@ router.post('/isloggedin', (req, res) => {
 	db.query(sql, [req.body.token], (err, rows) => {
 		if (err) throw err
 		if (rows.length) {
-			const user = rows[0]
-			user.token = crypto.randomBytes(10).toString('hex')
-			user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
+			const user = {
+				...rows[0],
+				token: crypto.randomBytes(10).toString('hex'),
+				tokenExpiration: moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
+			}
 			const sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
 			db.query(sql, [user.token, user.tokenExpiration, user.id], err => {
 				if (err) throw err
