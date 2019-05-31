@@ -43,6 +43,7 @@ io.on('connection', socket => {
 			if (users[key] === socket.id) {
 				delete users[key]
 				console.log('Client disconnected')
+				console.log('users are', users)
 			}
 		}
 	})
