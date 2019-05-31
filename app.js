@@ -39,8 +39,12 @@ io.on('connection', socket => {
 		console.log('users are', users)
 	})
 	socket.on('disconnect', () => {
-		delete users[id]
-		console.log('Client disconnected')
+		for (let key of Object.keys(users)) {
+			if (users[key] === socket.id) {
+				delete users[key]
+				console.log('Client disconnected')
+			}
+		}
 	})
 })
 
