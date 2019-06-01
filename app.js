@@ -26,14 +26,18 @@ const io = socketIo(server)
 
 let users = {}
 
+io.use((socket, next) => {
+	var handshake = socket.handshake;
+	console.log(handshake.query);
+	next();
+})
+
 io.on('connection', socket => {
 	console.log('New client connected', socket.id)
 	socket.on('chat', data => {
 		console.log('i recieved this --> ', data)
-		io.sockets.connected[users[data.to]].emit('chat', data)
-		// io.to(users[data.to]).emit('chat', data.msg)
-		// 	.then(res => console.log('sent --> ', res))
-		// 	.catch(err => console.log('error -->', err))
+		if (users[data.to])
+			io.sockets.connected[users[data.to]].emit('chat', data)
 	})
 	socket.on('auth', id => {
 		users[id] = socket.id
