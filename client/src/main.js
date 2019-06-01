@@ -16,7 +16,7 @@ Vue.use(Vuetify, {
 
 Vue.use(vueResource)
 
-const SocketInstance = io('http://134.209.195.36', { query: 'test=test1' });
+const SocketInstance = io('http://134.209.195.36');
 
 Vue.use(new vueIo({
 	debug: true,

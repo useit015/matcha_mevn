@@ -94,23 +94,18 @@ export const store = new Vuex.Store({
 		},
 		SOCKET_connect: state => {
 			state.isConnected = true
-			console.log('connected -->')
 			timer = setInterval(function () {
 				if (state.user.id) {
 					clearInterval(timer)
 					console.log('<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>')
-					(new Vue()).$socket.emit('auth', state.user.id)
+					return (new Vue()).$socket.emit('auth', state.user.id)
 				}
-			}, 1)
+			}, 10)
 		},
 		SOCKET_disconnect: state => {
 			state.isConnected = false
 			console.log('disconnected -->')
 		},
-		// SOCKET_auth: (state, data) => {
-		// 	// while (!state.user);
-		// 	// (new Vue()).$socket.emit('auth', state.user.id)
-		// },
 		SOCKET_chat: (state, data) => {
 			console.log('You\'ve got a message --> ', data)
 		}
@@ -128,15 +123,6 @@ export const store = new Vuex.Store({
 				context.dispatch('syncHistory', user.id)
 				localStorage.setItem('token', user.token)
 				context.commit('login', user)
-				// const socket = io('http://134.209.195.36')
-				// socket.on('chat', () => console.log('chaaat -->'))
-				// socket.on('connect', () => console.log('connected -->'))
-				// socket.on('disconnect', () => console.log('disconnected -->'))
-				// socket.emit('auth', user.id)
-				// socket.emit('chat', {
-				// 	to: 313,
-				// 	msg: 'hello world'
-				// })
 			}
 		},
 		logout: (context) => {

@@ -25,22 +25,10 @@ const server = http.createServer(app)
 const io = socketIo(server)
 
 let users = {}
-let online = []
-
-io.use((socket, next) => {
-	var handshake = socket.handshake;
-	console.log(handshake.query);
-	next();
-})
 
 io.on('connection', socket => {
-	socket.emit('auth', socket.id)
-	console.log('New client connected', socket.id)
-	console.log('> users are', users)
-	online.push(socket.id)
-	console.log('> online are', online)
+	console.log('New client connected --> ', socket.id)
 	socket.on('chat', data => {
-		console.log('i recieved this --> ', data)
 		if (users[data.to])
 			io.sockets.connected[users[data.to]].emit('chat', data)
 	})
@@ -49,17 +37,13 @@ io.on('connection', socket => {
 		console.log('users are', users)
 	})
 	socket.on('logout', () => {
-		console.log('im in logout')
-		online = online.filter(cur => cur != socket.id)
 		socket.disconnect()
 	})
 	socket.on('disconnect', () => {
-		online = online.filter(cur => cur != socket.id)
 		for (let key of Object.keys(users)) {
 			if (users[key] === socket.id) {
 				delete users[key]
-				console.log('Client disconnected')
-				console.log('>>> users are', users)
+				console.log('Client disconnected --> ', socket.id)
 				socket.disconnect()
 			}
 		}
