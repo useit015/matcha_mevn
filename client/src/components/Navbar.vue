@@ -81,6 +81,8 @@ export default {
 					this.$store.dispatch('login', user)
 					this.$socket.emit('auth', user.id)
 					this.updateLocation(user.id)
+				} else {
+					this.$socket.emit('logout')
 				}
 			}).catch(err => console.error(err))
 	},

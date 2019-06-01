@@ -47,6 +47,10 @@ io.on('connection', socket => {
 		users[id] = socket.id
 		console.log('users are', users)
 	})
+	socket.on('logout', () => {
+		online = online.filter(cur => cur != socket.id)
+		socket.disconnect()
+	})
 	socket.on('disconnect', () => {
 		online = online.filter(cur => cur != socket.id)
 		for (let key of Object.keys(users)) {
