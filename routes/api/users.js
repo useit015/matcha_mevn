@@ -6,7 +6,8 @@ const crypto = require('crypto')
 const multer = require('multer')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const nodemailer = require('nodemailer')
+// const nodemailer = require('nodemailer')
+const sendMail = require('../../utility/mail')
 const db = require('../../utility/database')
 
 const router = express.Router()
@@ -170,24 +171,24 @@ router.post('/login', (req, res) => {
 	})
 })
 
-const sendMail = async (to, key) => {
-	let transporter = nodemailer.createTransport({
-		host: 'smtp.gmail.com',
-		port: 587,
-		secure: false,
-		auth: {
-			user: 'ousstest015@gmail.com',
-			pass: 'fuck3dupsh17'
-		}
-	})
-	await transporter.sendMail({
-		from: 'Matcha team',
-		to,
-		subject: "Hello ✔",
-		text: "Hello world?",
-		html: `<a href="http://134.209.195.36/api/users/verify/${key}">Click here</a>`
-	})
-}
+// const sendMail = async (to, key) => {
+// 	let transporter = nodemailer.createTransport({
+// 		host: 'smtp.gmail.com',
+// 		port: 587,
+// 		secure: false,
+// 		auth: {
+// 			user: 'ousstest015@gmail.com',
+// 			pass: 'fuck3dupsh17'
+// 		}
+// 	})
+// 	await transporter.sendMail({
+// 		from: 'Matcha team',
+// 		to,
+// 		subject: "Hello ✔",
+// 		text: "Hello world?",
+// 		html: `<a href="http://134.209.195.36/api/users/verify/${key}">Click here</a>`
+// 	})
+// }
 
 router.post('/add', (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
