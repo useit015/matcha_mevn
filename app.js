@@ -28,12 +28,12 @@ let users = {}
 
 io.on('connection', socket => {
 	console.log('New client connected', socket.id)
-	console.log('users are', users)
 	socket.on('chat', data => {
-		console.log(data)
-		io.emit('chat', {
-			to: users[data.to]
-		})
+		console.log('i recieved this --> ', data)
+		io.sockets.connected[users[data.to]].emit('chat', data)
+		// io.to(users[data.to]).emit('chat', data.msg)
+		// 	.then(res => console.log('sent --> ', res))
+		// 	.catch(err => console.log('error -->', err))
 	})
 	socket.on('auth', id => {
 		users[id] = socket.id

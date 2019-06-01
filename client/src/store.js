@@ -90,16 +90,16 @@ export const store = new Vuex.Store({
 			state.blocked = blacklist.blocked
 			state.blockedBy = blacklist.blockedBy
 		},
-		SOCKET_CONNECT(state) {
+		SOCKET_connect: state => {
 			state.isConnected = true
 			console.log('connected -->')
 		},
-		SOCKET_DISCONNECT(state) {
+		SOCKET_disconnect: state => {
 			state.isConnected = false
 			console.log('disconnected -->')
 		},
-		SOCKET_MESSAGECHANNEL(state, message) {
-			state.socketMessage = message
+		SOCKET_chat: (state, data, lata) => {
+			console.log('You\'ve got a message --> ', data, lata)
 		}
 	},
 	actions: {

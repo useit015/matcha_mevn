@@ -11,12 +11,18 @@
 export default {
 	name: 'Chat',
 	data: () => ({
-		to: null,
 		msg: null
 	}),
 	methods: {
 		sendMsg () {
-			
+			this.$socket.emit('chat', {
+				to: this.$route.params.id,
+				msg: this.msg
+			})
+			console.log('data sent -->', {
+				to: this.$route.params.id,
+				msg: this.msg
+			})
 		}
 	}
 }

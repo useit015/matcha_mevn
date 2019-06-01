@@ -79,6 +79,7 @@ export default {
 				if (user.tokenExpiration && Date.parse(user.tokenExpiration) >= Date.now()) {
 					user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
 					this.$store.dispatch('login', user)
+					this.$socket.emit('auth', user.id)
 					this.updateLocation(user.id)
 				}
 			}).catch(err => console.error(err))

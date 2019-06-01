@@ -23,12 +23,10 @@ Vue.use(new vueIo({
 	connection: SocketInstance,
 	vuex: {
 		store,
-		options: {
-			useConnectionNamespace: true
-		}
+		actionPrefix: 'SOCKET_',
+		mutationPrefix: 'SOCKET_'
 	}
 }))
-// Vue.use(vueIo, SocketInstance, store)
 
 String.prototype.has = function(needle) {
 	return this.toLowerCase().includes(needle.toLowerCase())
