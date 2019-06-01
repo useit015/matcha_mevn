@@ -25,7 +25,7 @@ const server = http.createServer(app)
 const io = socketIo(server)
 
 let users = {}
-const online = []
+let online = []
 
 io.use((socket, next) => {
 	var handshake = socket.handshake;
