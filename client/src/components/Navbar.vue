@@ -79,7 +79,7 @@ export default {
 				if (user.tokenExpiration && Date.parse(user.tokenExpiration) >= Date.now()) {
 					user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
 					this.$store.dispatch('login', user)
-					this.$socket.emit('auth', user.id)
+					this.$socket.on('auth', data => console.log(data))
 					this.updateLocation(user.id)
 				} else {
 					console.log('im in logout vue')
