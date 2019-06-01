@@ -34,6 +34,7 @@ io.use((socket, next) => {
 })
 
 io.on('connection', socket => {
+	console.log('I am the socket --> ', socket)
 	console.log('New client connected', socket.id)
 	console.log('> users are', users)
 	online.push(socket.id)
