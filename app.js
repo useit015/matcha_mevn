@@ -25,6 +25,7 @@ const server = http.createServer(app)
 const io = socketIo(server)
 
 let users = {}
+const online = []
 
 io.use((socket, next) => {
 	var handshake = socket.handshake;
@@ -35,6 +36,8 @@ io.use((socket, next) => {
 io.on('connection', socket => {
 	console.log('New client connected', socket.id)
 	console.log('> users are', users)
+	online.push(socket.id)
+	console.log('> online are', online)
 	socket.on('chat', data => {
 		console.log('i recieved this --> ', data)
 		if (users[data.to])

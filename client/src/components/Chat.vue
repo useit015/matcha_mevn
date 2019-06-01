@@ -16,7 +16,8 @@ export default {
 	methods: {
 		sendMsg () {
 			this.$socket.emit('chat', {
-				to: this.$route.params.id,
+				from: this.$store.getters.user.id,
+				to: Number(this.$route.params.id),
 				msg: this.msg
 			})
 			console.log('data sent -->', {
