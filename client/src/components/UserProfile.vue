@@ -22,7 +22,7 @@
 					<v-btn icon flat large color="primary" :disabled="userCantLike" @click="match"  class="hidden-xs-only">
 						<v-icon>{{ liked ? 'favorite' : 'favorite_border' }}</v-icon>
 					</v-btn>
-					<v-btn icon flat large color="primary" :disabled="!userCanChat" class="hidden-xs-only mx-0">
+					<v-btn icon flat large color="primary" :disabled="!userCanChat" class="hidden-xs-only mx-0" router :to="`/chat/${user.id}`">
 						<v-icon>{{ userCanChat ? 'chat_bubble' : 'chat_bubble_outline' }}</v-icon>
 					</v-btn>
 					<v-speed-dial v-model="fab" direction="bottom" transition="slide-y-reverse-transition" class="speed_list">

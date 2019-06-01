@@ -28,6 +28,7 @@ let users = {}
 
 io.on('connection', socket => {
 	console.log('New client connected', socket.id)
+	console.log('users are', users)
 	socket.on('chat', data => {
 		console.log(data)
 		io.emit('chat', {
