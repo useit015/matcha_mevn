@@ -48,6 +48,7 @@ io.on('connection', socket => {
 		console.log('users are', users)
 	})
 	socket.on('logout', () => {
+		console.log('im in logout')
 		online = online.filter(cur => cur != socket.id)
 		socket.disconnect()
 	})
