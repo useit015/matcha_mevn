@@ -34,6 +34,7 @@ io.use((socket, next) => {
 
 io.on('connection', socket => {
 	console.log('New client connected', socket.id)
+	console.log('> users are', users)
 	socket.on('chat', data => {
 		console.log('i recieved this --> ', data)
 		if (users[data.to])
@@ -47,8 +48,9 @@ io.on('connection', socket => {
 		for (let key of Object.keys(users)) {
 			if (users[key] === socket.id) {
 				delete users[key]
+				socket.disconnect()
 				console.log('Client disconnected')
-				console.log('users are', users)
+				console.log('>>> users are', users)
 			}
 		}
 	})
