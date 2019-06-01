@@ -5,6 +5,8 @@ import utility from './utility.js'
 
 Vue.use(Vuex)
 
+let timer
+
 export const store = new Vuex.Store({
 	strict: true,
 	state: {
@@ -93,13 +95,24 @@ export const store = new Vuex.Store({
 		SOCKET_connect: state => {
 			state.isConnected = true
 			console.log('connected -->')
+			timer = setInterval(function () {
+				if (state.user.id) {
+					clearInterval(timer)
+					console.log('<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>')
+					(new Vue()).$socket.emit('auth', state.user.id)
+				}
+			}, 1)
 		},
 		SOCKET_disconnect: state => {
 			state.isConnected = false
 			console.log('disconnected -->')
 		},
-		SOCKET_chat: (state, data, lata) => {
-			console.log('You\'ve got a message --> ', data, lata)
+		// SOCKET_auth: (state, data) => {
+		// 	// while (!state.user);
+		// 	// (new Vue()).$socket.emit('auth', state.user.id)
+		// },
+		SOCKET_chat: (state, data) => {
+			console.log('You\'ve got a message --> ', data)
 		}
 	},
 	actions: {
