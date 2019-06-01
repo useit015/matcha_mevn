@@ -48,7 +48,9 @@ io.on('connection', socket => {
 		console.log('users are', users)
 	})
 	socket.on('disconnect', () => {
-		online.filter(cur => cur != socket.id)
+		online = online.map(cur => {
+			if (cur != socket.id) return cur
+		})
 		for (let key of Object.keys(users)) {
 			if (users[key] === socket.id) {
 				delete users[key]
