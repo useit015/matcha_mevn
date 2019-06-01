@@ -52,9 +52,9 @@ io.on('connection', socket => {
 		for (let key of Object.keys(users)) {
 			if (users[key] === socket.id) {
 				delete users[key]
-				socket.disconnect()
 				console.log('Client disconnected')
 				console.log('>>> users are', users)
+				socket.disconnect()
 			}
 		}
 	})
