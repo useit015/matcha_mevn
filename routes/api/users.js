@@ -200,7 +200,8 @@ router.post('/add', (req, res) => {
 		vkey: crypto.randomBytes(10).toString('hex')
 	}
 	// // AND MUST SEND VALIDATION EMAIL !!!!
-	const sql = `INSERT INTO users (first_name, last_name, username, email, password, vkey)
+	const sql = `INSERT INTO users (first_name, last_name,
+					username, email, password, vkey)
 					VALUES (?, ?, ?, ?, ?, ?)`
 	db.query(sql, Object.values(user), err => {
 		if (err) throw err
@@ -231,8 +232,9 @@ router.post('/install', (req, res) => {
 		lat: req.body.lat,
 		lng: req.body.lng
 	}
-	// // AND MUST SEND VALIDATION EMAIL !!!!
-	const sql = `INSERT INTO users (first_name, last_name, username, email, password, vkey, verified, gender, looking, birthdate, biography, tags, address, city, country, rating, postal_code, phone, lat, lng)
+	const sql = `INSERT INTO users (first_name, last_name, username, email,
+					password, vkey, verified, gender, looking, birthdate, biography,
+					tags, address, city, country, rating, postal_code, phone, lat, lng)
 					VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	db.query(sql, Object.values(user), err => {
 		if (err) throw err
@@ -339,7 +341,9 @@ router.post('/image/:id', upload.single('image'), (req, res) => {
 })
 
 router.get('/show', (req, res) => {
-	const sql = 'SELECT * FROM users, images WHERE users.id = images.user_id AND images.profile = 1'
+	const sql = `SELECT * FROM users, images
+					WHERE users.id = images.user_id
+					AND images.profile = 1`
 	db.query(sql, (err, rows) => {
 		if (err) throw err
 		res.json(rows)

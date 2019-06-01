@@ -15,15 +15,14 @@ export default {
 	}),
 	methods: {
 		sendMsg () {
-			this.$socket.emit('chat', {
+			const data = {
 				from: this.$store.getters.user.id,
 				to: Number(this.$route.params.id),
-				msg: this.msg
-			})
-			console.log('data sent -->', {
-				to: this.$route.params.id,
-				msg: this.msg
-			})
+				msg: this.msg,
+				time: new Date()
+			}
+			this.$socket.emit('chat', data)
+			console.log('data sent --> ', data)
 		}
 	}
 }

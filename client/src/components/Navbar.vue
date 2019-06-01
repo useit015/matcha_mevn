@@ -82,8 +82,8 @@ export default {
 					// this.$socket.emit('auth', user.id)
 					this.updateLocation(user.id)
 				} else {
-					console.log('im in logout')
-					this.$socket.emit('logout')
+					// console.log('im in logout')
+					// this.$socket.emit('logout')
 				}
 			}).catch(err => console.error(err))
 	},

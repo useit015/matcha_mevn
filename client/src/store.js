@@ -97,7 +97,6 @@ export const store = new Vuex.Store({
 			timer = setInterval(function () {
 				if (state.user.id) {
 					clearInterval(timer)
-					console.log('<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>')
 					return (new Vue()).$socket.emit('auth', state.user.id)
 				}
 			}, 10)
