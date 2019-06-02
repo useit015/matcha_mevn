@@ -80,7 +80,7 @@ export default {
 					user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
 					this.$store.dispatch('login', user)
 					// this.$socket.emit('auth', user.id)
-					this.updateLocation(user.id)
+					// this.updateLocation(user.id)
 				} else {
 					// console.log('im in logout')
 					// this.$socket.emit('logout')

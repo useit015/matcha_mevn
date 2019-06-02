@@ -3,10 +3,15 @@ const express = require('express')
 const cors = require('cors')
 const path = require('path')
 const http = require('http')
+const env = require('dotenv')
 const socketIo = require('socket.io')
 const usersRoute = require('./routes/api/users')
 const port = process.env.PORT || 8080
 const app = express()
+
+env.config()
+
+console.log('i am the password --> ', process.env.password)
 
 app.use(cors())
 

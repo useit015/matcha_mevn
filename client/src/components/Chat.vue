@@ -22,7 +22,6 @@ export default {
 				time: new Date()
 			}
 			this.$socket.emit('chat', data)
-			console.log('data sent --> ', data)
 		}
 	}
 }

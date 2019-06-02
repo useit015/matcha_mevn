@@ -23,6 +23,8 @@
 </template>
 
 <script>
+import utility from '../utility.js'
+
 export default {
 	name: 'Login',
 	data: () => ({
@@ -50,6 +52,7 @@ export default {
 		]
 	}),
 	methods: {
+		...utility,
 		login() {
 			this.$http.post('http://134.209.195.36/api/users/login', {
 				username: this.username,
@@ -59,6 +62,7 @@ export default {
 				if (user.tokenExpiration && Date.parse(user.tokenExpiration) >= Date.now()) {
 					user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
 					this.$store.dispatch('login', user)
+					this.updateLocation(user.id)
 					this.$router.push('/')
 				}
 			}).catch(err => console.error(err))

@@ -8,14 +8,18 @@ const translateLocation = loc => ({
 })
 
 const getLocationFromIp = f => {
-	Vue.http.get('https://get.geojs.io/v1/ip/geo.json')
-			.then(res => f(translateLocation(res.body)))
-			.catch(err => console.error(err))
+	Vue.http.get('https://ipinfo.io?token=3443e12245bdcf')
+			.then(res => {
+				if (!res.error) {
+					const splitted = res.body.loc.split(',')
+					f({ lat: Number(splitted[0]), lng: Number(splitted[1]) })
+				}
+			}).catch(err => console.error(err))
 }
 
 const syncLocation = (id, location) => {
 	Vue.http.post(`http://134.209.195.36/api/users/position/${id}`, location)
-			.then(() => console.log('synced'))
+			.then(() => console.log('synced -->', location))
 			.catch(err => console.error(err))
 }
 
@@ -50,13 +54,13 @@ export default {
 					lat: pos.coords.latitude,
 					lng: pos.coords.longitude
 			}), () => getLocationFromIp(res => syncLocation(id, {
-				lat: Number(res.body.latitude),
-				lng: Number(res.body.longitude)
+				lat: Number(res.lat),
+				lng: Number(res.lng)
 			})))
 		} else {
 			getLocationFromIp(res => syncLocation(id, {
-				lat: Number(res.body.latitude),
-				lng: Number(res.body.longitude)
+				lat: Number(res.lat),
+				lng: Number(res.lng)
 			}))
 		}
 	},

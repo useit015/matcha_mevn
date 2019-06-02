@@ -19,8 +19,7 @@ export const store = new Vuex.Store({
 		blockedBy: [],
 		visitor: [],
 		visited: [],
-		isConnected: false,
-		socketMessage: ''
+		isConnected: false
 	},
 	getters: {
 		user: state => state.user,
@@ -111,12 +110,10 @@ export const store = new Vuex.Store({
 	},
 	actions: {
 		updateUser: (context, user) => {
-			context.dispatch('locate', user.id)
 			context.commit('updateUser', user)
 		},
-		login:(context, user) => {
+		login: (context, user) => {
 			if (user.id) {
-				context.dispatch('locate', user.id)
 				context.dispatch('syncMatches', user.id)
 				context.dispatch('syncBlocked', user.id)
 				context.dispatch('syncHistory', user.id)
