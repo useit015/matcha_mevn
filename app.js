@@ -5,11 +5,11 @@ const path = require('path')
 const http = require('http')
 const env = require('dotenv')
 const socketIo = require('socket.io')
-const usersRoute = require('./routes/api/users')
 const port = process.env.PORT || 8080
 const app = express()
 
 env.config()
+const usersRoute = require('./routes/api/users')
 
 app.use(cors())
 
