@@ -1,15 +1,14 @@
+require('dotenv').config()
 const bodyParser = require('body-parser')
 const express = require('express')
 const cors = require('cors')
 const path = require('path')
 const http = require('http')
-const env = require('dotenv')
 const socketIo = require('socket.io')
 const port = process.env.PORT || 8080
+const usersRoute = require('./routes/api/users')
 const app = express()
 
-env.config()
-const usersRoute = require('./routes/api/users')
 
 app.use(cors())
 
