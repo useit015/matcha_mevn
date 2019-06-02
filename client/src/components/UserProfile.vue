@@ -251,6 +251,7 @@ export default {
 		},
 		distance () {
 			const from = this.location
+			console.log('i am location -> ', this.location)
 			const to = {
 				lat: this.user.lat,
 				lng: this.user.lng

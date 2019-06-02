@@ -92,7 +92,7 @@ export const store = new Vuex.Store({
 			state.blockedBy = blacklist.blockedBy
 		},
 		SOCKET_connect: state => {
-			state.isConnected = true
+			// state.isConnected = true
 			timer = setInterval(function () {
 				if (state.user.id) {
 					clearInterval(timer)
@@ -110,10 +110,18 @@ export const store = new Vuex.Store({
 	},
 	actions: {
 		updateUser: (context, user) => {
+			context.commit('locate', {
+				lat: user.lat,
+				lng: user.lng
+			})
 			context.commit('updateUser', user)
 		},
 		login: (context, user) => {
 			if (user.id) {
+				context.commit('locate', {
+					lat: user.lat,
+					lng: user.lng
+				})
 				context.dispatch('syncMatches', user.id)
 				context.dispatch('syncBlocked', user.id)
 				context.dispatch('syncHistory', user.id)

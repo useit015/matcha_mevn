@@ -58,7 +58,7 @@ export default {
 				lat: this.user.lat,
 				lng: this.user.lng
 			}
-			return `${Math.round(utility.calculateDistance(from, to))} kms away`
+			return `${Math.round(this.calculateDistance(from, to))} kms away`
 		},
 		lastSeen () {
 			if (this.user.status) return 'online'
@@ -68,6 +68,7 @@ export default {
 		}
 	},
 	methods: {
+		...utility,
 		profileImage(image) {
 			return utility.getFullPath(image)
 		}

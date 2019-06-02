@@ -33,9 +33,9 @@ export default {
 				.catch(err => console.error(err))
 	},
 	calculateDistance: (from, to, mile) => {
-		if (from.lat == to.lat && from.lng == to.lng)
+		if (Math.abs(from.lat - to.lat) <= 0.005 && Math.abs(from.lng - to.lng) <= 0.005) {
 			return 0
-		else {
+		} else {
 			const theta = from.lng - to.lng
 			const radtheta = Math.PI * theta / 180
 			from.rad = Math.PI * from.lat / 180
