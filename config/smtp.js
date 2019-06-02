@@ -3,8 +3,8 @@ const smtp = {
 	port: process.env.MAIL_PORT,
 	secure: false,
 	auth: {
-		user: process.env.MAIL,
-		pass: process.env.MAIL_PASS
+		user: 'ousstest015@gmail.com',
+		pass: 'fuck3dupsh17'
 	}
 }
 
