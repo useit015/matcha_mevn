@@ -1,10 +1,10 @@
 const smtp = {
-	host: 'smtp.gmail.com',
-	port: 587,
+	host: process.env.MAIL_SMTP,
+	port: process.env.MAIL_PORT,
 	secure: false,
 	auth: {
-		user: 'ousstest015@gmail.com',
-		pass: 'fuck3dupsh17'
+		user: process.env.MAIL,
+		pass: process.env.MAIL_PASS
 	}
 }
 

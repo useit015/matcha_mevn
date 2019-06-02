@@ -11,8 +11,6 @@ const app = express()
 
 env.config()
 
-console.log('i am the password --> ', process.env.password)
-
 app.use(cors())
 
 
