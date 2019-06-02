@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer')
 const conf = require('../config/smtp')
-console.log('config----------------->', conf)
+
 const sendMail = async (to, key) => {
 	let transporter = nodemailer.createTransport(conf)
 	await transporter.sendMail({
