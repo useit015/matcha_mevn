@@ -22,7 +22,7 @@ app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.h
 const server = http.createServer(app)
 
 
-const io = socketIo(server)
+const io = socketIo(server, { pingInterval: 10, pingTimeout: 4000 })
 
 let users = {}
 
