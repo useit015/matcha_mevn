@@ -75,6 +75,10 @@ export const store = new Vuex.Store({
 		login: (state, user) => {
 			state.status = true
 			state.user = user
+			if (!state.isConnected) {
+				(new Vue()).$socket.emit('auth', state.user.id)
+				state.isConnected = true
+			}
 		},
 		locate: (state, location) => {
 			state.location = location
@@ -91,14 +95,14 @@ export const store = new Vuex.Store({
 			state.blocked = blacklist.blocked
 			state.blockedBy = blacklist.blockedBy
 		},
-		SOCKET_connect: state => {
+		SOCKET_connect: async state => {
 			// state.isConnected = true
-			timer = setInterval(function () {
-				if (state.user.id) {
-					clearInterval(timer)
-					return (new Vue()).$socket.emit('auth', state.user.id)
-				}
-			}, 10)
+			// timer = setInterval(function () {
+			// 	if (state.user.id) {
+			// 		clearInterval(timer)
+			// 		return (new Vue()).$socket.emit('auth', state.user.id)
+			// 	}
+			// }, 1000)
 		},
 		SOCKET_disconnect: state => {
 			state.isConnected = false
@@ -117,6 +121,7 @@ export const store = new Vuex.Store({
 			context.commit('updateUser', user)
 		},
 		login: (context, user) => {
+			console.log('this is the user i got --> ', user)
 			if (user.id) {
 				context.commit('locate', {
 					lat: user.lat,

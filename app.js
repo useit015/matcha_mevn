@@ -42,6 +42,7 @@ io.on('connection', socket => {
 		socket.disconnect()
 	})
 	socket.on('disconnect', () => {
+		console.log('non identified Client disconnected')
 		for (let key of Object.keys(users)) {
 			if (users[key] === socket.id) {
 				delete users[key]

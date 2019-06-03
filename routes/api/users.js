@@ -120,7 +120,7 @@ router.post('/isloggedin', async (req, res) => {
 			let sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
 			await pool.query(sql, [user.token, user.tokenExpiration, user.id])
 			sql = `SELECT * FROM images WHERE user_id = ?`
-			user.images = await pool.query(sql, [user.token, user.tokenExpiration, user.id])
+			user.images = await pool.query(sql, [user.id])
 			res.json(user)
 			// jwt.sign({ user: user }, 'secret', (err, token) => {
 			// 	if (err) throw err
