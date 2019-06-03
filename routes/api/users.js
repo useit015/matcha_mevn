@@ -133,7 +133,7 @@ router.post('/isloggedin', async (req, res) => {
 	}
 })
 
-router.post('/login', (async (req, res) => {
+router.post('/login', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
 	try {
 		const sql = `SELECT * FROM users WHERE username = ?`
@@ -161,7 +161,7 @@ router.post('/login', (async (req, res) => {
 	} catch (err) {
 		throw new Error(err)
 	}
-})().catch(err => console.log(err)))
+})
 
 router.post('/add', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
