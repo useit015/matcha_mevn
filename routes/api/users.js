@@ -322,41 +322,30 @@ router.get('/show', async (req, res) => {
 						ANDS images.profile = 1`
 		const result = await pool.query(sql)
 		res.json(result)
-	} catch(err) {
+	} catch (err) {
 		throw new Error(err)
 	}
 })
 
-// router.get('/show', (req, res) => {
-// 	const sql = `SELECT * FROM users, images
-// 					WHERE users.id = images.user_id
-// 					AND images.profile = 1`
-// 	db.query(sql, (err, rows) => {
-// 		if (err) throw err
-// 		res.json(rows)
-// 	})
-// })
-
 router.post('/show/:id', (req, res) => {
-	const sql = `SELECT * FROM users WHERE id = ?`
-	db.query(sql, [req.params.id], (err, rows) => {
-		if (err) throw err
-		if (rows.length) {
-			const user = rows[0]
-			const sql = `SELECT * FROM images WHERE user_id = ?`
-			db.query(sql, [req.params.id], (err, rows) => {
-				if (err) throw err
-				user.images = rows
+	try {
+		const sql = `SELECT * FROM users WHERE id = ?`
+		const result = await pool.query(sql, [req.params.id])
+		if (result.length) {
+			try {
+				const user = result[0]
 				const sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
-				db.query(sql, [req.body.visitor, req.params.id], err => {
-					if (err) throw err
-					res.json(user)
-				})
-			})
+				await pool.query(sql, [req.body.visitor, req.params.id])
+				res.json(user)
+			} catch (err) {
+				throw new Error(err)
+			}
 		} else {
 			res.status(400).json('User doesnt exist')
 		}
-	})
+	} catch (err) {
+		throw new Error(err)
+	}
 })
 
 router.post('/block/:id', (req, res) => {
