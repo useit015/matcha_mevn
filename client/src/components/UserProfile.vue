@@ -164,7 +164,7 @@ export default {
 		blocked: {
 			immediate: true,
 			handler () {
-				const id = this.$route.params.id
+				const id = Number(this.$route.params.id)
 				console.log('blocked -->', ...this.blocked, '------>>')
 				console.log('blockedBy -->', this.blockedBy, id)
 				if (Array.isArray(this.blocked) && this.blocked.includes(id)) {
