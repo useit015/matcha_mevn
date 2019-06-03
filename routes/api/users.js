@@ -166,7 +166,7 @@ router.post('/login', async (req, res) => {
 						await pool.query(sql, [user.token, user.tokenExpiration, user.id])
 						try {
 							const sql = `SELECT * FROM images WHERE user_id = ?`
-							user.images = pool.query(sql, [user.id])
+							user.images = await pool.query(sql, [user.id])
 							res.json(user)
 							// jwt.sign({ user: user }, 'secret', (err, token) => {
 							// 	if (err) throw err
@@ -371,10 +371,16 @@ router.post('/show/:id', async (req, res) => {
 		const result = await pool.query(sql, [req.params.id])
 		if (result.length) {
 			try {
-				const user = result[0]
-				const sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
-				await pool.query(sql, [req.body.visitor, req.params.id])
-				res.json(user)
+				const sql = `SELECT * FROM images WHERE user_id = ?`
+				user.images = await pool.query(sql, [req.params.id])
+				try {
+					const user = result[0]
+					const sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
+					await pool.query(sql, [req.body.visitor, req.params.id])
+					res.json(user)
+				} catch (err) {
+					throw new Error(err)
+				}
 			} catch (err) {
 				throw new Error(err)
 			}
