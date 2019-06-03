@@ -121,7 +121,6 @@ export const store = new Vuex.Store({
 			context.commit('updateUser', user)
 		},
 		login: (context, user) => {
-			console.log('this is the user i got --> ', user)
 			if (user.id) {
 				context.commit('locate', {
 					lat: user.lat,
@@ -134,9 +133,10 @@ export const store = new Vuex.Store({
 				context.commit('login', user)
 			}
 		},
-		logout: (context) => {
+		logout: (context, id) => {
 			localStorage.removeItem('token')
-			context.commit('logout')
+			context.commit('logout');
+			(new Vue()).$socket.emit('logout', id)
 		},
 		locate: (context, id) => {
 			let loc = {}

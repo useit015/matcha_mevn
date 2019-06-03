@@ -38,8 +38,10 @@ io.on('connection', socket => {
 		users[id] = socket.id
 		console.log('users are', users)
 	})
-	socket.on('logout', () => {
-		socket.disconnect()
+	socket.on('logout', id => {
+		// socket.disconnect()
+		delete users[`${id}`]
+		console.log('user logged out --> ', id)
 	})
 	socket.on('disconnect', () => {
 		console.log('non identified Client disconnected')

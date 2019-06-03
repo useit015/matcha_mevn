@@ -102,7 +102,7 @@ export default {
 		...utility,
 		logout () {
 			this.$http.post('http://134.209.195.36/api/users/logout')
-				.then(res => res.body.ok ? this.$store.dispatch('logout') : 1)
+				.then(res => res.body.ok ? this.$store.dispatch('logout', this.$store.getters.user.id) : 1)
 				.catch(err => console.error(err))
 		}
 	}
