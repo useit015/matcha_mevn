@@ -371,10 +371,10 @@ router.post('/show/:id', async (req, res) => {
 		const result = await pool.query(sql, [req.params.id])
 		if (result.length) {
 			try {
+				const user = result[0]
 				const sql = `SELECT * FROM images WHERE user_id = ?`
-				user.images = await pool.query(sql, [req.params.id])
+				user.images = await pool.query(sql, [user.id])
 				try {
-					const user = result[0]
 					const sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
 					await pool.query(sql, [req.body.visitor, req.params.id])
 					res.json(user)
