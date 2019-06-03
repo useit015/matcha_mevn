@@ -370,20 +370,12 @@ router.post('/show/:id', async (req, res) => {
 		const sql = `SELECT * FROM users WHERE id = ?`
 		const result = await pool.query(sql, [req.params.id])
 		if (result.length) {
-			try {
-				const user = result[0]
-				const sql = `SELECT * FROM images WHERE user_id = ?`
-				user.images = await pool.query(sql, [user.id])
-				try {
-					const sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
-					await pool.query(sql, [req.body.visitor, req.params.id])
-					res.json(user)
-				} catch (err) {
-					throw new Error(err)
-				}
-			} catch (err) {
-				throw new Error(err)
-			}
+			const user = result[0]
+			let sql = `SELECT * FROM images WHERE user_id = ?`
+			user.images = await pool.query(sql, [user.id])
+			sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
+			await pool.query(sql, [req.body.visitor, req.params.id])
+			res.json(user)
 		} else {
 			res.status(400).json('User doesnt exist')
 		}
