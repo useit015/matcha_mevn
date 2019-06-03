@@ -17,7 +17,7 @@ const sendMail = require('../../utility/mail')
 router.post('/getmatches', async (req, res) => {
 	if (!req.body.id) return res.json('must include user id')
 	try {
-		const sql = `SELECT
+		let sql = `SELECT
 						matches.matched as matched_id,
 						matches.created_at as match_date,
 						users.username as username,
@@ -30,24 +30,20 @@ router.post('/getmatches', async (req, res) => {
 					where matches.matcher = ?
 					AND images.profile = 1`
 		const following = await pool.query(sql, [req.body.id])
-		try {
-			const sql = `SELECT
-						matches.matcher as matcher_id,
-						matches.created_at as match_date,
-						users.username as username,
-						images.name as profile_image
-					FROM matches
-					INNER JOIN users
-					ON matches.matcher = users.id
-					INNER JOIN images
-					ON matches.matcher = images.user_id
-					where matches.matched = ?
-					AND images.profile = 1`
-			const followers = await pool.query(sql, [req.body.id])		
-			res.json([...following, ...followers])
-		} catch (err) {
-			throw new Error(err)
-		}
+		sql = `SELECT
+					matches.matcher as matcher_id,
+					matches.created_at as match_date,
+					users.username as username,
+					images.name as profile_image
+				FROM matches
+				INNER JOIN users
+				ON matches.matcher = users.id
+				INNER JOIN images
+				ON matches.matcher = images.user_id
+				where matches.matched = ?
+				AND images.profile = 1`
+		const followers = await pool.query(sql, [req.body.id])		
+		res.json([...following, ...followers])
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -56,7 +52,7 @@ router.post('/getmatches', async (req, res) => {
 router.post('/gethistory', async (req, res) => {
 	if (!req.body.id) return res.json('must include user id')
 	try {
-		const sql = `SELECT
+		let sql = `SELECT
 						history.visitor as visitor_id,
 						history.created_at as visit_date,
 						users.username as username,
@@ -69,24 +65,20 @@ router.post('/gethistory', async (req, res) => {
 					WHERE history.visited = ?
 					AND images.profile = 1`
 		const visitors = await pool.query(sql, [req.body.id])
-		try {
-			const sql = `SELECT
-							history.visited as visited_id,
-							history.created_at as visit_date,
-							users.username as username,
-							images.name as profile_image
-						FROM history
-						INNER JOIN users 
-						ON history.visited = users.id
-						INNER JOIN images
-						ON history.visited = images.user_id
-						WHERE history.visitor = ?
-						AND images.profile = 1`
-			const visited = await pool.query(sql, [req.body.id])		
-			res.json([...visitors, ...visited])
-		} catch (err) {
-			throw new Error(err)
-		}
+		sql = `SELECT
+					history.visited as visited_id,
+					history.created_at as visit_date,
+					users.username as username,
+					images.name as profile_image
+				FROM history
+				INNER JOIN users 
+				ON history.visited = users.id
+				INNER JOIN images
+				ON history.visited = images.user_id
+				WHERE history.visitor = ?
+				AND images.profile = 1`
+		const visited = await pool.query(sql, [req.body.id])		
+		res.json([...visitors, ...visited])
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -120,27 +112,19 @@ router.post('/isloggedin', async (req, res) => {
 						AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
 		const result = await pool.query(sql, [req.body.token])
 		if (result.length) {
-			try {
-				const user = {
-					...result[0],
-					token: crypto.randomBytes(10).toString('hex'),
-					tokenExpiration: moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
-				}
-				const sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
-				await pool.query(sql, [user.token, user.tokenExpiration, user.id])
-				try {
-					const sql = `SELECT * FROM images WHERE user_id = ?`
-					user.images = await pool.query(sql, [user.token, user.tokenExpiration, user.id])
-					res.json(user)
-					// jwt.sign({ user: user }, 'secret', (err, token) => {
-					// 	if (err) throw err
-					// })
-				} catch (err) {
-					throw new Error(err)
-				}
-			} catch (err) {
-				throw new Error(err)
+			const user = {
+				...result[0],
+				token: crypto.randomBytes(10).toString('hex'),
+				tokenExpiration: moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
 			}
+			let sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
+			await pool.query(sql, [user.token, user.tokenExpiration, user.id])
+			sql = `SELECT * FROM images WHERE user_id = ?`
+			user.images = await pool.query(sql, [user.token, user.tokenExpiration, user.id])
+			res.json(user)
+			// jwt.sign({ user: user }, 'secret', (err, token) => {
+			// 	if (err) throw err
+			// })
 		} else {
 			res.json('not logged in')
 		}
@@ -156,32 +140,20 @@ router.post('/login', async (req, res) => {
 		const result = await pool.query(sql, [req.body.username])
 		if (result.length && result[0].verified) {
 			const user = result[0]
-			try {
-				const result = bcrypt.compare(req.body.password, user.password)
-				if (result) {
-					try {
-						user.token = crypto.randomBytes(10).toString('hex')
-						user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
-						const sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
-						await pool.query(sql, [user.token, user.tokenExpiration, user.id])
-						try {
-							const sql = `SELECT * FROM images WHERE user_id = ?`
-							user.images = await pool.query(sql, [user.id])
-							res.json(user)
-							// jwt.sign({ user: user }, 'secret', (err, token) => {
-							// 	if (err) throw err
-							// })
-						} catch (err) {
-							throw new Error(err)
-						}
-					} catch (err) {
-						throw new Error(err)
-					}
-				} else {
-					res.status(400).json('wrong pass')
-				}
-			} catch (err) {
-				throw new Error(err)
+			const result = bcrypt.compare(req.body.password, user.password)
+			if (result) {
+				user.token = crypto.randomBytes(10).toString('hex')
+				user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
+				let sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
+				await pool.query(sql, [user.token, user.tokenExpiration, user.id])
+				sql = `SELECT * FROM images WHERE user_id = ?`
+				user.images = await pool.query(sql, [user.id])
+				res.json(user)
+				// jwt.sign({ user: user }, 'secret', (err, token) => {
+				// 	if (err) throw err
+				// })
+			} else {
+				res.status(400).json('wrong pass')
 			}
 		} else {
 			res.status(400).json('wrong username')
@@ -236,30 +208,22 @@ router.post('/install', async (req, res) => {
 			lat: req.body.lat,
 			lng: req.body.lng
 		}
-		const sql = `INSERT INTO users (first_name, last_name, username, email,
+		let sql = `INSERT INTO users (first_name, last_name, username, email,
 						password, vkey, verified, gender, looking, birthdate, biography,
 						tags, address, city, country, rating, postal_code, phone, lat, lng)
 						VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 		await pool.query(sql, Object.values(user))
-		try {
-			const sql = `SELECT id FROM users WHERE username = ?`
-			const result = await pool.query(sql, [user.username])
-			if (result.length) {
-				try {
-					const sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
-					const data = {
-						id: result[0].id,
-						name: req.body.image,
-						profile: 1
-					}
-					await pool.query(sql, Object.values(data))
-					res.json('user added !!')
-				} catch (err) {
-					throw new Error(err)
-				}
+		sql = `SELECT id FROM users WHERE username = ?`
+		const result = await pool.query(sql, [user.username])
+		if (result.length) {
+			const sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
+			const data = {
+				id: result[0].id,
+				name: req.body.image,
+				profile: 1
 			}
-		} catch (err) {
-			throw new Error(err)
+			await pool.query(sql, Object.values(data))
+			res.json('user added !!')
 		}
 	} catch (err) {
 		throw new Error(err)
@@ -363,7 +327,7 @@ router.get('/show', async (req, res) => {
 
 router.post('/show/:id', async (req, res) => {
 	try {
-		const sql = `SELECT * FROM users WHERE id = ?`
+		const sql = `SELECT * FROMS users WHERE id = ?`
 		const result = await pool.query(sql, [req.params.id])
 		if (result.length) {
 			const user = result[0]
