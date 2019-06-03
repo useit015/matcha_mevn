@@ -140,20 +140,24 @@ router.post('/login', async (req, res) => {
 		const result = await pool.query(sql, [req.body.username])
 		if (result.length && result[0].verified) {
 			const user = result[0]
-			const result = await bcrypt.compare(req.body.password, user.password)
-			if (result) {
-				user.token = crypto.randomBytes(10).toString('hex')
-				user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
-				let sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
-				await pool.query(sql, [user.token, user.tokenExpiration, user.id])
-				sql = `SELECT * FROM images WHERE user_id = ?`
-				user.images = await pool.query(sql, [user.id])
-				res.json(user)
-				// jwt.sign({ user: user }, 'secret', (err, token) => {
-				// 	if (err) throw err
-				// })
-			} else {
-				res.status(400).json('wrong pass')
+			try {
+				const result = await bcrypt.compare(req.body.password, user.password)
+				if (result) {
+					user.token = crypto.randomBytes(10).toString('hex')
+					user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
+					let sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
+					await pool.query(sql, [user.token, user.tokenExpiration, user.id])
+					sql = `SELECT * FROM images WHERE user_id = ?`
+					user.images = await pool.query(sql, [user.id])
+					res.json(user)
+					// jwt.sign({ user: user }, 'secret', (err, token) => {
+					// 	if (err) throw err
+					// })
+				} else {
+					res.status(400).json('wrong pass')
+				}
+			} catch (err) {
+				throw new Error(err)
 			}
 		} else {
 			res.status(400).json('wrong username')
