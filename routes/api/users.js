@@ -327,7 +327,7 @@ router.get('/show', async (req, res) => {
 	}
 })
 
-router.post('/show/:id', (req, res) => {
+router.post('/show/:id', async (req, res) => {
 	try {
 		const sql = `SELECT * FROM users WHERE id = ?`
 		const result = await pool.query(sql, [req.params.id])
