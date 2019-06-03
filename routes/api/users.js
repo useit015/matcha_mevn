@@ -327,7 +327,7 @@ router.get('/show', async (req, res) => {
 
 router.post('/show/:id', async (req, res) => {
 	try {
-		const sql = `SELECT * FROMS users WHERE id = ?`
+		const sql = `SELECT * FROM users WHERE id = ?`
 		const result = await pool.query(sql, [req.params.id])
 		if (result.length) {
 			const user = result[0]

@@ -179,6 +179,8 @@ export default {
 			immediate: true,
 			handler () {
 				if (this.loggedIn.id && this.f) {
+					if (this.loggedIn.id == this.$route.params.id)
+						this.$router.push('/settings')
 					this.$http.post(`http://134.209.195.36/api/users/show/${this.$route.params.id}`, {
 						visitor: this.$store.getters.user.id
 					}).then(res => {
