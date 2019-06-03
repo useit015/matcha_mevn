@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const router = require('express').Router()
 const db = require('../../utility/database')
+const pool = require('../../utility/database')
 const sendMail = require('../../utility/mail')
 const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
 
@@ -318,11 +319,23 @@ router.get('/show', (req, res) => {
 	const sql = `SELECT * FROM users, images
 					WHERE users.id = images.user_id
 					AND images.profile = 1`
-	db.query(sql, (err, rows) => {
-		if (err) throw err
-		res.json(rows)
-	})
+	try {
+		const result = await pool.query(sql)
+		res.json(result)
+	} catch(err) {
+		throw new Error(err)
+	}
 })
+
+// router.get('/show', (req, res) => {
+// 	const sql = `SELECT * FROM users, images
+// 					WHERE users.id = images.user_id
+// 					AND images.profile = 1`
+// 	db.query(sql, (err, rows) => {
+// 		if (err) throw err
+// 		res.json(rows)
+// 	})
+// })
 
 router.post('/show/:id', (req, res) => {
 	const sql = `SELECT * FROM users WHERE id = ?`
