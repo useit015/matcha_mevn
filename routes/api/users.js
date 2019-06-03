@@ -277,13 +277,9 @@ router.get('/verify/:key', async (req, res) => {
 		const result = await pool.query(sql, [req.params.key])
 		if (result.length) {
 			if (result[0].verified) return res.json('User already verified')
-			try {
-				const sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
-				await pool.query(sql, [req.params.key])
-				res.json('User Verified')
-			} catch (err) {
-				throw new Error(err)
-			}
+			const sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
+			await pool.query(sql, [req.params.key])
+			res.json('User Verified')
 		} else {
 			res.status(400).json('invalid key')
 		}
@@ -406,33 +402,25 @@ router.post('/block/:id', async (req, res) => {
 })
 
 router.post('/match/:id', async (req, res) => {
-	const data = [req.body.matcher, req.params.id]
-	if (req.body.liked) {
-		try {
+	try {
+		const data = [req.body.matcher, req.params.id]
+		if (req.body.liked) {
 			const sql = `DELETE FROM matches where matcher = ? AND matched = ?`
 			await pool.query(sql, data)
 			res.json('User unMatched')
-		} catch (err) {
-			throw new Error(err)
-		}
-	} else {
-		try {
+		} else {
 			const sql = `SELECT * FROM matches where matcher = ? AND matched = ?`
 			const result = await pool.query(sql, data)
 			if (!result.length) {
-				try {
-					const sql = `INSERT INTO matches (matcher, matched) VALUES (?, ?)`
-					await pool.query(sql, data)
-					res.json('User Matched')
-				} catch (err) {
-					throw new Error(err)
-				}
+				const sql = `INSERT INTO matches (matcher, matched) VALUES (?, ?)`
+				await pool.query(sql, data)
+				res.json('User Matched')
 			} else {
 				res.status(400).json('User already Matched')
 			}
-		} catch (err) {
-			throw new Error(err)
 		}
+	} catch (err) {
+		throw new Error(err)
 	}
 })
 
