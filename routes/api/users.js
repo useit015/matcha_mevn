@@ -140,8 +140,8 @@ router.post('/login', async (req, res) => {
 		const result = await pool.query(sql, [req.body.username])
 		if (result.length && result[0].verified) {
 			const user = result[0]
-			const result = bcrypt.compare(req.body.password, user.password)
-			if (result) {
+			const r = bcrypt.compare(req.body.password, user.password)
+			if (r) {
 				user.token = crypto.randomBytes(10).toString('hex')
 				user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
 				let sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
