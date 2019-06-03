@@ -316,10 +316,10 @@ router.post('/image/:id', upload.single('image'), (req, res) => {
 })
 
 router.get('/show', async (req, res) => {
-	const sql = `SELECT * FROM users, images
-					WHERE users.id = images.user_id
-					AND images.profile = 1`
 	try {
+		const sql = `SELECT * FROM users, images
+						WHERE users.id = images.user_id
+						ANDS images.profile = 1`
 		const result = await pool.query(sql)
 		res.json(result)
 	} catch(err) {
