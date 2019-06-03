@@ -137,7 +137,7 @@ router.post('/login', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
 	try {
 		const sql = `SELECT * FROM users WHERE username = ?`
-		const result = await pool.query(sql, [req.body.username])
+		const result = pool.query(sql, [req.body.username])
 		if (result.length && result[0].verified) {
 			const user = result[0]
 			const result = bcrypt.compare(req.body.password, user.password)
