@@ -164,15 +164,16 @@ router.post('/login', async (req, res) => {
 						user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
 						const sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
 						await pool.query(sql, [user.token, user.tokenExpiration, user.id])
-						const sql = `SELECT * FROM images WHERE user_id = ?`
-						db.query(sql, [user.id], (err, result) => {
-							if (err) throw err
-							user.images = result
+						try {
+							const sql = `SELECT * FROM images WHERE user_id = ?`
+							user.images = pool.query(sql, [user.id])
 							res.json(user)
-						})
-						// jwt.sign({ user: user }, 'secret', (err, token) => {
-						// 	if (err) throw err
-						// })
+							// jwt.sign({ user: user }, 'secret', (err, token) => {
+							// 	if (err) throw err
+							// })
+						} catch (err) {
+							throw new Error(err)
+						}
 					} catch (err) {
 						throw new Error(err)
 					}
