@@ -315,7 +315,7 @@ router.post('/image/:id', upload.single('image'), (req, res) => {
 	})
 })
 
-router.get('/show', (req, res) => {
+router.get('/show', async (req, res) => {
 	const sql = `SELECT * FROM users, images
 					WHERE users.id = images.user_id
 					AND images.profile = 1`
