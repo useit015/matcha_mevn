@@ -159,6 +159,7 @@ router.post('/login', async (req, res) => {
 			res.status(400).json('wrong username')
 		}
 	} catch (err) {
+		console.log(err)
 		throw new Error(err)
 	}
 })
