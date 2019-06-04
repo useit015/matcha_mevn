@@ -1,5 +1,5 @@
 <template>
-	<v-layout align-center justify center row class="messenger_form px-3">
+	<v-layout align-center justify center row class="messenger_form px-3 chat_layout">
 		<v-text-field class="ma-4"  label="message" v-model="msg"></v-text-field>
 		<v-btn color="primary" class="ma-4" outline large @click="sendMsg">Send</v-btn>
 	</v-layout>
