@@ -71,6 +71,7 @@ export const store = new Vuex.Store({
 		logout: state => {
 			state.status = false
 			state.user = {}
+			state.isConnected = false
 		},
 		login: (state, user) => {
 			state.status = true

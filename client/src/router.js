@@ -8,6 +8,7 @@ import install from '@/components/install'
 import Register from '@/components/Register'
 import Settings from '@/components/Settings'
 import Discover from '@/components/Discover'
+import Messenger from '@/components/Messenger'
 import UserProfile from '@/components/UserProfile'
 
 Vue.use(vueRouter)
@@ -47,6 +48,10 @@ export const router = new vueRouter({
 		{
 			path: '/chat/:id',
 			component: Chat
+		},
+		{
+			path: '/chat',
+			component: Messenger
 		},
 		{
 			path: '/user/:id',

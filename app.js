@@ -7,6 +7,7 @@ const http = require('http')
 const socketIo = require('socket.io')
 const port = process.env.PORT || 8080
 const usersRoute = require('./routes/api/users')
+const chatRoute = require('./routes/api/chat')
 const app = express()
 
 
@@ -16,6 +17,7 @@ app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
+app.use('/api/chat', chatRoute)
 app.use('/api/users', usersRoute)
 app.use('/static', express.static(`${__dirname}/public`))
 
