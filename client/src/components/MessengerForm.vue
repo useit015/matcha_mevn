@@ -6,22 +6,28 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
 	name: 'MessengerForm',
 	data: () => ({
 		msg: null
 	}),
 	methods: {
-		sendMsg () {
+		async sendMsg () {
 			const data = {
-				from: this.$store.getters.user.id,
-				to: Number(this.$route.params.id),
-				msg: this.msg,
-				time: new Date()
+				id_conversation: this.selectedConvo,
+				id_from: this.user.id,
+				message: this.msg
 			}
 			this.$socket.emit('chat', data)
+			const result = await this.$http.post(`http://134.209.195.36/api/chat/send`, data)
+			console.log('i sent the message', result)
 		}
-	}
+	},
+	computed: {
+		...mapGetters(['user', 'selectedConvo'])
+	},
 }
 </script>
 

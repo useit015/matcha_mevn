@@ -19,7 +19,10 @@ export const store = new Vuex.Store({
 		blockedBy: [],
 		visitor: [],
 		visited: [],
-		isConnected: false
+		isConnected: false,
+		selectedConvo: null,
+		usernameConvo: null,
+		imageConvo: null
 	},
 	getters: {
 		user: state => state.user,
@@ -49,6 +52,9 @@ export const store = new Vuex.Store({
 		following: state => state.following,
 		followers: state => state.followers,
 		blockedBy: state => state.blockedBy,
+		selectedConvo: state => state.selectedConvo,
+		usernameConvo: state => state.usernameConvo,
+		imageConvo: state => state.imageConvo,
 		matches: state => state.following.filter(cur => {
 			for (const follower of state.followers)
 				if (follower.id == cur.id)
@@ -95,6 +101,11 @@ export const store = new Vuex.Store({
 		syncBlocked: (state, blacklist) => {
 			state.blocked = blacklist.blocked
 			state.blockedBy = blacklist.blockedBy
+		},
+		syncConvo: (state, convo) => {
+			state.selectedConvo = convo.id_conversation
+			state.usernameConvo = convo.username
+			state.imageConvo = convo.profile_image
 		},
 		SOCKET_connect: async state => {
 			// state.isConnected = true
@@ -203,6 +214,9 @@ export const store = new Vuex.Store({
 										profile_image: cur.profile_image
 									}))
 			}), id, 'history')
+		},
+		syncConvo: ({ commit }, convo) => {
+			commit('syncConvo', convo)
 		}
 	}
 })
