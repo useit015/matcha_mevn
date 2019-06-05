@@ -373,15 +373,31 @@ router.post('/match/:id', async (req, res) => {
 	try {
 		const data = [req.body.matcher, req.params.id]
 		if (req.body.liked) {
-			const sql = `DELETE FROM matches where matcher = ? AND matched = ?`
+			let sql = `DELETE FROM matches where matcher = ? AND matched = ?`
 			await pool.query(sql, data)
+			sql = `UPDATE conversations SET allowed = 0
+					WHERE id_user1 = ? AND id_user2 = ?
+					OR id_user2 = ? AND id_user1 = ?`
+			await pool.query(sql, [...data, ...data])
 			res.json('User unMatched')
 		} else {
 			const sql = `SELECT * FROM matches where matcher = ? AND matched = ?`
 			const result = await pool.query(sql, data)
 			if (!result.length) {
-				const sql = `INSERT INTO matches (matcher, matched) VALUES (?, ?)`
+				let sql = `INSERT INTO matches (matcher, matched) VALUES (?, ?)`
 				await pool.query(sql, data)
+				sql = `SELECT * FROM matches WHERE matcher = ? AND matched = ?`
+				const result = await pool.query(sql, data.reverse())
+				if (result.length) {
+					sql = `SELECT * FROM conversations
+							WHERE id_user1 = ? AND id_user2 = ?
+							OR id_user2 = ? AND id_user1 = ?`
+					const result = await pool.query(sql, [...data, ...data])
+					if (!result.length) {
+						const sql = `INSERT INTO conversations (id_user1, id_user2) VALUES (?, ?)`
+						await pool.query(sql, data)
+					}
+				}
 				res.json('User Matched')
 			} else {
 				res.status(400).json('User already Matched')

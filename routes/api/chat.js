@@ -4,28 +4,32 @@ const pool = require('../../utility/database')
 router.post('/all', async (req, res) => {
 	try {
 		const sql = `SELECT
+						users.id as user_id,
 						id_conversation, last_update,
 						users.username as username,
 						users.first_name as first_name,
 						users.last_name as last_name,
 						users.status as status,
-						images.name as profile_image
+						images.name as profile_image,
+						images.profile
 					FROM conversations
 					INNER JOIN users ON conversations.id_user2 = users.id
 					INNER JOIN images ON conversations.id_user2 = images.user_id
-					WHERE conversations.id_user1 = ?
+					WHERE conversations.id_user1 = ? AND images.profile = 1 AND conversations.allowed = 1
 					UNION SELECT
+						users.id as user_id,
 						id_conversation, last_update,
 						users.username as username,
 						users.first_name as first_name,
 						users.last_name as last_name,
 						users.status as status,
-						images.name as profile_image
+						images.name as profile_image,
+						images.profile
 					FROM conversations
 					INNER JOIN users ON conversations.id_user1 = users.id
 					INNER JOIN images ON conversations.id_user1 = images.user_id
-					WHERE conversations.id_user2 = ?
-					ORDER BY last_update DESC`
+					WHERE conversations.id_user2 = ? AND images.profile = 1 AND conversations.allowed = 1
+					`
 		const result = await pool.query(sql, [req.body.id, req.body.id])
 		res.json(result)
 	} catch (err) {
@@ -51,8 +55,10 @@ router.post('/send', async (req, res) => {
 			id_from: req.body.id_from,
 			message: req.body.message
 		}
-		const sql = `INSERT INTO chat (id_conversation, id_from, message) VALUES (?, ?, ?)`
+		let sql = `INSERT INTO chat (id_conversation, id_from, message) VALUES (?, ?, ?)`
 		await pool.query(sql, Object.values(msg))
+		sql = `UPDATE conversations SET last_update = NOW() WHERE id_conversation = ?`
+		await pool.query(sql, [msg.id_conversation])
 		res.json('Message added')
 	} catch (err) {
 		throw new Error(err)
