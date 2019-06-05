@@ -33,8 +33,11 @@ let users = {}
 io.on('connection', socket => {
 	console.log('New client connected --> ', socket.id)
 	socket.on('chat', data => {
-		if (users[data.to])
-			io.sockets.connected[users[data.to]].emit('chat', data)
+		console.log('i had a message --> ', data)
+		if (users[data.id_to]){
+			console.log('--->',users[data.id_to])
+			io.sockets.connected[users[data.id_to]].emit('chat', data)
+		}
 	})
 	socket.on('auth', id => {
 		users[id] = socket.id
