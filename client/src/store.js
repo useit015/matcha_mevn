@@ -22,7 +22,8 @@ export const store = new Vuex.Store({
 		isConnected: false,
 		selectedConvo: null,
 		usernameConvo: null,
-		imageConvo: null
+		imageConvo: null,
+		newMessage: null
 	},
 	getters: {
 		user: state => state.user,
@@ -53,6 +54,7 @@ export const store = new Vuex.Store({
 		followers: state => state.followers,
 		blockedBy: state => state.blockedBy,
 		selectedConvo: state => state.selectedConvo,
+		newMessage: state => state.newMessage,
 		usernameConvo: state => state.usernameConvo,
 		imageConvo: state => state.imageConvo,
 		matches: state => state.following.filter(cur => {
@@ -79,6 +81,10 @@ export const store = new Vuex.Store({
 			state.user = {}
 			state.isConnected = false
 		},
+		messageClr: state => {
+			state.newMessage = null
+		}
+		,
 		login: (state, user) => {
 			state.status = true
 			state.user = user
@@ -121,7 +127,13 @@ export const store = new Vuex.Store({
 			console.log('disconnected -->')
 		},
 		SOCKET_chat: (state, data) => {
-			console.log('You\'ve got a message --> ', data)
+			if (data.id_conversation == state.selectedConvo) {
+				if (!state.newMessage) {
+					state.newMessage = data
+				}
+			} else {
+				console.log('You\'ve got a message --> ', data)
+			}
 		}
 	},
 	actions: {
@@ -149,6 +161,9 @@ export const store = new Vuex.Store({
 			localStorage.removeItem('token')
 			context.commit('logout');
 			(new Vue()).$socket.emit('logout', id)
+		},
+		messageClr: (context) => {
+			context.commit('messageClr')
 		},
 		locate: (context, id) => {
 			let loc = {}

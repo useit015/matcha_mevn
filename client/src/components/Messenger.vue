@@ -1,16 +1,16 @@
 <template>
-	<v-container fluid class="Messenger pa-0">
-		<v-layout class="chat_layout">
-			<v-flex xs3 class="list">
+	<v-container fluid grid-list-md class="messenger pa-3">
+		<v-layout row wrap class="parent">
+			<v-flex xs3 class="left">
 				<MessengerList :convos="convos"/>
 			</v-flex>
-			<v-flex>
+			<v-flex xs9 class="right">
 				<v-layout column class="chat_layout">
-					<v-flex xs10>
-						<MessengerChat :username="username" :profile_image="profile_image"/>
+					<v-flex xs9 class="top">
+						<MessengerChat ref="chat"/>
 					</v-flex>
-					<v-flex xs2>
-						<MessengerForm/>
+					<v-flex xs3 class="bottom">
+						<MessengerForm @msgSent="messageSent" :toId="getToId()"/>
 					</v-flex>
 				</v-layout>
 			</v-flex>
@@ -48,9 +48,27 @@ export default {
 			immediate: true,
 			async handler () {
 				const result = await this.$http.post('http://134.209.195.36/api/chat/all', { id: this.user.id })
-				this.convos = result.body
+				console.log(result.body)
+				this.convos = result.body.sort((a, b) => {
+					return new Date(b.last_update) - new Date(a.last_update)
+				})
+				console.log(this.convos)
 				if (this.convos.length)
 					this.$store.dispatch('syncConvo', this.convos[0])
+				console.log('this is what i got --> ', result)
+			}
+		}
+	},
+	methods: {
+		messageSent (msg) {
+			this.$refs.chat.msgSent(msg)
+		},
+		getToId () {
+			for (const cur of this.convos) {
+				console.log('i am testing this --> ', cur)
+				if (cur.id_conversation == this.selectedConvo) {
+					return cur.user_id
+				}
 			}
 		}
 	}
@@ -58,8 +76,25 @@ export default {
 </script>
 
 <style>
-	.Messenger, .list, .chat_layout {
-		width: 100%;
-		height: 100%;
-	}
+.messenger {
+	overflow: hidden;
+	height: calc(100vh - 4.75rem);
+}
+
+.parent, .chat_layout {
+	height: 100%;
+}
+
+.top {
+	flex: 1 0 90% !important;
+	overflow-y: scroll;
+}
+
+.bottom {
+	flex: 0 0 10% !important;
+}
+
+/* .chat_layout {
+	height: 70vh;
+} */
 </style>
