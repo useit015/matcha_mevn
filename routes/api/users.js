@@ -1,18 +1,18 @@
-// const fs = require('fs')
-// const path = require('path')
 const moment = require('moment')
-const crypto = require('crypto')
-// const multer = require('multer')
+const multer = require('multer')
 const bcrypt = require('bcryptjs')
-// const jwt = require('jsonwebtoken')
-// const { promisify } = require('util')
+const jwt = require('jsonwebtoken')
+const { writeFile } = require('fs')
+const { dirname } = require('path')
+const { promisify } = require('util')
+const { randomBytes } = require('crypto')
 const router = require('express').Router()
-// const db = require('../../utility/database')
 const pool = require('../../utility/database')
 const sendMail = require('../../utility/mail')
-// const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
+const writeFileAsync = promisify(writeFile)
+const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
 
-// const writeFileAsync = promisify(fs.writeFile)
+const randomHex = () => randomBytes(10).toString('hex')
 
 router.post('/getmatches', async (req, res) => {
 	if (!req.body.id) return res.json('must include user id')
@@ -108,16 +108,16 @@ router.post('/position/:id', async (req, res) => {
 router.post('/isloggedin', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
 	try {
-		const sql = `SELECT * FROM users WHERE token = ?
+		let sql = `SELECT * FROM users WHERE token = ?
 						AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
 		const result = await pool.query(sql, [req.body.token])
 		if (result.length) {
 			const user = {
 				...result[0],
-				token: crypto.randomBytes(10).toString('hex'),
+				token: randomHex(),
 				tokenExpiration: moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
 			}
-			let sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
+			sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
 			await pool.query(sql, [user.token, user.tokenExpiration, user.id])
 			sql = `SELECT * FROM images WHERE user_id = ?`
 			user.images = await pool.query(sql, [user.id])
@@ -126,7 +126,8 @@ router.post('/isloggedin', async (req, res) => {
 			// 	if (err) throw err
 			// })
 		} else {
-			res.json('not logged in')
+			res.json({ ok: false, status: 'not logged in' })
+
 		}
 	} catch (err) {
 		throw new Error(err)
@@ -136,16 +137,16 @@ router.post('/isloggedin', async (req, res) => {
 router.post('/login', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
 	try {
-		const sql = `SELECT * FROM users WHERE username = ?`
-		const result = await pool.query(sql, [req.body.username])
+		let sql = `SELECT * FROM users WHERE username = ?`
+		let result = await pool.query(sql, [req.body.username])
 		if (result.length && result[0].verified) {
 			const user = result[0]
 			try {
-				const result = await bcrypt.compare(req.body.password, user.password)
+				result = await bcrypt.compare(req.body.password, user.password)
 				if (result) {
-					user.token = crypto.randomBytes(10).toString('hex')
+					user.token = randomHex()
 					user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
-					let sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
+					sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
 					await pool.query(sql, [user.token, user.tokenExpiration, user.id])
 					sql = `SELECT * FROM images WHERE user_id = ?`
 					user.images = await pool.query(sql, [user.id])
@@ -154,13 +155,13 @@ router.post('/login', async (req, res) => {
 					// 	if (err) throw err
 					// })
 				} else {
-					res.status(400).json('wrong pass')
+					res.json({ ok: false, status: 'wrong pass' })
 				}
 			} catch (err) {
 				throw new Error(err)
 			}
 		} else {
-			res.status(400).json('wrong username')
+			res.json({ ok: false, status: 'wrong username' })
 		}
 	} catch (err) {
 		throw new Error(err)
@@ -175,15 +176,15 @@ router.post('/add', async (req, res) => {
 			last_name: req.body.last_name,
 			username: req.body.username,
 			email: req.body.email,
-			password: bcrypt.hashSync(req.body.password, 10),
-			vkey: crypto.randomBytes(10).toString('hex')
+			password: await bcrypt.hash(req.body.password, 10),
+			vkey: randomHex()
 		}
 		const sql = `INSERT INTO users (first_name, last_name,
 						username, email, password, vkey)
 						VALUES (?, ?, ?, ?, ?, ?)`
 		await pool.query(sql, Object.values(user))
 		sendMail(user.email, user.vkey)
-		res.json('User Added')
+		res.json({ ok: true, status: 'User Added' })
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -197,7 +198,7 @@ router.post('/install', async (req, res) => {
 			username: req.body.username,
 			email: req.body.email,
 			password: bcrypt.hashSync(req.body.password, 10),
-			vkey: crypto.randomBytes(10).toString('hex'),
+			vkey: randomHex(),
 			gender: req.body.gender,
 			looking: req.body.looking,
 			birthdate: req.body.birthdate,
@@ -220,14 +221,14 @@ router.post('/install', async (req, res) => {
 		sql = `SELECT id FROM users WHERE username = ?`
 		const result = await pool.query(sql, [user.username])
 		if (result.length) {
-			const sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
+			sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
 			const data = {
 				id: result[0].id,
 				name: req.body.image,
 				profile: 1
 			}
 			await pool.query(sql, Object.values(data))
-			res.json('user added !!')
+			res.json({ ok: true, status: 'User Added' })
 		}
 	} catch (err) {
 		throw new Error(err)
@@ -241,81 +242,77 @@ router.post('/logout', (req, res) => {
 router.get('/verify/:key', async (req, res) => {
 	if (!req.params.key) return res.json('Cant validate')
 	try {
-		const sql = `SELECT verified FROM users WHERE vkey = ?`
+		let sql = `SELECT verified FROM users WHERE vkey = ?`
 		const result = await pool.query(sql, [req.params.key])
 		if (result.length) {
 			if (result[0].verified) return res.json('User already verified')
-			const sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
+			sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
 			await pool.query(sql, [req.params.key])
-			res.json('User Verified')
+			res.json({ ok: true, status: 'User Verified' })
 		} else {
-			res.status(400).json('invalid key')
+			res.json({ ok: false, status: 'invalid key' })
 		}
 	} catch (err) {
 		throw new Error(err)
 	}
 })
 
-// router.post('/update/:id', async (req, res) => {
-// 	const sql = `SELECT * FROM users WHERE id = ${req.params.id}`
-// 	db.query(sql, (err, rows) => {
-// 		if (err) throw err
-// 		if (rows.length) {
-// 			// ! MUST VALIDATE INPUT !!!!
-// 			const user = {
-// 				first_name: req.body.first_name,
-// 				last_name: req.body.last_name,
-// 				username: req.body.username,
-// 				email: req.body.email,
-// 				gender: req.body.gender,
-// 				looking: req.body.looking,
-// 				birthdate: req.body.birthdate,
-// 				biography: req.body.biography,
-// 				tags: req.body.tags,
-// 				address: req.body.address,
-// 				city: req.body.city,
-// 				country: req.body.country,
-// 				rating: req.body.rating,
-// 				postal_code: req.body.postal_code,
-// 				phone: req.body.phone,
-// 				id: req.params.id
-// 			}
-// 			const sql = `UPDATE users SET
-// 							first_name = ?, last_name = ?, username = ?,
-// 							email = ?, gender = ?, looking = ?, birthdate = ?,
-// 							biography = ?, tags = ?, \`address\` = ?, city = ?,
-// 							country = ?, rating = ?, postal_code = ?, phone = ?
-// 						WHERE id = ?`
-// 			db.query(sql, Object.values(user), err => {
-// 				if (err) throw err
-// 				res.json('User Updated')
-// 			})
-// 		} else {
-// 			res.status(400).json({ status: 'User not found' })
-// 		}
-// 	})
-// })
+router.post('/update/:id', async (req, res) => {
+	try {
+		let sql, result
+		sql = `SELECT * FROM users WHERE id = ?`
+		result = await pool.query(sql, [req.params.id])
+		if (result.length) {
+			// ! MUST VALIDATE INPUT !!!!
+			const user = {
+				first_name: req.body.first_name,
+				last_name: req.body.last_name,
+				username: req.body.username,
+				email: req.body.email,
+				gender: req.body.gender,
+				looking: req.body.looking,
+				birthdate: req.body.birthdate,
+				biography: req.body.biography,
+				tags: req.body.tags,
+				address: req.body.address,
+				city: req.body.city,
+				country: req.body.country,
+				rating: req.body.rating,
+				postal_code: req.body.postal_code,
+				phone: req.body.phone,
+				id: req.params.id
+			}
+			sql = `UPDATE users SET
+						first_name = ?, last_name = ?, username = ?,
+						email = ?, gender = ?, looking = ?, birthdate = ?,
+						biography = ?, tags = ?, \`address\` = ?, city = ?,
+						country = ?, rating = ?, postal_code = ?, phone = ?
+					WHERE id = ?`
+			await pool.query(sql, Object.values(user))
+			res.json({ ok: true, status: 'User Updated' }) 
+		} else {
+			res.json({ ok: false, status: 'User not found' })
+		}
+	} catch (err) {
+		throw new Error(err)
+	}
+})
 
-// router.post('/image/:id', upload.single('image'), async (req, res) => {
-// 	const base64Data = req.body.image.replace(/^data:image\/png;base64,/, '')
-// 	const uploadDir = `${path.dirname(path.dirname(__dirname))}/public/uploads/`
-// 	const imgName = `${req.params.id}-${crypto.randomBytes(10).toString('hex')}.png`
-// 	fs.writeFile(uploadDir + imgName, base64Data, 'base64', err => {
-// 		if (err) throw err
-// 		const sql = `UPDATE images SET profile = 0 WHERE user_id = ?`
-// 		db.query(sql, [req.params.id], err => {
-// 			if (err) throw err
-// 			const sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, 1)`
-// 			db.query(sql, [req.params.id, imgName], err => {
-// 				if (err) throw err
-// 				res.json({
-// 					ok: true,
-// 					name: imgName
-// 				})
-// 			})
-// 		})
-// 	})
-// })
+router.post('/image/:id', upload.single('image'), async (req, res) => {
+	try {
+		const base64Data = req.body.image.replace(/^data:image\/png;base64,/, '')
+		const uploadDir = `${dirname(dirname(__dirname))}/public/uploads/`
+		const imgName = `${req.params.id}-${randomHex()}.png`
+		await writeFileAsync(uploadDir + imgName, base64Data, 'base64')
+		let sql = `UPDATE images SET profile = 0 WHERE user_id = ?`
+		await pool.query(sql, [req.params.id])
+		sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, 1)`
+		await pool.query(sql, [req.params.id, imgName])
+		res.json({ ok: true, status: 'Image Updated', name: imgName })
+	} catch (err) {
+		throw new Error(err)
+	}
+})
 
 router.get('/show', async (req, res) => {
 	try {
@@ -331,17 +328,17 @@ router.get('/show', async (req, res) => {
 
 router.post('/show/:id', async (req, res) => {
 	try {
-		const sql = `SELECT * FROM users WHERE id = ?`
+		let sql = `SELECT * FROM users WHERE id = ?`
 		const result = await pool.query(sql, [req.params.id])
 		if (result.length) {
 			const user = result[0]
-			let sql = `SELECT * FROM images WHERE user_id = ?`
+			sql = `SELECT * FROM images WHERE user_id = ?`
 			user.images = await pool.query(sql, [user.id])
 			sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
 			await pool.query(sql, [req.body.visitor, req.params.id])
 			res.json(user)
 		} else {
-			res.status(400).json('User doesnt exist')
+			res.json('User doesnt exist')
 		}
 	} catch (err) {
 		throw new Error(err)
@@ -350,19 +347,19 @@ router.post('/show/:id', async (req, res) => {
 
 router.post('/block/:id', async (req, res) => {
 	try {
-		const sql = `SELECT * FROM blocked where blocker = ? AND blocked = ?`
+		let sql = `SELECT * FROM blocked where blocker = ? AND blocked = ?`
 		const data = [req.body.blocker, req.params.id]
 		const result = await pool.query(sql, data)
 		if (!result.length) {
 			try {
-				const sql = `INSERT INTO blocked (blocker, blocked) VALUES (?, ?)`
+				sql = `INSERT INTO blocked (blocker, blocked) VALUES (?, ?)`
 				await pool.query(sql, data)
 				res.json('User Blocked')
 			} catch (err) {
 				throw new Error(err)
 			}
 		} else {
-			res.status(400).json('User already Blocked')
+			res.json('User already Blocked')
 		}
 	} catch (err) {
 		throw new Error(err)
@@ -371,9 +368,10 @@ router.post('/block/:id', async (req, res) => {
 
 router.post('/match/:id', async (req, res) => {
 	try {
+		let sql, result
 		const data = [req.body.matcher, req.params.id]
 		if (req.body.liked) {
-			let sql = `DELETE FROM matches where matcher = ? AND matched = ?`
+			sql = `DELETE FROM matches where matcher = ? AND matched = ?`
 			await pool.query(sql, data)
 			sql = `UPDATE conversations SET allowed = 0
 					WHERE id_user1 = ? AND id_user2 = ?
@@ -381,26 +379,30 @@ router.post('/match/:id', async (req, res) => {
 			await pool.query(sql, [...data, ...data])
 			res.json('User unMatched')
 		} else {
-			const sql = `SELECT * FROM matches where matcher = ? AND matched = ?`
-			const result = await pool.query(sql, data)
+			sql = `SELECT * FROM matches where matcher = ? AND matched = ?`
+			result = await pool.query(sql, data)
 			if (!result.length) {
-				let sql = `INSERT INTO matches (matcher, matched) VALUES (?, ?)`
+				sql = `INSERT INTO matches (matcher, matched) VALUES (?, ?)`
 				await pool.query(sql, data)
 				sql = `SELECT * FROM matches WHERE matcher = ? AND matched = ?`
-				const result = await pool.query(sql, data.reverse())
+				result = await pool.query(sql, data.reverse())
 				if (result.length) {
 					sql = `SELECT * FROM conversations
 							WHERE id_user1 = ? AND id_user2 = ?
 							OR id_user2 = ? AND id_user1 = ?`
-					const result = await pool.query(sql, [...data, ...data])
+					result = await pool.query(sql, [...data, ...data])
 					if (!result.length) {
-						const sql = `INSERT INTO conversations (id_user1, id_user2) VALUES (?, ?)`
+						sql = `INSERT INTO conversations (id_user1, id_user2) VALUES (?, ?)`
 						await pool.query(sql, data)
+					} else if (result[0].allowed == 0) {
+						sql = `UPDATE conversations SET allowed = 1 WHERE id_conversation = ?`
+						await pool.query(sql, [result[0].id_conversation])
+						console.log('i am the convo --> ', result[0].allowed)
 					}
 				}
 				res.json('User Matched')
 			} else {
-				res.status(400).json('User already Matched')
+				res.json('User already Matched')
 			}
 		}
 	} catch (err) {

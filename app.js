@@ -10,9 +10,7 @@ const usersRoute = require('./routes/api/users')
 const chatRoute = require('./routes/api/chat')
 const app = express()
 
-
 app.use(cors())
-
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -25,7 +23,6 @@ app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.h
 
 const server = http.createServer(app)
 
-
 const io = socketIo(server, { pingInterval: 10, pingTimeout: 4000 })
 
 let users = {}
@@ -33,9 +30,7 @@ let users = {}
 io.on('connection', socket => {
 	console.log('New client connected --> ', socket.id)
 	socket.on('chat', data => {
-		console.log('i had a message --> ', data)
-		if (users[data.id_to]){
-			console.log('--->',users[data.id_to])
+		if (users[data.id_to]) {
 			io.sockets.connected[users[data.id_to]].emit('chat', data)
 		}
 	})
@@ -54,7 +49,7 @@ io.on('connection', socket => {
 			if (users[key] === socket.id) {
 				delete users[key]
 				console.log('Client disconnected --> ', socket.id)
-				socket.disconnect()
+				socket.disconnect( )
 			}
 		}
 	})
