@@ -176,20 +176,19 @@ export default {
 		},
 		loggedIn: {
 			immediate: true,
-			handler () {
+			async handler () {
 				if (this.loggedIn.id && this.f) {
-					if (this.loggedIn.id == this.$route.params.id)
+					if (this.loggedIn.id == this.$route.params.id) {
 						this.$router.push('/settings')
-					else {
-						this.$http.post(`http://134.209.195.36/api/users/show/${this.$route.params.id}`, {
-							visitor: this.loggedIn.id
-						}).then(res => {
+					} else {
+						try {
+							const url = `http://134.209.195.36/api/users/show/${this.$route.params.id}`
+							const res = await this.$http.post(url, { visitor: this.loggedIn.id })
+							this.user = { ...res.body, rating: Number(res.body.rating) }
 							this.f = false
-							this.user = {
-								...res.body,
-								rating: Number(res.body.rating)
-							}
-						}).catch(err => console.error(err))
+						} catch (err) {
+							console.error(err)
+						}
 					}
 				}
 			}
@@ -274,21 +273,19 @@ export default {
 			const image = this.user.images.filter(cur => cur.profile == true)[0]
 			return image ? image.name : 'default.jpg'
 		},
-		match () {
-			this.$http.post(`http://134.209.195.36/api/users/match/${this.$route.params.id}`, {
+		async match () {
+			const url = `http://134.209.195.36/api/users/match/${this.$route.params.id}`
+			const res = await this.$http.post(url, {
 				matcher: this.loggedIn.id,
 				liked: this.liked
-			}).then(res => {
-				this.liked = res.matched
-			}).catch(err => console.error(err))
+			})
+			this.liked = res.matched
 		},
-		block () {
-			this.$http.post(`http://134.209.195.36/api/users/block/${this.$route.params.id}`, {
-				blocker: this.loggedIn.id
-			}).then(res => {
-				this.syncBlocked(this.loggedIn.id)
-				this.$router.go(-1)
-			}).catch(err => console.error(err))
+		async block () {
+			const url = `http://134.209.195.36/api/users/block/${this.$route.params.id}`
+			const res = await this.$http.post(url, { blocker: this.loggedIn.id })
+			this.syncBlocked(this.loggedIn.id)
+			this.$router.go(-1)
 			this.blockDialog = false
 		}
 	}

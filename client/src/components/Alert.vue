@@ -10,7 +10,7 @@
 <script>
 export default {
 	name: 'Alert',
-	data () {
+	data: () => {
 		return {}
 	},
 	props: {

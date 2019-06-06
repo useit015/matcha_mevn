@@ -61,15 +61,18 @@ export default {
 		}
 	}),
 	methods: {
-		registerUser(e) {
+		async registerUser (e) {
 			e.preventDefault()
-			this.$http.post('http://134.209.195.36/api/users/add', {
-				first_name: this.firstname,
-				last_name: this.lastname,
-				username: this.username,
-				email: this.email,
-				password: this.password
-			}).then(res => {
+			try {
+				const url = 'http://134.209.195.36/api/users/add'
+				const data = {
+					first_name: this.firstname,
+					last_name: this.lastname,
+					username: this.username,
+					email: this.email,
+					password: this.password
+				}
+				const res = await this.$http.post(url, data)
 				if (res.body) {
 					this.userAdded = true
 					setTimeout(() => this.userAdded = false, 5000)
@@ -78,7 +81,9 @@ export default {
 					this.userFailed = true
 					setTimeout(() => this.userFailed = false, 5000)
 				}
-			}).catch(err => console.error(err))
+			} catch (err) {
+				console.error(err)
+			}
 		},
 		passwordMatch () { 
 			return !this.passwordConfirm.length || this.password === this.passwordConfirm ? '' : 'Passwords must match';
@@ -88,21 +93,21 @@ export default {
 </script>
 
 <style>
-	.alert-enter-active, .alert-leave-active, .register {
-		transition: all .5s;
-	}
-	.alert-enter, .alert-leave-to {
-		opacity: 0;
-	}
-	.register, .alert {
-		width: 100%;
-		max-width: 40rem;
-		margin: auto;
-	}
-	.alert {
-		position: absolute;
-		left: 50%;
-		top: 1rem;
-		transform: translateX(-50%);
-	}
+.alert-enter-active, .alert-leave-active, .register {
+	transition: all .5s;
+}
+.alert-enter, .alert-leave-to {
+	opacity: 0;
+}
+.register, .alert {
+	width: 100%;
+	max-width: 40rem;
+	margin: auto;
+}
+.alert {
+	position: absolute;
+	left: 50%;
+	top: 1rem;
+	transform: translateX(-50%);
+}
 </style>

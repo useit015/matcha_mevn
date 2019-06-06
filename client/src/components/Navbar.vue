@@ -112,9 +112,7 @@ export default {
 		async logout () {
 			try {
 				const res = await this.$http.post('http://134.209.195.36/api/users/logout')
-				if (res.body.ok) {
-					this.out(this.user.id)
-				}
+				if (res.body.ok) this.out(this.user.id)
 			} catch (err) {
 				console.error(err)
 			}

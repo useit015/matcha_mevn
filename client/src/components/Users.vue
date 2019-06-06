@@ -13,24 +13,11 @@
 <script>
 export default {
 	name: 'Users',
-	data () {
-		return {
-			users: []
-		}
-	},
-	methods: {
-		fetchUsers(){
-			this.$http.get('http://134.209.195.36/api/users/show')
-				.then(res => this.users = res.body)
-				.catch(err => console.error(err))
-		}
-	},
-	created: function(){
-		this.fetchUsers()
+	data: () => ({ users: [] }),
+	async created () {
+		const url = 'http://134.209.195.36/api/users/show'
+		const res = await this.$http.get(url)
+		this.users = res.body
 	}
 }
 </script>
-
-<style scoped>
-
-</style>

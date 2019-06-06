@@ -13,7 +13,7 @@
 		<v-form v-model="valid" class="my-4">
 			<v-text-field color="primary" class="my-5" v-model="username" validate-on-blur :rules="usernameRules" label="Username" required ></v-text-field>
 			<v-text-field v-on:keyup.enter="login" color="primary" class="my-5" v-model="password" validate-on-blur :rules="passRules" label="Password" required :append-icon="showPass ? 'visibility' : 'visibility_off'" :type="showPass ? 'text' : 'password'" @click:append="showPass = !showPass"></v-text-field>
-			<v-btn block large depressed color="primary" dark @click.prevent="login" class="mt-5">Login</v-btn>
+			<v-btn block large depressed color="primary" dark @click.prevent="log" class="mt-5">Login</v-btn>
 			<v-layout row justify-end>
 				<v-btn flat color="primary" dark to="/register">Don't have an account? Sign up</v-btn>
 			</v-layout>
@@ -54,20 +54,25 @@ export default {
 	}),
 	methods: {
 		...utility,
-		...mapActions({ log: 'login' }),
-		login () {
-			this.$http.post('http://134.209.195.36/api/users/login', {
-				username: this.username,
-				password: this.password
-			}).then(res => {
+		...mapActions(['login']),
+		async log () {
+			try {
+				const url = 'http://134.209.195.36/api/users/login'
+				const auth = {
+					username: this.username,
+					password: this.password
+				}
+				const res = await this.$http.post(url, auth)
 				const user = res.body
 				if (user.tokenExpiration && Date.parse(user.tokenExpiration) >= Date.now()) {
 					user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
-					this.log(user)
+					this.login(user)
 					this.updateLocation(user.id)
 					this.$router.push('/')
 				}
-			}).catch(err => console.error(err))
+			} catch (err) {
+				console.error(err)
+			}
 		}
 	}
 }

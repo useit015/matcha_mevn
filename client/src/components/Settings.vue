@@ -120,31 +120,37 @@ export default {
 			syncMatches: 'syncMatches',
 			syncHistory: 'syncHistory'
 		}),
-		updateUser () {
-			this.$http.post(`http://134.209.195.36/api/users/update/${this.user.id}`, { ...this.user })
-				.then(res => {
-					if (res && res.body && res.body.ok) {
-						this.showAlert('success', 'Your account has been updated successfuly')
-						this.update(this.user)
-					} else {
-						this.showAlert('red', 'Ouups something went wrong!')
-						console.log(res)
-					}
-				}).catch(err => console.error(err))
+		async updateUser () {
+			try {
+				const url = `http://134.209.195.36/api/users/update/${this.user.id}`
+				const res = await this.$http.post(url, this.user)
+				if (res && res.body && res.body.ok) {
+					this.showAlert('success', 'Your account has been updated successfuly')
+					this.update(this.user)
+				} else {
+					this.showAlert('red', 'Ouups something went wrong!')
+					console.log(res)
+				}
+			} catch (err) {
+				console.error(err)
+			}
 		},
-		updateImage (data) {
-			const fd = new FormData()
-			fd.append('image', data)
-			this.$http.post(`http://134.209.195.36/api/users/image/${this.user.id}`, fd)
-				.then(res => {
-					if (res && res.body && res.body.ok) {
-						this.showAlert('success', 'You profile image has been updated successfuly')
-						this.$store.commit('updateProfileImage', res.body.name)
-					} else {
-						this.showAlert('red', 'Ouups something went wrong!')
-						console.log(res)
-					}
-				}).catch(err => console.error(err))
+		async updateImage (data) {
+			try {
+				const fd = new FormData()
+				fd.append('image', data)
+				const url = `http://134.209.195.36/api/users/image/${this.user.id}`
+				const res = await this.$http.post(url, fd)
+				if (res && res.body && res.body.ok) {
+					this.showAlert('success', 'You profile image has been updated successfuly')
+					this.$store.commit('updateProfileImage', res.body.name)
+				} else {
+					this.showAlert('red', 'Ouups something went wrong!')
+					console.log(res)
+				}
+			} catch (err) {
+				console.error(err)
+			}
 		},
 		showAlert (color, text) {
 			this.alert = {
