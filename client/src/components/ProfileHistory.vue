@@ -59,9 +59,6 @@ export default {
 		fromNow (date) {
 			return moment.utc(date).fromNow()
 		},
-		formatTime (entry) {
-			return moment(this.getDate(entry)).format('MMM Do YY, h:mm a')
-		},
 		increaseLimit () {
 			if (this.limit + 11 < this.$store.getters.history.length)
 				this.limit += 10

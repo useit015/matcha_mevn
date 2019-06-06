@@ -48,14 +48,9 @@ export default {
 			immediate: true,
 			async handler () {
 				const result = await this.$http.post('http://134.209.195.36/api/chat/all', { id: this.user.id })
-				console.log(result.body)
-				this.convos = result.body.sort((a, b) => {
-					return new Date(b.last_update) - new Date(a.last_update)
-				})
-				console.log(this.convos)
+				this.convos = result.body.sort((a, b) => new Date(b.last_update) - new Date(a.last_update))
 				if (this.convos.length)
 					this.$store.dispatch('syncConvo', this.convos[0])
-				console.log('this is what i got --> ', result)
 			}
 		}
 	},

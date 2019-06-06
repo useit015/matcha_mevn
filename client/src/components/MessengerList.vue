@@ -9,7 +9,7 @@
 				<v-list-tile-title>{{ convo.username }}</v-list-tile-title>
 			</v-list-tile-content>
 			<v-list-tile-action>
-				<v-icon :color="convo.status ? 'teal' : 'grey'">chat_bubble</v-icon>
+				<v-icon :color="convo.status ? 'teal' : 'grey'">fiber_manual_record</v-icon>
 			</v-list-tile-action>
 		</v-list-tile>
 	</v-list>
@@ -34,7 +34,3 @@ export default {
 	}
 }
 </script>
-
-<style>
-
-</style>

@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import vueResource from 'vue-resource'
-import 'vuetify/dist/vuetify.min.css'
-import { router } from './router'
-import { store } from './store'
-import App from './App'
 import io from 'socket.io-client'
 import vueIo from 'vue-socket.io'
+import vueResource from 'vue-resource'
+import 'vuetify/dist/vuetify.min.css'
+import App from './App'
+import { router } from './router'
+import { store } from './store/store'
 
 Vue.use(Vuetify, {
 	theme: {

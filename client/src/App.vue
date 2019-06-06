@@ -4,11 +4,11 @@
 	<v-content>
 		<router-view/>
 	</v-content>
-	<v-fab-transition>
+	<!-- <v-fab-transition>
 		<v-btn color="primary" dark fab fixed bottom right>
 			<v-icon>keyboard_arrow_up</v-icon>
 		</v-btn>
-	</v-fab-transition>
+	</v-fab-transition> -->
 </v-app>
 </template>
 

@@ -1,11 +1,23 @@
 import Vue from 'vue'
+import moment from 'moment'
 
 const isExternal = url => url && (url.indexOf(':') > -1 || url.indexOf('//') > -1 || url.indexOf('www.') > -1)
 
-const translateLocation = loc => ({
-	lat: Number(loc.latitude),
-	lng: Number(loc.longitude)
-})
+const getDate = (item) => {
+	if (!item) return new Date()
+	switch (item.type) {
+		case 'visitor':
+			return item.visit_date
+		case 'visited':
+			return item.visit_date
+		case 'follower':
+			return item.match_date
+		case 'following':
+			return item.match_date
+		default:
+			return item
+	}
+}
 
 const getLocationFromIp = f => {
 	Vue.http.get('https://ipinfo.io?token=3443e12245bdcf')
@@ -24,9 +36,14 @@ const syncLocation = (id, location) => {
 }
 
 export default {
+	getDate,
 	syncLocation,
 	getLocationFromIp,
 	getFullPath: file => isExternal(file) ? file : `http://134.209.195.36/static/uploads/${file ? file : 'default.jpg'}`,
+	formatTime (date) {
+		const when = moment(getDate(date))
+		return `${when.format('MMMM D, YYYY')} at ${when.format('h:mm A')}`
+	},
 	sync: (f, id, type) => {
 		Vue.http.post(`http://134.209.195.36/api/users/get${type}`, { id })
 				.then(res => f(res))
@@ -74,18 +91,6 @@ export default {
 				return 'Liked you'
 			case 'following':
 				return 'You liked'
-		}
-	},
-	getDate (item) {
-		switch (item.type) {
-			case 'visitor':
-				return item.visit_date
-			case 'visited':
-				return item.visit_date
-			case 'follower':
-				return item.match_date
-			case 'following':
-				return item.match_date
 		}
 	}
 }
