@@ -7,14 +7,8 @@
 <script>
 export default {
 	name: 'About',
-	data () {
-		return {
-
-		}
+	data: () => {
+		return {}
 	}
 }
 </script>
-
-<style scoped>
-
-</style>

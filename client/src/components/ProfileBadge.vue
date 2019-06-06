@@ -18,8 +18,8 @@
 </template>
 
 <script>
-import utility from '../utility.js'
 import moment from 'moment'
+import utility from '../utility.js'
 
 export default {
 	name: 'ProfileBadge',
@@ -48,9 +48,7 @@ export default {
 			]
 		}
 	},
-	methods: {
-		...utility
-	}
+	methods: utility
 }
 </script>
 

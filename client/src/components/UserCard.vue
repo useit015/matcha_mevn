@@ -29,8 +29,9 @@
 </template>
 
 <script>
-import utility from '../utility.js'
 import moment from 'moment'
+import { mapGetters } from 'vuex'
+import utility from '../utility.js'
 
 export default {
 	name: 'UserCard',
@@ -46,9 +47,7 @@ export default {
 		}
 	},
 	computed: {
-		location () {
-			return { ...this.$store.getters.location }
-		},
+		...mapGetters(['location']),
 		age () {
 			return new Date().getFullYear() - new Date(this.user.birthdate).getFullYear()
 		},
@@ -70,7 +69,7 @@ export default {
 	methods: {
 		...utility,
 		profileImage(image) {
-			return utility.getFullPath(image)
+			return this.getFullPath(image)
 		}
 	}
 

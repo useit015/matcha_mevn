@@ -18,12 +18,14 @@ export default {
 		}
 	},
 	methods: {
-		install () {
-			this.$http.get(`https://randomuser.me/api/?results=${this.users}`)
-			.then(res => {
+		async install () {
+			try {
+				const url = `https://randomuser.me/api/?results=${this.users}`
+				const res = await this.$http.get(url)
 				console.log(res.body.results)
-				res.body.results.forEach(cur => {
-					this.$http.post('http://134.209.195.36/api/users/install', {
+				res.body.results.forEach(async cur => {
+					const url = 'http://134.209.195.36/api/users/install'
+					const data = {
 						first_name: cur.name.first,
 						last_name: cur.name.last,
 						username: cur.login.username,
@@ -43,10 +45,13 @@ export default {
 						rating: Math.random() * 5,
 						lat: cur.location.coordinates.latitude,
 						lng: cur.location.coordinates.longitude
-					}).then(res => console.log(res))
-					.catch(err => console.error(err))
+					}
+					const res = await this.$http.post(url, data)
+					console.log(res)
 				})
-			}).catch(err => console.error(err))
+			} catch (err) {
+				console.error(err)
+			}
 		}
 	}
 }

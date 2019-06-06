@@ -1,28 +1,29 @@
 <template>
-	<v-container class="mt-4">
-		<transition name="alert">
-			<v-alert v-if="userFailed" :value="true" dismissible type="error" color="error" icon="warning" transition="scale-transition" class="alert">
-				Oups .. something went wrong !
-			</v-alert>
-			<v-alert v-if="userAdded" :value="true" dismissible type="success" color="success" icon="check_circle" transition="scale-transition" class="alert">
-				You have been successfully registered, please verify your email
-			</v-alert>
-		</transition>
-		<div class="login mt-5">
-			<h1 class="page-header display-3 font-weight-light grey--text">Login</h1>
-			<v-form v-model="valid" class="my-4">
-				<v-text-field color="primary" class="my-5" v-model="username" validate-on-blur :rules="usernameRules" label="Username" required ></v-text-field>
-				<v-text-field v-on:keyup.enter="login" color="primary" class="my-5" v-model="password" validate-on-blur :rules="passRules" label="Password" required :append-icon="showPass ? 'visibility' : 'visibility_off'" :type="showPass ? 'text' : 'password'" @click:append="showPass = !showPass"></v-text-field>
-				<v-btn block large depressed color="primary" dark @click.prevent="login" class="mt-5">Login</v-btn>
-				<v-layout row justify-end>
-					<v-btn flat color="primary" dark to="/register">Don't have an account? Sign up</v-btn>
-				</v-layout>
-			</v-form>
-		</div>
-	</v-container>
+<v-container class="mt-4">
+	<transition name="alert">
+		<v-alert v-if="userFailed" :value="true" dismissible type="error" color="error" icon="warning" transition="scale-transition" class="alert">
+			Oups .. something went wrong !
+		</v-alert>
+		<v-alert v-if="userAdded" :value="true" dismissible type="success" color="success" icon="check_circle" transition="scale-transition" class="alert">
+			You have been successfully registered, please verify your email
+		</v-alert>
+	</transition>
+	<div class="login mt-5">
+		<h1 class="page-header display-3 font-weight-light grey--text">Login</h1>
+		<v-form v-model="valid" class="my-4">
+			<v-text-field color="primary" class="my-5" v-model="username" validate-on-blur :rules="usernameRules" label="Username" required ></v-text-field>
+			<v-text-field v-on:keyup.enter="login" color="primary" class="my-5" v-model="password" validate-on-blur :rules="passRules" label="Password" required :append-icon="showPass ? 'visibility' : 'visibility_off'" :type="showPass ? 'text' : 'password'" @click:append="showPass = !showPass"></v-text-field>
+			<v-btn block large depressed color="primary" dark @click.prevent="login" class="mt-5">Login</v-btn>
+			<v-layout row justify-end>
+				<v-btn flat color="primary" dark to="/register">Don't have an account? Sign up</v-btn>
+			</v-layout>
+		</v-form>
+	</div>
+</v-container>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import utility from '../utility.js'
 
 export default {
@@ -53,7 +54,8 @@ export default {
 	}),
 	methods: {
 		...utility,
-		login() {
+		...mapActions({ log: 'login' }),
+		login () {
 			this.$http.post('http://134.209.195.36/api/users/login', {
 				username: this.username,
 				password: this.password
@@ -61,7 +63,7 @@ export default {
 				const user = res.body
 				if (user.tokenExpiration && Date.parse(user.tokenExpiration) >= Date.now()) {
 					user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
-					this.$store.dispatch('login', user)
+					this.log(user)
 					this.updateLocation(user.id)
 					this.$router.push('/')
 				}
@@ -72,21 +74,21 @@ export default {
 </script>
 
 <style>
-	.alert-enter-active, .alert-leave-active, .register {
-		transition: all .5s;
-	}
-	.alert-enter, .alert-leave-to {
-		opacity: 0;
-	}
-	.login, .alert {
-		width: 100%;
-		max-width: 40rem;
-		margin: auto;
-	}
-	.alert {
-		position: absolute;
-		left: 50%;
-		top: 1rem;
-		transform: translateX(-50%);
-	}
+.alert-enter-active, .alert-leave-active, .register {
+	transition: all .5s;
+}
+.alert-enter, .alert-leave-to {
+	opacity: 0;
+}
+.login, .alert {
+	width: 100%;
+	max-width: 40rem;
+	margin: auto;
+}
+.alert {
+	position: absolute;
+	left: 50%;
+	top: 1rem;
+	transform: translateX(-50%);
+}
 </style>

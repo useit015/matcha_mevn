@@ -6,13 +6,13 @@
 				<span>M</span><span class="font-weight-light">atcha</span>
 			</v-toolbar-title>
 			<v-spacer></v-spacer>
-			<div v-if="isLoggedIn">
+			<div v-if="status">
 				<v-btn flat color="grey" @click="logout">
 					<span>Logout</span>
 					<v-icon dark right>exit_to_app</v-icon>
 				</v-btn>
 			</div>
-			<div v-if="!isLoggedIn">
+			<div v-if="!status">
 				<v-btn flat color="grey" router to="/login">Login</v-btn>
 				<v-btn flat color="grey" router to="/register">Sign Up</v-btn>
 			</div>
@@ -20,12 +20,14 @@
 		<v-navigation-drawer v-model="drawer" app fixed class="primary">
 			<v-list>
 				<v-list-tile avatar>
-					<v-layout align-center justify-center v-if="isLoggedIn">
+					<v-layout align-center justify-center v-if="status">
 						<v-list-tile-avatar>
-							<img :src="profileImage">
+							<img :src="image">
 						</v-list-tile-avatar>
 						<v-list-tile-content>
-							<v-list-tile-title class="white--text text-capitalize font-weight-light subheading">{{ whoIsLoggedIn.username }}</v-list-tile-title>
+							<v-list-tile-title class="white--text text-capitalize font-weight-light subheading">
+								{{ user.username }}
+							</v-list-tile-title>
 						</v-list-tile-content>
 					</v-layout>
 					<v-list-tile-action class="ml-auto">
@@ -36,14 +38,14 @@
 				</v-list-tile>
 				<v-divider></v-divider>
 				<v-list-tile v-for="link in links" :key="link.text" router :to="link.route" >
-					<v-list-tile-action v-if="link.public || isLoggedIn">
+					<v-list-tile-action v-if="link.public || status">
 						<v-icon class="white--text">{{ link.icon }}</v-icon>
 					</v-list-tile-action>
-					<v-list-tile-content v-if="link.public || isLoggedIn">
+					<v-list-tile-content v-if="link.public || status">
 						<v-list-tile-title class="white--text">{{ link.text }}</v-list-tile-title>
 					</v-list-tile-content>
 				</v-list-tile>
-				<v-list-tile v-if="isLoggedIn" @click="logout">
+				<v-list-tile v-if="status" @click="logout">
 					<v-list-tile-action>
 						<v-icon class="white--text">exit_to_app</v-icon>
 					</v-list-tile-action>
@@ -57,6 +59,7 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
 import utility from '../utility.js'
 
 export default {
@@ -71,39 +74,50 @@ export default {
 			{ icon: 'settings', text: 'Settings', route: '/settings', public: false },
 		]
 	}),
-	created () {
-		this.$http.post('http://134.209.195.36/api/users/isloggedin', {
-				token: localStorage.getItem("token")
-			}).then(res => {
-				const user = res.body
-				if (user.tokenExpiration && Date.parse(user.tokenExpiration) >= Date.now()) {
-					user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
-					this.$store.dispatch('login', user)
-					// this.$socket.emit('auth', user.id)
-					// this.updateLocation(user.id)
-				} else {
-					// console.log('im in logout')
-					// this.$socket.emit('logout')
-				}
-			}).catch(err => console.error(err))
+	async created () {
+		try {
+			const token = localStorage.getItem('token')
+			const url = 'http://134.209.195.36/api/users/isloggedin'
+			const res = await this.$http.post(url, { token })
+			const user = res.body
+			if (user.tokenExpiration && Date.parse(user.tokenExpiration) >= Date.now()) {
+				user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+				this.in(user)
+				// this.$socket.emit('auth', user.id)
+				// this.updateLocation(user.id)
+			} else {
+				// console.log('im in logout')
+				// this.$socket.emit('logout')
+			}
+		} catch (err) {
+			console.error(err)
+		}
 	},
 	computed: {
-		isLoggedIn () {
-			return !!this.$store.getters.status;
-		},
-		whoIsLoggedIn () {
-			return this.$store.getters.user;
-		},
-		profileImage () {
-			return this.getFullPath(this.$store.getters.profileImage)
+		...mapGetters([
+			'user',
+			'status',
+			'profileImage'
+		]),
+		image () {
+			return this.getFullPath(this.profileImage)
 		}
 	},
 	methods: {
 		...utility,
-		logout () {
-			this.$http.post('http://134.209.195.36/api/users/logout')
-				.then(res => res.body.ok ? this.$store.dispatch('logout', this.$store.getters.user.id) : 1)
-				.catch(err => console.error(err))
+		...mapActions({
+			in: 'login',
+			out: 'logout'
+		}),
+		async logout () {
+			try {
+				const res = await this.$http.post('http://134.209.195.36/api/users/logout')
+				if (res.body.ok) {
+					this.out(this.user.id)
+				}
+			} catch (err) {
+				console.error(err)
+			}
 		}
 	}
 }

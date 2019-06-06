@@ -38,20 +38,25 @@
 
 <script>
 import moment from 'moment'
+import { mapGetters } from 'vuex'
 import utility from '../utility.js'
 
 export default {
 	name: 'ProfileHistory',
 	data: () => ({ limit: 15 }),
 	computed: {
+		...mapGetters({
+			blocked: 'blocked',
+			hist: 'history'
+		}),
 		history () {
-			return this.$store.getters.history
-					.filter(cur => !this.$store.getters.blocked.includes(cur.id))
+			return this.hist
+					.filter(cur => !this.blocked.includes(cur.id))
 					.sort((a, b) => new Date(this.getDate(b)) - new Date(this.getDate(a)))
 					.slice(0, this.limit)
 		},
 		moreToLoad () {
-			return this.limit < this.$store.getters.history.length - 1
+			return this.limit < this.hist.length - 1
 		}
 	},
 	methods: {
@@ -60,10 +65,11 @@ export default {
 			return moment.utc(date).fromNow()
 		},
 		increaseLimit () {
-			if (this.limit + 11 < this.$store.getters.history.length)
+			if (this.limit + 11 < this.hist.length) {
 				this.limit += 10
-			else
-				this.limit = this.$store.getters.history.length - 1
+			} else {
+				this.limit = this.hist.length - 1
+			}
 		}
 	}
 }

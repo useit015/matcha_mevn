@@ -129,6 +129,7 @@
 <script>
 import moment from 'moment'
 import loader from './loader'
+import { mapGetters, mapActions } from 'vuex'
 import utility from '../utility.js'
 import ProfileForm from './ProfileForm'
 import ProfileTabs from './ProfileTabs'
@@ -165,12 +166,10 @@ export default {
 			immediate: true,
 			handler () {
 				const id = Number(this.$route.params.id)
-				console.log('blocked -->', ...this.blocked, '------>>')
-				console.log('blockedBy -->', this.blockedBy, id)
 				if (Array.isArray(this.blocked) && this.blocked.includes(id)) {
 					this.$router.push('/')
 				}
-				if (Array.isArray(this.$store.getters.blockedBy) && this.$store.getters.blockedBy.includes(id)) {
+				if (Array.isArray(this.blockedBy) && this.blockedBy.includes(id)) {
 					this.$router.push('/')
 				}
 			}
@@ -183,7 +182,7 @@ export default {
 						this.$router.push('/settings')
 					else {
 						this.$http.post(`http://134.209.195.36/api/users/show/${this.$route.params.id}`, {
-							visitor: this.$store.getters.user.id
+							visitor: this.loggedIn.id
 						}).then(res => {
 							this.f = false
 							this.user = {
@@ -197,31 +196,35 @@ export default {
 		}
 	},
 	computed: {
+		...mapGetters({
+			loggedIn: 'user',
+			blocked: 'blocked',
+			matches: 'matches',
+			location: 'location',
+			following: 'following',
+			blockedBy: 'blockedBy'
+		}),
 		liked: {
 			get () {
-				for (let match of this.$store.getters.following)
+				for (let match of this.following)
 					if (match.id == this.user.id)
 						return true 
 				return false
 			},
-			set () { this.$store.dispatch('syncMatches', this.$store.getters.user.id) }
-		},
-		blocked () {
-			return this.$store.getters.blocked
-		},
-		loggedIn () {
-			return this.$store.getters.user
+			set () {
+				this.syncMatches(this.loggedIn.id)
+			}
 		},
 		profileImage () {
 			return this.getFullPath(this.getProfileImage())
 		},
 		userCantLike () {
 			return false
-			const imgs = this.$store.getters.user.images
+			const imgs = this.loggedIn.images
 			return imgs ? !imgs.length : true
 		},
 		userCanChat () {
-			for (const match of this.$store.getters.matches)
+			for (const match of this.matches)
 				if (match.id == this.user.id)
 					return true
 			return false
@@ -250,9 +253,6 @@ export default {
 				{ label: 'Phone Number', content: this.user.phone }
 			]
 		},
-		location () {
-			return { ...this.$store.getters.location }
-		},
 		distance () {
 			const from = this.location
 			console.log('i am location -> ', this.location)
@@ -265,6 +265,7 @@ export default {
 	},
 	methods: {
 		...utility,
+		...mapActions(['syncBlocked', 'syncMatches']),
 		changeTab (tab) {
 			this.activeTab = tab
 		},
@@ -275,7 +276,7 @@ export default {
 		},
 		match () {
 			this.$http.post(`http://134.209.195.36/api/users/match/${this.$route.params.id}`, {
-				matcher: this.$store.getters.user.id,
+				matcher: this.loggedIn.id,
 				liked: this.liked
 			}).then(res => {
 				this.liked = res.matched
@@ -283,9 +284,9 @@ export default {
 		},
 		block () {
 			this.$http.post(`http://134.209.195.36/api/users/block/${this.$route.params.id}`, {
-				blocker: this.$store.getters.user.id
+				blocker: this.loggedIn.id
 			}).then(res => {
-				this.$store.dispatch('syncBlocked', this.$store.getters.user.id)
+				this.syncBlocked(this.loggedIn.id)
 				this.$router.go(-1)
 			}).catch(err => console.error(err))
 			this.blockDialog = false

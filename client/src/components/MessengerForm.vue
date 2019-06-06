@@ -21,17 +21,22 @@ export default {
 	}),
 	methods: {
 		async sendMsg () {
-			const data = {
-				id_conversation: this.selectedConvo,
-				id_from: this.user.id,
-				id_to: this.toId,
-				message: this.msg
+			try {
+				const url = `http://134.209.195.36/api/chat/send`
+				const data = {
+					id_conversation: this.selectedConvo,
+					id_from: this.user.id,
+					id_to: this.toId,
+					message: this.msg
+				}
+				this.$socket.emit('chat', data)
+				const result = await this.$http.post(url, data)
+				this.$emit('msgSent', data)
+				this.msg = ''
+				console.log('i sent the message', result)
+			} catch (err) {
+				console.error(err)
 			}
-			this.$socket.emit('chat', data)
-			const result = await this.$http.post(`http://134.209.195.36/api/chat/send`, data)
-			this.$emit('msgSent', data)
-			this.msg = ''
-			console.log('i sent the message', result)
 		}
 	},
 	computed: {
@@ -39,7 +44,3 @@ export default {
 	},
 }
 </script>
-
-<style>
-
-</style>

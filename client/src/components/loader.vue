@@ -1,20 +1,18 @@
 <template>
-	<div class="cs-loader">
-		<div class="cs-loader-inner">
-			<label>●</label>
-			<label>●</label>
-			<label>●</label>
-			<label>●</label>
-			<label>●</label>
-			<label>●</label>
-		</div>
+<div class="cs-loader">
+	<div class="cs-loader-inner">
+		<label>●</label>
+		<label>●</label>
+		<label>●</label>
+		<label>●</label>
+		<label>●</label>
+		<label>●</label>
 	</div>
+</div>
 </template>
 
 <script>
-export default {
-	name: 'loader'
-}
+export default { name: 'loader' }
 </script>
 
 <style>
@@ -62,15 +60,27 @@ export default {
 	}
 }
 
-.cs-loader-inner label:nth-child(6) { animation: lol 3s infinite ease-in-out; }
+.cs-loader-inner label:nth-child(6) {
+	animation: lol 3s infinite ease-in-out;
+}
 
-.cs-loader-inner label:nth-child(5) { animation: lol 3s 100ms infinite ease-in-out; }
+.cs-loader-inner label:nth-child(5) {
+	animation: lol 3s 100ms infinite ease-in-out;
+}
 
-.cs-loader-inner label:nth-child(4) { animation: lol 3s 200ms infinite ease-in-out; }
+.cs-loader-inner label:nth-child(4) {
+	animation: lol 3s 200ms infinite ease-in-out;
+}
 
-.cs-loader-inner label:nth-child(3) { animation: lol 3s 300ms infinite ease-in-out; }
+.cs-loader-inner label:nth-child(3) {
+	animation: lol 3s 300ms infinite ease-in-out;
+}
 
-.cs-loader-inner label:nth-child(2) { animation: lol 3s 400ms infinite ease-in-out; }
+.cs-loader-inner label:nth-child(2) {
+	animation: lol 3s 400ms infinite ease-in-out;
+}
 
-.cs-loader-inner label:nth-child(1) { animation: lol 3s 500ms infinite ease-in-out; }
+.cs-loader-inner label:nth-child(1) {
+	animation: lol 3s 500ms infinite ease-in-out;
+}
 </style>

@@ -92,16 +92,6 @@ export default {
 			this.user.tags = this.tags.map(cur => cur.text.toLowerCase()).join(',')
 		}
 	},
-	// computed : {
-	// 	birthdate: {
-	// 		get () {
-	// 			return new Date(this.user.birthdate).toISOString().substr(0, 10)
-	// 		},
-	// 		set (date) {
-	// 			this.user.birthdate = date
-	// 		}
-	// 	}
-	// },
 	methods: {
 		...utility,
 		syncUser() {

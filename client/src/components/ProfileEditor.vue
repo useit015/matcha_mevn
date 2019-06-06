@@ -15,9 +15,10 @@
 </template>
 
 <script>
+import utility from '../utility.js'
 import VueAvatar from './VueAvatar.vue'
 import VueAvatarScale from './VueAvatarScale.vue'
-import utility from '../utility.js'
+
 export default {
 	name: 'ProfileEditor',
 	components: {
@@ -32,7 +33,7 @@ export default {
 	props: {
 		user: {
 			type: Object,
-			default: function() {
+			default: () => {
 				return {}
 			}
 		}

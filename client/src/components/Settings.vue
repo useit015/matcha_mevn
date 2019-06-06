@@ -56,9 +56,10 @@ import utility from '../utility.js'
 import ProfileForm from './ProfileForm'
 import ProfileTabs from './ProfileTabs'
 import ProfileBadge from './ProfileBadge'
-import ProfileHistory from './ProfileHistory'
 import ProfileEditor from './ProfileEditor'
 import ProfileGallery from './ProfileGallery'
+import ProfileHistory from './ProfileHistory'
+import { mapGetters, mapActions } from 'vuex'
 import ProfileSettings from './ProfileSettings'
 
 export default {
@@ -83,21 +84,23 @@ export default {
 	}),
 	created () {
 		if (this.user.id) {
-			this.$store.dispatch('syncHistory', this.$store.getters.user.id)
-			this.$store.dispatch('syncMatches', this.$store.getters.user.id)
+			this.syncHistory(this.loggedIn.id)
+			this.syncMatches(this.loggedIn.id)
 		}
 	},
 	computed: {
+		...mapGetters({
+			loggedIn: 'user',
+			avatar: 'profileImage'
+		}),
 		user: {
 			get () {
-				return { ...this.$store.getters.user }
+				return { ...this.loggedIn }
 			},
-			set (user) {
-				
-			},
+			set (user) {}
 		},
 		profileImage () {
-			return this.getFullPath(this.$store.getters.profileImage)
+			return this.getFullPath(this.avatar)
 		}
 	},
 	watch: {
@@ -112,12 +115,17 @@ export default {
 	},
 	methods: {
 		...utility,
+		...mapActions({
+			update: 'updateUser',
+			syncMatches: 'syncMatches',
+			syncHistory: 'syncHistory'
+		}),
 		updateUser () {
 			this.$http.post(`http://134.209.195.36/api/users/update/${this.user.id}`, { ...this.user })
 				.then(res => {
 					if (res && res.body && res.body.ok) {
 						this.showAlert('success', 'Your account has been updated successfuly')
-						this.$store.dispatch('updateUser', this.user)
+						this.update(this.user)
 					} else {
 						this.showAlert('red', 'Ouups something went wrong!')
 						console.log(res)

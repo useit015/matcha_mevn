@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { actions } from './action'
+import { auth } from './auth'
+import { user } from './user'
+import { chat } from './chat'
+import { socket } from './socket'
 import { getters } from './getter'
-import { mutations } from './mutation'
 
 Vue.use(Vuex)
 
@@ -25,6 +27,15 @@ export const store = new Vuex.Store({
 		newMessage: null
 	},
 	getters,
-	mutations,
-	actions
+	mutations: {
+		...auth.mutations,
+		...user.mutations,
+		...chat.mutations,
+		...socket.mutations
+	},
+	actions: {
+		...auth.actions,
+		...user.actions,
+		...chat.actions
+	}
 })

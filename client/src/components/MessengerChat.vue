@@ -34,15 +34,26 @@ import utility from '../utility.js'
 export default {
 	name: 'MessengerChat',
 	data: () => ({ messages: [] }),
-	computed: mapGetters(['user', 'selectedConvo', 'profileImage', 'imageConvo', 'newMessage', 'usernameConvo']),
+	computed: mapGetters([
+		'user',
+		'selectedConvo',
+		'profileImage',
+		'imageConvo',
+		'newMessage',
+		'usernameConvo'
+	]),
 	watch: {
 		selectedConvo: {
 			immediate: true,
 			async handler () {
 				if (this.selectedConvo) {
-					const url = `http://134.209.195.36/api/chat/single/${this.selectedConvo}`
-					const result = await this.$http.get(url)
-					this.messages = result.body
+					try {
+						const url = `http://134.209.195.36/api/chat/single/${this.selectedConvo}`
+						const result = await this.$http.get(url)
+						this.messages = result.body
+					} catch (err) {
+						console.error(err)
+					}
 				}
 			}
 		},
@@ -59,7 +70,8 @@ export default {
 			setTimeout(() => {
 				const top = document.querySelector('.top')
 				top.scrollTop = top.scrollHeight - top.clientHeight
-			}, 0);
+			},
+			0);
 		}
 	},
 	methods: {

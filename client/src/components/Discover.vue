@@ -46,9 +46,10 @@
 </template>
 
 <script>
-import countries from '../nats.json'
-import UserCard from './UserCard'
 import loader from './loader'
+import { mapGetters } from 'vuex'
+import UserCard from './UserCard'
+import countries from '../nats.json'
 
 export default {
 	name: 'Discover',
@@ -70,11 +71,16 @@ export default {
 		}
 	},
 	computed: {
+		...mapGetters([
+			'user',
+			'blocked',
+			'blockedBy'
+		]),
 		filtered () {
 			return this.users
 				.filter(val => val.user_id != this.user.id)
-				.filter(val => !this.$store.getters.blocked.includes(val.user_id))
-				.filter(val => !this.$store.getters.blockedBy.includes(val.user_id))
+				.filter(val => !this.blocked.includes(val.user_id))
+				.filter(val => !this.blockedBy.includes(val.user_id))
 				.filter(val => val.rating >= this.rating[0] && val.rating <= this.rating[1])
 				.filter(val => !this.gender || val.gender === this.gender)
 				.filter(val => !this.location || val.country.has(this.location) || val.address.has(this.location) || val.city.has(this.location))
@@ -91,21 +97,21 @@ export default {
 							return true
 					return false
 				})
-		},
-		user () {
-			return this.$store.getters.user
 		}
 	},
-	created () {
-		this.$http.get('http://134.209.195.36/api/users/show')
-			.then(res => {
-				this.users = res.body.map(cur => ({
-					...cur,
-					rating: Number(cur.rating),
-					status: Math.round(Math.random() * 100) % 2
-				}))
-				this.loaded = true
-			}).catch(err => console.error(err))
+	async created () {
+		try {
+			const url = 'http://134.209.195.36/api/users/show'
+			const res = await this.$http.get(url)
+			this.users = res.body.map(cur => ({
+				...cur,
+				rating: Number(cur.rating),
+				status: Math.round(Math.random() * 100) % 2
+			}))
+			this.loaded = true
+		} catch (err) {
+			console.error(err);
+		}
 	},
 	methods: {
 		reset () {

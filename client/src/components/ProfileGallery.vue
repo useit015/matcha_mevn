@@ -14,7 +14,7 @@ import utility from '../utility.js'
 
 export default {
 	name: 'ProfileTabs',
-	data() {
+	data () {
 		return {}
 	},
 	props: {
@@ -24,8 +24,9 @@ export default {
 		}
 	},
 	methods: {
-		profileImage(image) {
-			return utility.getFullPath(image)
+		...utility,
+		profileImage (image) {
+			return this.getFullPath(image)
 		}
 	}
 }

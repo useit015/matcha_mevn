@@ -22,7 +22,7 @@
 import MessengerList from './MessengerList'
 import MessengerChat from './MessengerChat'
 import MessengerForm from './MessengerForm'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
 	name: 'Messenger',
@@ -47,14 +47,21 @@ export default {
 		user: {
 			immediate: true,
 			async handler () {
-				const result = await this.$http.post('http://134.209.195.36/api/chat/all', { id: this.user.id })
-				this.convos = result.body.sort((a, b) => new Date(b.last_update) - new Date(a.last_update))
-				if (this.convos.length)
-					this.$store.dispatch('syncConvo', this.convos[0])
+				try {
+					const { id } = this.user
+					const url = 'http://134.209.195.36/api/chat/all'
+					const result = await this.$http.post(url, { id })
+					this.convos = result.body.sort((a, b) => new Date(b.last_update) - new Date(a.last_update))
+					if (this.convos.length)
+						this.syncConvo(this.convos[0])
+				} catch (err) {
+					console.error(err)
+				}
 			}
 		}
 	},
 	methods: {
+		...mapActions(['syncConvo']),
 		messageSent (msg) {
 			this.$refs.chat.msgSent(msg)
 		},
@@ -88,8 +95,4 @@ export default {
 .bottom {
 	flex: 0 0 10% !important;
 }
-
-/* .chat_layout {
-	height: 70vh;
-} */
 </style>
