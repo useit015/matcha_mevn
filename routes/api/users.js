@@ -10,26 +10,29 @@ const router = require('express').Router()
 const pool = require('../../utility/database')
 const sendMail = require('../../utility/mail')
 const writeFileAsync = promisify(writeFile)
+const sign = promisify(jwt.sign)
 const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
+const auth = require('../../middleware/auth')
 
 const randomHex = () => randomBytes(10).toString('hex')
 
-router.post('/getmatches', async (req, res) => {
-	if (!req.body.id) return res.json('must include user id')
+router.get('/getmatches', auth, async (req, res) => {
+	if (!req.user.id) res.json({ ok: false, status: 'not logged in' })
 	try {
-		let sql = `SELECT
-						matches.matched as matched_id,
-						matches.created_at as match_date,
-						users.username as username,
-						images.name as profile_image
-					FROM matches
-					INNER JOIN users
-					ON matches.matched = users.id
-					INNER JOIN images
-					ON matches.matched = images.user_id
-					where matches.matcher = ?
-					AND images.profile = 1`
-		const following = await pool.query(sql, [req.body.id])
+		let sql
+		sql = `SELECT
+					matches.matched as matched_id,
+					matches.created_at as match_date,
+					users.username as username,
+					images.name as profile_image
+				FROM matches
+				INNER JOIN users
+				ON matches.matched = users.id
+				INNER JOIN images
+				ON matches.matched = images.user_id
+				where matches.matcher = ?
+				AND images.profile = 1`
+		const following = await pool.query(sql, [req.user.id])
 		sql = `SELECT
 					matches.matcher as matcher_id,
 					matches.created_at as match_date,
@@ -42,29 +45,30 @@ router.post('/getmatches', async (req, res) => {
 				ON matches.matcher = images.user_id
 				where matches.matched = ?
 				AND images.profile = 1`
-		const followers = await pool.query(sql, [req.body.id])		
+		const followers = await pool.query(sql, [req.user.id])		
 		res.json([...following, ...followers])
 	} catch (err) {
 		throw new Error(err)
 	}
 })
 
-router.post('/gethistory', async (req, res) => {
-	if (!req.body.id) return res.json('must include user id')
+router.get('/gethistory', auth, async (req, res) => {
+	if (!req.user.id) res.json({ ok: false, status: 'not logged in' })
 	try {
-		let sql = `SELECT
-						history.visitor as visitor_id,
-						history.created_at as visit_date,
-						users.username as username,
-						images.name as profile_image
-					FROM history
-					INNER JOIN users 
-					ON history.visitor = users.id
-					INNER JOIN images
-					ON history.visitor = images.user_id
-					WHERE history.visited = ?
-					AND images.profile = 1`
-		const visitors = await pool.query(sql, [req.body.id])
+		let sql
+		sql = `SELECT
+					history.visitor as visitor_id,
+					history.created_at as visit_date,
+					users.username as username,
+					images.name as profile_image
+				FROM history
+				INNER JOIN users 
+				ON history.visitor = users.id
+				INNER JOIN images
+				ON history.visitor = images.user_id
+				WHERE history.visited = ?
+				AND images.profile = 1`
+		const visitors = await pool.query(sql, [req.user.id])
 		sql = `SELECT
 					history.visited as visited_id,
 					history.created_at as visit_date,
@@ -77,58 +81,51 @@ router.post('/gethistory', async (req, res) => {
 				ON history.visited = images.user_id
 				WHERE history.visitor = ?
 				AND images.profile = 1`
-		const visited = await pool.query(sql, [req.body.id])		
+		const visited = await pool.query(sql, [req.user.id])		
 		res.json([...visitors, ...visited])
 	} catch (err) {
 		throw new Error(err)
 	}
 })
 
-router.post('/getblocked', async (req, res) => {
-	if (!req.body.id) return res.json('must include user id')
+router.get('/getblocked', auth, async (req, res) => {
+	if (!req.user.id) res.json({ ok: false, status: 'not logged in' })
 	try {
 		const sql = `SELECT * FROM blocked where blocker = ? OR blocked = ?`
-		const blacklist = await pool.query(sql, [req.body.id, req.body.id])
+		const blacklist = await pool.query(sql, [req.user.id, req.user.id])
 		res.json(blacklist)
 	} catch (err) {
 		throw new Error(err)
 	}
 })
 
-router.post('/position/:id', async (req, res) => {
+router.post('/position', auth, async (req, res) => {
+	if (!req.user.id) res.json({ ok: false, status: 'not logged in' })
 	try {
 		const sql = `UPDATE users SET lat = ?, lng = ? WHERE id = ?`
-		await pool.query(sql, [req.body.lat, req.body.lng, req.params.id])
+		await pool.query(sql, [req.body.lat, req.body.lng, req.user.id])
 		res.json('synced position')
 	} catch (err) {
 		throw new Error(err)
 	}
 })
 
-router.post('/isloggedin', async (req, res) => {
+router.get('/isloggedin', auth, async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
+	if (!req.user.id) res.json({ ok: false, status: 'not logged in' })
 	try {
-		let sql = `SELECT * FROM users WHERE token = ?
-						AND TIME_TO_SEC(TIMEDIFF(tokenExpiration, NOW())) > 0`
-		const result = await pool.query(sql, [req.body.token])
-		if (result.length) {
-			const user = {
-				...result[0],
-				token: randomHex(),
-				tokenExpiration: moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
-			}
-			sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
-			await pool.query(sql, [user.token, user.tokenExpiration, user.id])
-			sql = `SELECT * FROM images WHERE user_id = ?`
-			user.images = await pool.query(sql, [user.id])
-			res.json(user)
-			// jwt.sign({ user: user }, 'secret', (err, token) => {
-			// 	if (err) throw err
-			// })
-		} else {
-			res.json({ ok: false, status: 'not logged in' })
-
-		}
+		let sql = `SELECT * FROM users WHERE id = ?`
+		const result = await pool.query(sql, [req.user.id])
+		const user = result[0]
+		delete user.password
+		delete user.verified
+		delete user.tokenExpiration
+		sql = `SELECT * FROM images WHERE user_id = ?`
+		user.images = await pool.query(sql, [user.id])
+		const { id, username, first_name, last_name, email } = user
+		const payload = { id, username, first_name, last_name, email }
+		user.token = await sign(payload, process.env.SECRET, { expiresIn: 7200 })
+		res.json(user)
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -144,16 +141,19 @@ router.post('/login', async (req, res) => {
 			try {
 				result = await bcrypt.compare(req.body.password, user.password)
 				if (result) {
-					user.token = randomHex()
-					user.tokenExpiration = moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
-					sql = `UPDATE users SET token = ?, tokenExpiration = ? WHERE id = ?`
-					await pool.query(sql, [user.token, user.tokenExpiration, user.id])
-					sql = `SELECT * FROM images WHERE user_id = ?`
-					user.images = await pool.query(sql, [user.id])
-					res.json(user)
-					// jwt.sign({ user: user }, 'secret', (err, token) => {
-					// 	if (err) throw err
-					// })
+					try {
+						delete user.password
+						delete user.verified
+						delete user.tokenExpiration
+						sql = `SELECT * FROM images WHERE user_id = ?`
+						user.images = await pool.query(sql, [user.id])
+						const { id, username, first_name, last_name, email } = user
+						const payload = { id, username, first_name, last_name, email }
+						user.token = await sign(payload, process.env.SECRET, { expiresIn: 7200 })
+						res.json(user)
+					} catch (err) {
+						throw new Error(err)
+					}
 				} else {
 					res.json({ ok: false, status: 'wrong pass' })
 				}
@@ -257,11 +257,12 @@ router.get('/verify/:key', async (req, res) => {
 	}
 })
 
-router.post('/update/:id', async (req, res) => {
+router.post('/update', auth, async (req, res) => {
+	if (!req.user.id) res.json({ ok: false, status: 'not logged in' })
 	try {
 		let sql, result
 		sql = `SELECT * FROM users WHERE id = ?`
-		result = await pool.query(sql, [req.params.id])
+		result = await pool.query(sql, [req.user.id])
 		if (result.length) {
 			// ! MUST VALIDATE INPUT !!!!
 			const user = {
@@ -280,7 +281,7 @@ router.post('/update/:id', async (req, res) => {
 				rating: req.body.rating,
 				postal_code: req.body.postal_code,
 				phone: req.body.phone,
-				id: req.params.id
+				id: req.user.id
 			}
 			sql = `UPDATE users SET
 						first_name = ?, last_name = ?, username = ?,
