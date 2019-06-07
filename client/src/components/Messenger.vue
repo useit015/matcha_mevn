@@ -48,12 +48,20 @@ export default {
 			immediate: true,
 			async handler () {
 				try {
-					const { id } = this.user
+					const token = localStorage.getItem('token')
 					const url = 'http://134.209.195.36/api/chat/all'
-					const result = await this.$http.post(url, { id })
-					this.convos = result.body.sort((a, b) => new Date(b.last_update) - new Date(a.last_update))
-					if (this.convos.length)
-						this.syncConvo(this.convos[0])
+					const result = await this.$http.get(url, {
+						headers: {
+							'x-auth-token': token
+						}
+					})
+					if (!result.body.msg) {
+						this.convos = result.body.sort((a, b) => new Date(b.last_update) - new Date(a.last_update))
+						if (this.convos.length)
+							this.syncConvo(this.convos[0])
+					} else {
+						this.$router.push('/login')
+					}
 				} catch (err) {
 					console.error(err)
 				}
@@ -67,7 +75,6 @@ export default {
 		},
 		getToId () {
 			for (const cur of this.convos) {
-				console.log('i am testing this --> ', cur)
 				if (cur.id_conversation == this.selectedConvo) {
 					return cur.user_id
 				}

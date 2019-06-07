@@ -15,8 +15,10 @@ export default {
 	name: 'Users',
 	data: () => ({ users: [] }),
 	async created () {
-		const url = 'http://134.209.195.36/api/users/show'
-		const res = await this.$http.get(url)
+		const url = 'http://134.209.195.36/api/users/'
+		const res = await this.$http.get(url, {
+			headers: { 'x-auth-token': localStorage.getItem('token') }
+		})
 		this.users = res.body
 	}
 }

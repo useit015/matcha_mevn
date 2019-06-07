@@ -32,7 +32,7 @@ export const user = {
 			})
 			commit('updateUser', user)
 		},
-		locate: ({ commit }, id) => {
+		locate: ({ commit }) => {
 			let loc = {}
 			if  (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition(pos => {
@@ -41,19 +41,19 @@ export const user = {
 						lng: pos.coords.longitude
 					}
 					commit('locate', loc)
-					utility.syncLocation(id, loc)
+					utility.syncLocation(loc)
 				}, () => utility.getLocationFromIp(loc => {
 					commit('locate', loc)
-					utility.syncLocation(id, loc)
+					utility.syncLocation(loc)
 				}))
 			} else {
 				utility.getLocationFromIp(loc => {
 					commit('locate', loc)
-					utility.syncLocation(id, loc)
+					utility.syncLocation(loc)
 				})
 			}
 		},
-		syncMatches: ({ commit }, id) => {
+		syncMatches: ({ commit }) => {
 			utility.sync(res => {
 				commit('syncMatches', {
 					following: res.body.filter(cur => cur.matched_id)
@@ -71,15 +71,15 @@ export const user = {
 											profile_image: cur.profile_image
 										}))
 				})
-			}, id, 'matches')
+			}, 'matches')
 		},
-		syncBlocked: ({ commit }, id) => {
+		syncBlocked: ({ commit }) => {
 			utility.sync(res => commit('syncBlocked', {
 				blocked: res.body.filter(cur => cur.blocker == id).map(cur => cur.blocked),
 				blockedBy: res.body.filter(cur => cur.blocked == id).map(cur => cur.blocker)
-			}), id, 'blocked')
+			}), 'blocked')
 		},
-		syncHistory: ({ commit }, id) => {
+		syncHistory: ({ commit }) => {
 			utility.sync(res => commit('syncHistory', {
 				visitor: res.body.filter(cur => cur.visitor_id)
 									.map(cur => ({
@@ -95,7 +95,7 @@ export const user = {
 										username: cur.username,
 										profile_image: cur.profile_image
 									}))
-			}), id, 'history')
+			}), 'history')
 		}
 	}
 }

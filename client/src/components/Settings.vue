@@ -122,11 +122,17 @@ export default {
 		}),
 		async updateUser () {
 			try {
-				const url = `http://134.209.195.36/api/users/update/${this.user.id}`
-				const res = await this.$http.post(url, this.user)
-				if (res && res.body && res.body.ok) {
+				const token = localStorage.getItem('token')
+				const url = `http://134.209.195.36/api/users/update`
+				const res = await this.$http.post(url, this.user, {
+					headers: {
+						'x-auth-token': token
+					}
+				})
+				if (res && res.body && !res.body.msg) {
 					this.showAlert('success', 'Your account has been updated successfuly')
 					this.update(this.user)
+					console.log(res)
 				} else {
 					this.showAlert('red', 'Ouups something went wrong!')
 					console.log(res)
@@ -139,9 +145,14 @@ export default {
 			try {
 				const fd = new FormData()
 				fd.append('image', data)
+				const token = localStorage.getItem('token')
 				const url = `http://134.209.195.36/api/users/image/${this.user.id}`
-				const res = await this.$http.post(url, fd)
-				if (res && res.body && res.body.ok) {
+				const res = await this.$http.post(url, fd, {
+					headers: {
+						'x-auth-token': token
+					}
+				})
+				if (res && res.body && !res.body.msg) {
 					this.showAlert('success', 'You profile image has been updated successfuly')
 					this.$store.commit('updateProfileImage', res.body.name)
 				} else {

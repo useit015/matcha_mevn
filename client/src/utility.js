@@ -29,10 +29,18 @@ const getLocationFromIp = f => {
 			}).catch(err => console.error(err))
 }
 
-const syncLocation = (id, location) => {
-	Vue.http.post(`http://134.209.195.36/api/users/position/${id}`, location)
-			.then(() => console.log('synced -->', location))
-			.catch(err => console.error(err))
+const syncLocation = async (location) => {
+	try {
+		const token = localStorage.getItem('token')
+		const url = `http://134.209.195.36/api/users/position`
+		await Vue.http.post(url, location, {
+			headers: {
+				'x-auth-token': token
+			}
+		})
+	} catch (err) {
+		console.log('error here -->', err)
+	}
 }
 
 export default {
@@ -44,10 +52,19 @@ export default {
 		const when = moment(getDate(date))
 		return `${when.format('MMMM D, YYYY')} at ${when.format('h:mm A')}`
 	},
-	sync: (f, id, type) => {
-		Vue.http.post(`http://134.209.195.36/api/users/get${type}`, { id })
-				.then(res => f(res))
-				.catch(err => console.error(err))
+	sync: async (f, type) => {
+		try {
+			const token = localStorage.getItem('token')
+			const url = `http://134.209.195.36/api/users/get${type}`
+			const res = await Vue.http.get(url, {
+				headers: {
+					'x-auth-token': token
+				}
+			})
+			f(res)
+		} catch (err) {
+			console.log('error here -->', err)
+		}
 	},
 	calculateDistance: (from, to, mile) => {
 		if (Math.abs(from.lat - to.lat) <= 0.005 && Math.abs(from.lng - to.lng) <= 0.005) {
@@ -65,17 +82,17 @@ export default {
 			return !mile ? dist * 1.609344 : dist
 		}
 	},
-	updateLocation: id => {
+	updateLocation: () => {
 		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(pos => syncLocation(id, {
-					lat: pos.coords.latitude,
-					lng: pos.coords.longitude
-			}), () => getLocationFromIp(res => syncLocation(id, {
+			navigator.geolocation.getCurrentPosition(pos => syncLocation({
+				lat: pos.coords.latitude,
+				lng: pos.coords.longitude
+			}), () => getLocationFromIp(res => syncLocation({
 				lat: Number(res.lat),
 				lng: Number(res.lng)
 			})))
 		} else {
-			getLocationFromIp(res => syncLocation(id, {
+			getLocationFromIp(res => syncLocation({
 				lat: Number(res.lat),
 				lng: Number(res.lng)
 			}))

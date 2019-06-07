@@ -64,10 +64,10 @@ export default {
 				}
 				const res = await this.$http.post(url, auth)
 				const user = res.body
-				if (user.tokenExpiration && Date.parse(user.tokenExpiration) >= Date.now()) {
+				if (user.id) {
 					user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
 					this.login(user)
-					this.updateLocation(user.id)
+					this.updateLocation()
 					this.$router.push('/')
 				}
 			} catch (err) {

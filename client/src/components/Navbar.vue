@@ -78,19 +78,20 @@ export default {
 		try {
 			const token = localStorage.getItem('token')
 			const url = 'http://134.209.195.36/api/users/isloggedin'
-			const res = await this.$http.post(url, { token })
-			const user = res.body
-			if (user.tokenExpiration && Date.parse(user.tokenExpiration) >= Date.now()) {
+			const res = await this.$http.get(url, {
+				headers: {
+					'x-auth-token': token
+				}
+			})
+			if (!res.body.msg) {
+				const user = res.body
 				user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
 				this.in(user)
-				// this.$socket.emit('auth', user.id)
-				// this.updateLocation(user.id)
 			} else {
-				// console.log('im in logout')
-				// this.$socket.emit('logout')
+				console.log(res.body.msg)
 			}
 		} catch (err) {
-			console.error(err)
+			console.log('problem with -->', err)
 		}
 	},
 	computed: {
@@ -114,7 +115,7 @@ export default {
 				const res = await this.$http.post('http://134.209.195.36/api/users/logout')
 				if (res.body.ok) this.out(this.user.id)
 			} catch (err) {
-				console.error(err)
+				console.log('problem with -->', err)
 			}
 		}
 	}
