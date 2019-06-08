@@ -8,13 +8,21 @@
 			<v-spacer></v-spacer>
 			<div v-if="status">
 				<v-btn flat color="grey" @click="logout">
-					<span>Logout</span>
-					<v-icon dark right>exit_to_app</v-icon>
+					<span>
+						Logout
+					</span>
+					<v-icon dark right>
+						exit_to_app
+					</v-icon>
 				</v-btn>
 			</div>
 			<div v-if="!status">
-				<v-btn flat color="grey" router to="/login">Login</v-btn>
-				<v-btn flat color="grey" router to="/register">Sign Up</v-btn>
+				<v-btn flat color="grey" router to="/login">
+					Login
+				</v-btn>
+				<v-btn flat color="grey" router to="/register">
+					Sign Up
+				</v-btn>
 			</div>
 		</v-toolbar>
 		<v-navigation-drawer v-model="drawer" app fixed class="primary">
@@ -37,20 +45,28 @@
 					</v-list-tile-action>
 				</v-list-tile>
 				<v-divider></v-divider>
-				<v-list-tile v-for="link in links" :key="link.text" router :to="link.route" >
-					<v-list-tile-action v-if="link.public || status">
-						<v-icon class="white--text">{{ link.icon }}</v-icon>
-					</v-list-tile-action>
-					<v-list-tile-content v-if="link.public || status">
-						<v-list-tile-title class="white--text">{{ link.text }}</v-list-tile-title>
-					</v-list-tile-content>
-				</v-list-tile>
+				<div v-for="link in links" :key="link.text">
+					<v-list-tile v-if="link.public || status" router :to="link.route">
+						<v-list-tile-action>
+							<v-icon class="white--text">
+								{{ link.icon }}
+							</v-icon>
+						</v-list-tile-action>
+						<v-list-tile-content>
+							<v-list-tile-title class="white--text">
+								{{ link.text }}
+							</v-list-tile-title>
+						</v-list-tile-content>
+					</v-list-tile>
+				</div>
 				<v-list-tile v-if="status" @click="logout">
 					<v-list-tile-action>
 						<v-icon class="white--text">exit_to_app</v-icon>
 					</v-list-tile-action>
 					<v-list-tile-content>
-						<v-list-tile-title class="white--text">Logout</v-list-tile-title>
+						<v-list-tile-title class="white--text">
+							Logout
+						</v-list-tile-title>
 					</v-list-tile-content>
 				</v-list-tile>
 			</v-list>
@@ -77,7 +93,7 @@ export default {
 	async created () {
 		try {
 			const token = localStorage.getItem('token')
-			const url = 'http://134.209.195.36/api/users/isloggedin'
+			const url = 'http://134.209.195.36/auth/isloggedin'
 			const res = await this.$http.get(url, {
 				headers: {
 					'x-auth-token': token
@@ -112,8 +128,14 @@ export default {
 		}),
 		async logout () {
 			try {
-				const res = await this.$http.post('http://134.209.195.36/api/users/logout')
+				const url = 'http://134.209.195.36/auth/logout'
+				const res = await this.$http.get(url, {
+					headers: {
+						'x-auth-token': this.user.token
+					}
+				})
 				if (res.body.ok) this.out(this.user.id)
+				this.$router.push('/')
 			} catch (err) {
 				console.log('problem with -->', err)
 			}

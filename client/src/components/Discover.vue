@@ -73,6 +73,7 @@ export default {
 	computed: {
 		...mapGetters([
 			'user',
+			'status',
 			'blocked',
 			'blockedBy'
 		]),
@@ -83,7 +84,7 @@ export default {
 				.filter(val => !this.blockedBy.includes(val.user_id))
 				.filter(val => val.rating >= this.rating[0] && val.rating <= this.rating[1])
 				.filter(val => !this.gender || val.gender === this.gender)
-				.filter(val => !this.location || val.country.has(this.location) || val.address.has(this.location) || val.city.has(this.location))
+				.filter(val => !this.location || [val.country, val.address, val.city].some(cur => cur.has(this.location)))
 				.filter(val => {
 					const year = new Date(val.birthdate).getFullYear()
 					const now = new Date().getFullYear()
@@ -101,16 +102,24 @@ export default {
 	},
 	async created () {
 		try {
+			if (!this.status) this.$router.push('/login')
+			const token = localStorage.getItem('token')
 			const url = 'http://134.209.195.36/api/users/show'
-			const res = await this.$http.get(url)
-			this.users = res.body.map(cur => ({
-				...cur,
-				rating: Number(cur.rating),
-				status: Math.round(Math.random() * 100) % 2
-			}))
-			this.loaded = true
+			const res = await this.$http.get(url, {
+				headers: {
+					'x-auth-token': token
+				}
+			})
+			if (!res.body.msg) {
+				this.users = res.body.map(cur => ({
+					...cur,
+					rating: Number(cur.rating),
+					status: Math.round(Math.random() * 100) % 2
+				}))
+				this.loaded = true
+			}
 		} catch (err) {
-			console.error(err);
+			console.log('Error here --> ', err);
 		}
 	},
 	methods: {

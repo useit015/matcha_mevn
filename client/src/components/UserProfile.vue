@@ -182,8 +182,13 @@ export default {
 						this.$router.push('/settings')
 					} else {
 						try {
+							const token = localStorage.getItem('token')
 							const url = `http://134.209.195.36/api/users/show/${this.$route.params.id}`
-							const res = await this.$http.post(url, { visitor: this.loggedIn.id })
+							const res = await this.$http.get(url, {
+								headers: {
+									'x-auth-token': token
+								}
+							})
 							this.user = { ...res.body, rating: Number(res.body.rating) }
 							this.f = false
 						} catch (err) {
@@ -274,16 +279,28 @@ export default {
 			return image ? image.name : 'default.jpg'
 		},
 		async match () {
-			const url = `http://134.209.195.36/api/users/match/${this.$route.params.id}`
-			const res = await this.$http.post(url, {
-				matcher: this.loggedIn.id,
+			const token = localStorage.getItem('token')
+			const url = `http://134.209.195.36/api/action/match`
+			const data = {
+				id: this.$route.params.id,
 				liked: this.liked
+			}
+			const res = await this.$http.post(url, data, {
+				headers: {
+					'x-auth-token': token
+				}
 			})
-			this.liked = res.matched
+			if (res.body.ok) this.liked = !this.liked
 		},
 		async block () {
-			const url = `http://134.209.195.36/api/users/block/${this.$route.params.id}`
-			const res = await this.$http.post(url, { blocker: this.loggedIn.id })
+			const token = localStorage.getItem('token')
+			const url = `http://134.209.195.36/api/action/block`
+			const data = { id: this.$route.params.id }
+			const res = await this.$http.post(url, data, {
+				headers: {
+					'x-auth-token': token
+				}
+			})
 			this.syncBlocked(this.loggedIn.id)
 			this.$router.go(-1)
 			this.blockDialog = false

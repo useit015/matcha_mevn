@@ -52,7 +52,7 @@ export default {
 						const result = await this.$http.get(url)
 						this.messages = result.body
 					} catch (err) {
-						console.error(err)
+						console.log('got error here --> ', err)
 					}
 				}
 			}
@@ -66,12 +66,11 @@ export default {
 				}
 			}
 		},
-		async messages () {
+		messages () {
 			setTimeout(() => {
-				const top = document.querySelector('.top')
+				const top = document.querySelector('.top_chat')
 				top.scrollTop = top.scrollHeight - top.clientHeight
-			},
-			0);
+			}, 0)
 		}
 	},
 	methods: {

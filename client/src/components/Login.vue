@@ -57,7 +57,7 @@ export default {
 		...mapActions(['login']),
 		async log () {
 			try {
-				const url = 'http://134.209.195.36/api/users/login'
+				const url = 'http://134.209.195.36/auth/login'
 				const auth = {
 					username: this.username,
 					password: this.password

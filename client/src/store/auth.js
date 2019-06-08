@@ -19,7 +19,8 @@ export const auth = {
 	actions: {
 		login: ({ commit, dispatch }, user) => {
 			if (user.id) {
-				commit('locate', { lat: user.lat, lng: user.lng })
+				const { lat, lng } = user
+				commit('locate', { lat, lng })
 				dispatch('syncMatches')
 				dispatch('syncBlocked')
 				dispatch('syncHistory')

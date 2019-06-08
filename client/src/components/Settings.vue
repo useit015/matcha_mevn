@@ -1,57 +1,61 @@
 <template>
-<v-layout column class="settings">
-	<div class="parallax"></div>
-	<v-layout class="py-0 strap grey lighten-3">
-		<v-container py-0>
-			<v-layout>
-				<v-flex xs12 sm8 md4 class="avatar">
-					<v-avatar slot="offset" class="mx-auto d-block" size="200">
-						<img :src="profileImage" class="avatar__img">
-						<div class="avatar__btn">
-							<v-fab-transition>
-								<v-btn color="grey lighten-5" fab small @click.stop="openEditor">
-									<v-icon>add_a_photo</v-icon>
-								</v-btn>
-							</v-fab-transition>
-						</div>
-					</v-avatar>
+<div>
+	<v-layout column class="settings" v-if="loaded">
+		<div class="parallax"></div>
+		<v-layout class="py-0 strap grey lighten-3">
+			<v-container py-0>
+				<v-layout>
+					<v-flex xs12 sm8 md4 class="avatar">
+						<v-avatar slot="offset" class="mx-auto d-block" size="200">
+							<img :src="profileImage" class="avatar__img">
+							<div class="avatar__btn">
+								<v-fab-transition>
+									<v-btn color="grey lighten-5" fab small @click.stop="openEditor">
+										<v-icon>add_a_photo</v-icon>
+									</v-btn>
+								</v-fab-transition>
+							</div>
+						</v-avatar>
+					</v-flex>
+					<profile-tabs settings :active="activeTab" @change-tab="changeTab"></profile-tabs>
+				</v-layout>
+			</v-container>
+		</v-layout>
+		<v-container fill-height grid-list-xl class="profile">
+			<v-layout justify-center wrap>
+				<v-flex xs12 sm8 md4>
+					<profile-badge :user="user" settings></profile-badge>
 				</v-flex>
-				<profile-tabs settings :active="activeTab" @change-tab="changeTab"></profile-tabs>
+				<v-flex xs12 sm10 md8 class="main pa-0 grey--text">
+					<profile-tabs settings :active="activeTab" @change-tab="changeTab" mobile></profile-tabs>
+					<v-tabs-items v-model="activeTab">
+						<v-tab-item value="tab-profile">
+							<profile-form :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
+						</v-tab-item>
+						<v-tab-item value="tab-photo">
+							<profile-gallery :images="user.images"></profile-gallery>
+						</v-tab-item>
+						<v-tab-item value="tab-history">
+							<profile-history></profile-history>
+						</v-tab-item>
+						<v-tab-item value="tab-setting">
+							<profile-settings></profile-settings>
+						</v-tab-item>
+					</v-tabs-items>
+				</v-flex>
 			</v-layout>
 		</v-container>
+		<alert :data="alert"></alert>
+		<profile-editor @update-image="updateImage" ref="profile_editor"></profile-editor>
 	</v-layout>
-	<v-container fill-height grid-list-xl class="profile">
-		<v-layout justify-center wrap>
-			<v-flex xs12 sm8 md4>
-				<profile-badge :user="user" settings></profile-badge>
-			</v-flex>
-			<v-flex xs12 sm10 md8 class="main pa-0 grey--text">
-				<profile-tabs settings :active="activeTab" @change-tab="changeTab" mobile></profile-tabs>
-				<v-tabs-items v-model="activeTab">
-					<v-tab-item value="tab-profile">
-						<profile-form :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
-					</v-tab-item>
-					<v-tab-item value="tab-photo">
-						<profile-gallery :images="user.images"></profile-gallery>
-					</v-tab-item>
-					<v-tab-item value="tab-history">
-						<profile-history></profile-history>
-					</v-tab-item>
-					<v-tab-item value="tab-setting">
-						<profile-settings></profile-settings>
-					</v-tab-item>
-				</v-tabs-items>
-			</v-flex>
-		</v-layout>
-	</v-container>
-	<alert :data="alert"></alert>
-	<profile-editor @update-image="updateImage" ref="profile_editor"></profile-editor>
-</v-layout>
+	<loader v-else/>
+</div>
 </template>
 
 <script>
 import Alert from './Alert'
 import moment from 'moment'
+import loader from './loader'
 import utility from '../utility.js'
 import ProfileForm from './ProfileForm'
 import ProfileTabs from './ProfileTabs'
@@ -66,6 +70,7 @@ export default {
 	name: 'Settings',
 	components: {
 		Alert,
+		loader,
 		ProfileTabs,
 		ProfileForm,
 		ProfileBadge,
@@ -75,6 +80,7 @@ export default {
 		ProfileSettings
 	},
 	data: () => ({
+		loaded: true,
 		activeTab: 'tab-profile',
 		alert: {
 			state: false,
@@ -91,7 +97,8 @@ export default {
 	computed: {
 		...mapGetters({
 			loggedIn: 'user',
-			avatar: 'profileImage'
+			avatar: 'profileImage',
+			status: 'status'
 		}),
 		user: {
 			get () {
@@ -104,11 +111,30 @@ export default {
 		}
 	},
 	watch: {
-		user: {
+		loggedIn: {
 			immediate: true,
-			handler () {
-				if (this.user.id && (!this.user.token || this.user.token != localStorage.getItem('token'))) {
-					this.$router.push('/')
+			async handler () {
+				if (!this.loaded) {
+					if (!this.user.id) {
+						try {
+							const token = localStorage.getItem('token')
+							const url = 'http://134.209.195.36/auth/isloggedin'
+							const res = await this.$http.get(url, {
+								headers: {
+									'x-auth-token': token
+								}
+							})
+							if (res.body.msg) {
+								this.$router.push('/login')
+							} else {
+								this.loaded = true
+							}
+						} catch (err) {
+							console.log('problem with -->', err)
+						}
+					} else {
+						this.loaded = true
+					}
 				}
 			}
 		}
@@ -122,45 +148,49 @@ export default {
 		}),
 		async updateUser () {
 			try {
-				const token = localStorage.getItem('token')
+				let msg
 				const url = `http://134.209.195.36/api/users/update`
 				const res = await this.$http.post(url, this.user, {
 					headers: {
-						'x-auth-token': token
+						'x-auth-token': this.user.token
 					}
 				})
 				if (res && res.body && !res.body.msg) {
-					this.showAlert('success', 'Your account has been updated successfuly')
+					msg = 'Your account has been updated successfuly'
+					this.showAlert('success', msg)
 					this.update(this.user)
 					console.log(res)
 				} else {
-					this.showAlert('red', 'Ouups something went wrong!')
+					msg = 'Ouups something went wrong!'
+					this.showAlert('red', msg)
 					console.log(res)
 				}
 			} catch (err) {
-				console.error(err)
+				console.log('got error here --> ', err)
 			}
 		},
 		async updateImage (data) {
 			try {
+				let msg
 				const fd = new FormData()
 				fd.append('image', data)
-				const token = localStorage.getItem('token')
-				const url = `http://134.209.195.36/api/users/image/${this.user.id}`
+				const url = `http://134.209.195.36/api/users/image`
 				const res = await this.$http.post(url, fd, {
 					headers: {
-						'x-auth-token': token
+						'x-auth-token': this.user.token
 					}
 				})
 				if (res && res.body && !res.body.msg) {
-					this.showAlert('success', 'You profile image has been updated successfuly')
+					msg = 'You profile image has been updated successfuly'
+					this.showAlert('success', msg)
 					this.$store.commit('updateProfileImage', res.body.name)
 				} else {
-					this.showAlert('red', 'Ouups something went wrong!')
+					msg = 'Ouups something went wrong!'
+					this.showAlert('red', msg)
 					console.log(res)
 				}
 			} catch (err) {
-				console.error(err)
+				console.log('got error here --> ', err)
 			}
 		},
 		showAlert (color, text) {

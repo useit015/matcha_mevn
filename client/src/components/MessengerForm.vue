@@ -1,7 +1,6 @@
 <template>
 	<v-layout align-center justify center row class="messenger_form px-3 chat_layout">
-		<v-text-field class="ma-4"  label="message" v-model="msg"></v-text-field>
-		<v-btn color="primary" class="ma-4" outline large @click="sendMsg">Send</v-btn>
+		<v-text-field solo flat outline class="ma-4" append-icon="send" @click:append="sendMsg" label="Type a message..." v-model="msg" @keyup.13="sendMsg"></v-text-field>
 	</v-layout>
 </template>
 
@@ -16,31 +15,34 @@ export default {
 			default: -1
 		}
 	},
-	data: () => ({
-		msg: null
-	}),
+	data: () => ({ msg: null }),
+	computed: mapGetters(['user', 'selectedConvo']),
 	methods: {
-		async sendMsg () {
-			try {
-				const url = `http://134.209.195.36/api/chat/send`
-				const data = {
-					id_conversation: this.selectedConvo,
-					id_from: this.user.id,
-					id_to: this.toId,
-					message: this.msg
+		async sendMsg (e) {
+			if (this.msg && !e.shiftKey) {
+				try {
+					const url = `http://134.209.195.36/api/chat/send`
+					const data = {
+						id_conversation: this.selectedConvo,
+						id_from: this.user.id,
+						id_to: this.toId,
+						message: this.msg
+					}
+					this.msg = ''
+					this.$emit('msgSent', data)
+					this.$socket.emit('chat', data)
+					const result = await this.$http.post(url, data)
+				} catch (err) {
+					console.error(err)
 				}
-				this.$socket.emit('chat', data)
-				const result = await this.$http.post(url, data)
-				this.$emit('msgSent', data)
-				this.msg = ''
-				console.log('i sent the message', result)
-			} catch (err) {
-				console.error(err)
 			}
 		}
-	},
-	computed: {
-		...mapGetters(['user', 'selectedConvo'])
-	},
+	}
 }
 </script>
+
+<style>
+.v-text-field--outline.v-text-field--single-line input {
+	margin-top: 0 !important;
+}
+</style>
