@@ -8,7 +8,7 @@ const sendMail = async (to, key) => {
 		to,
 		subject: "Hello ✔",
 		text: "Hello world?",
-		html: `<a href="http://134.209.195.36/api/users/verify/${key}">Click here</a>`
+		html: `<a href="http://134.209.195.36/auth/verify/${key}">Click here</a>`
 	})
 }
 
