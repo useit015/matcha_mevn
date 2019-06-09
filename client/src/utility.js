@@ -19,25 +19,25 @@ const getDate = (item) => {
 	}
 }
 
-const getLocationFromIp = f => {
-	Vue.http.get('https://ipinfo.io?token=3443e12245bdcf')
-			.then(res => {
-				if (!res.error) {
-					const splitted = res.body.loc.split(',')
-					f({ lat: Number(splitted[0]), lng: Number(splitted[1]) })
-				}
-			}).catch(err => console.error(err))
+const getLocationFromIp = async f => {
+	try {
+		const url = 'https://ipinfo.io?token=3443e12245bdcf'
+		const res = await Vue.http.get(url)
+		if (!res.error) {
+			const splitted = res.body.loc.split(',')
+			f({ lat: Number(splitted[0]), lng: Number(splitted[1]) })
+		}
+	} catch (err) {
+		console.log('error here -->', err)
+	}
 }
 
 const syncLocation = async (location) => {
 	try {
 		const token = localStorage.getItem('token')
 		const url = `http://134.209.195.36/api/users/position`
-		await Vue.http.post(url, location, {
-			headers: {
-				'x-auth-token': token
-			}
-		})
+		const headers = { 'x-auth-token': token }
+		await Vue.http.post(url, location, { headers })
 	} catch (err) {
 		console.log('error here -->', err)
 	}
@@ -56,11 +56,10 @@ export default {
 		try {
 			const token = localStorage.getItem('token')
 			const url = `http://134.209.195.36/api/users/get${type}`
-			const res = await Vue.http.get(url, {
-				headers: {
-					'x-auth-token': token
-				}
-			})
+			const headers = { 'x-auth-token': token }
+			const res = await Vue.http.get(url, { headers })
+			if (type == 'blocked')
+			console.log('getting the blocked dudes here --> ', res.body)
 			f(res)
 		} catch (err) {
 			console.log('error here -->', err)

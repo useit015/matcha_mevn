@@ -17,6 +17,18 @@ export default {
 	},
 	data: () => ({ msg: null }),
 	computed: mapGetters(['user', 'selectedConvo']),
+	watch: {
+		msg () {
+			if (this.msg.length) {
+				const data = {
+					id_conversation: this.selectedConvo,
+					id_from: this.user.id,
+					id_to: this.toId
+				}
+				this.$socket.emit('typing', data)
+			}
+		}
+	},
 	methods: {
 		async sendMsg (e) {
 			if (this.msg && !e.shiftKey) {

@@ -22,7 +22,7 @@ export const auth = {
 				const { lat, lng } = user
 				commit('locate', { lat, lng })
 				dispatch('syncMatches')
-				dispatch('syncBlocked')
+				dispatch('syncBlocked', user.id)
 				dispatch('syncHistory')
 				localStorage.setItem('token', user.token)
 				commit('login', user)

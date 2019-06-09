@@ -80,7 +80,7 @@ export default {
 		ProfileSettings
 	},
 	data: () => ({
-		loaded: true,
+		loaded: false,
 		activeTab: 'tab-profile',
 		alert: {
 			state: false,

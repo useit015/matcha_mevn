@@ -7,22 +7,32 @@
 			</v-toolbar-title>
 			<v-spacer></v-spacer>
 			<div v-if="status">
-				<v-btn flat color="grey" @click="logout">
-					<span>
-						Logout
-					</span>
-					<v-icon dark right>
-						exit_to_app
-					</v-icon>
+				<v-btn flat icon large color="grey">
+					<v-badge overlap v-model="newMsg" color="primary" class="mx-2" right>
+						<template v-slot:badge>
+							<span>{{ newMsgNum }}</span>
+						</template>
+						<v-icon color="grey">notifications</v-icon>
+					</v-badge>
 				</v-btn>
+				<v-btn flat icon large color="grey">
+					<v-badge overlap v-model="newMsg" color="primary" class="mx-2" right>
+						<template v-slot:badge>
+							<span>{{ newMsgNum }}</span>
+						</template>
+						<v-icon color="grey">chat</v-icon>
+					</v-badge>
+				</v-btn>
+				<!-- <v-avatar size="40" class="mx-3">
+					<img :src="image" :alt="user.username">
+				</v-avatar> -->
+				<!-- <v-btn flat icon large color="grey" @click="logout">
+					<v-icon dark>exit_to_app</v-icon>
+				</v-btn> -->
 			</div>
 			<div v-if="!status">
-				<v-btn flat color="grey" router to="/login">
-					Login
-				</v-btn>
-				<v-btn flat color="grey" router to="/register">
-					Sign Up
-				</v-btn>
+				<v-btn flat color="grey" router to="/login">Login</v-btn>
+				<v-btn flat color="grey" router to="/register">Sign Up</v-btn>
 			</div>
 		</v-toolbar>
 		<v-navigation-drawer v-model="drawer" app fixed class="primary">
@@ -81,6 +91,8 @@ import utility from '../utility.js'
 export default {
 	name: 'Navbar',
 	data: () => ({
+		newMsgNum: 0,
+		newMsg: false,
 		drawer: false,
 		links: [
 			{ icon: 'dashboard', text: 'Home', route: '/', public: true },
@@ -113,11 +125,22 @@ export default {
 	computed: {
 		...mapGetters([
 			'user',
+			'notif',
 			'status',
 			'profileImage'
 		]),
 		image () {
 			return this.getFullPath(this.profileImage)
+		}
+	},
+	watch: {
+		notif () {
+			const chats = this.notif.filter(cur => cur.type = 'chat')
+			console.log('i am the fucking chats -> ', chats)
+			if (chats.length) {
+				this.newMsg = true
+				this.newMsgNum = chats.length
+			}
 		}
 	},
 	methods: {

@@ -16,15 +16,18 @@ export const store = new Vuex.Store({
 		location: { lat: 0, lng: 0 },
 		following: [],
 		followers: [],
-		blocked: [],
 		blockedBy: [],
+		blocked: [],
 		visitor: [],
 		visited: [],
+		convos: [],
+		notif: [],
 		isConnected: false,
 		selectedConvo: null,
 		usernameConvo: null,
 		imageConvo: null,
-		newMessage: null
+		newMessage: null,
+		typing: false
 	},
 	getters,
 	mutations: {

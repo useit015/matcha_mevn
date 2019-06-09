@@ -301,9 +301,12 @@ export default {
 					'x-auth-token': token
 				}
 			})
-			this.syncBlocked(this.loggedIn.id)
-			this.$router.go(-1)
-			this.blockDialog = false
+			console.log('i am res --> ', res)
+			if (!res.body.msg) {
+				this.syncBlocked(this.loggedIn.id)
+				this.$router.go(-1)
+				this.blockDialog = false
+			}
 		}
 	}
 }

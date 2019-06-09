@@ -37,12 +37,12 @@ export default {
 		MessengerForm
 	},
 	data: () => ({
-		loaded: false,
-		convos: []
+		loaded: false
 	}),
 	computed: {
 		...mapGetters([
 			'user',
+			'convos',
 			'selectedConvo'
 		]),
 		username () {
@@ -59,16 +59,11 @@ export default {
 				if (this.user.token) {
 					try {
 						const url = 'http://134.209.195.36/api/chat/all'
-						const result = await this.$http.get(url, {
-							headers: {
-								'x-auth-token': this.user.token
-							}
-						})
+						const headers = { 'x-auth-token': this.user.token }
+						const result = await this.$http.get(url, { headers })
 						this.loaded = true
 						if (!result.body.msg) {
-							const cmp = (a, b) => new Date(b.last_update) - new Date(a.last_update)
-							this.convos = result.body.sort(cmp)
-							if (this.convos.length) this.syncConvo(this.convos[0])
+							this.syncConvoAll(result.body)
 						} else {
 							this.$router.push('/login')
 						}
@@ -77,12 +72,20 @@ export default {
 					}
 				}
 			}
+		},
+		convos () {
+			if (this.convos.length) this.syncConvo(this.convos[0])
 		}
 	},
 	methods: {
-		...mapActions(['syncConvo']),
+		...mapActions([
+			'syncConvo',
+			'syncConvoAll',
+			'updateConvosOrder'
+		]),
 		messageSent (msg) {
 			this.$refs.chat.msgSent(msg)
+			this.updateConvosOrder(msg.id_conversation)
 		},
 		getToId () {
 			for (const cur of this.convos) {
@@ -91,6 +94,9 @@ export default {
 				}
 			}
 		}
+	},
+	beforeDestroy () {
+		this.syncConvo(null)
 	}
 }
 </script>

@@ -1,5 +1,7 @@
 export const getters = {
 	user: state => state.user,
+	notif: state => state.notif,
+	typing: state => state.typing,
 	status: state => state.status,
 	blocked: state => state.blocked,
 	location: state => state.location,
@@ -10,6 +12,7 @@ export const getters = {
 	newMessage: state => state.newMessage,
 	usernameConvo: state => state.usernameConvo,
 	selectedConvo: state => state.selectedConvo,
+	convos: state => [...state.convos].sort((a, b) => new Date(b.last_update) - new Date(a.last_update)),
 	history: state => {
 		return [
 			...state.visitor.map(cur => ({

@@ -67,7 +67,28 @@ export default {
 			age: [18, 85],
 			rating: [0, 5],
 			tags: ['sports', 'cinema', 'music'],
-			nats: countries
+			nats: countries,
+			filters: {
+				self: val => val.user_id != this.user.id,
+				blocked: val => !this.blocked.includes(val.user_id),
+				blockedBy: val => !this.blockedBy.includes(val.user_id),
+				rating: val => val.rating >= this.rating[0] && val.rating <= this.rating[1],
+				gender: val => !this.gender || val.gender === this.gender,
+				location: val => !this.location || [val.country, val.address, val.city].some(cur => cur.has(this.location)),
+				age: val => {
+					const year = new Date(val.birthdate).getFullYear()
+					const now = new Date().getFullYear()
+					return year >= now - this.age[1] && year <=  now - this.age[0]
+				},
+				interest: val => {
+					if (!this.interests.length)
+						return true
+					for (const interest of this.interests)
+						if (val.tags.split(',').includes(interest))
+							return true
+					return false
+				}
+			}
 		}
 	},
 	computed: {
@@ -79,47 +100,30 @@ export default {
 		]),
 		filtered () {
 			return this.users
-				.filter(val => val.user_id != this.user.id)
-				.filter(val => !this.blocked.includes(val.user_id))
-				.filter(val => !this.blockedBy.includes(val.user_id))
-				.filter(val => val.rating >= this.rating[0] && val.rating <= this.rating[1])
-				.filter(val => !this.gender || val.gender === this.gender)
-				.filter(val => !this.location || [val.country, val.address, val.city].some(cur => cur.has(this.location)))
-				.filter(val => {
-					const year = new Date(val.birthdate).getFullYear()
-					const now = new Date().getFullYear()
-					return year >= now - this.age[1] && year <=  now - this.age[0]
-				})
-				.filter(val => {
-					if (!this.interests.length)
-						return true
-					for (const interest of this.interests)
-						if (val.tags.split(',').includes(interest))
-							return true
-					return false
-				})
+				.filter(this.filters.self)
+				.filter(this.filters.blocked)
+				.filter(this.filters.blockedBy)
+				.filter(this.filters.rating)
+				.filter(this.filters.gender)
+				.filter(this.filters.location)
+				.filter(this.filters.age)
+				.filter(this.filters.interest)
 		}
 	},
 	async created () {
-		try {
-			if (!this.status) this.$router.push('/login')
-			const token = localStorage.getItem('token')
-			const url = 'http://134.209.195.36/api/users/show'
-			const res = await this.$http.get(url, {
-				headers: {
-					'x-auth-token': token
-				}
-			})
-			if (!res.body.msg) {
-				this.users = res.body.map(cur => ({
-					...cur,
-					rating: Number(cur.rating),
-					status: Math.round(Math.random() * 100) % 2
-				}))
-				this.loaded = true
-			}
-		} catch (err) {
-			console.log('Error here --> ', err);
+		const token = localStorage.getItem('token')
+		const url = 'http://134.209.195.36/api/users/show'
+		const headers = { 'x-auth-token': token }
+		const res = await this.$http.get(url, { headers })
+		if (!res.body.msg) {
+			this.users = res.body.map(cur => ({
+				...cur,
+				rating: Number(cur.rating),
+				status: Math.round(Math.random() * 100) % 2
+			}))
+			this.loaded = true
+		} else {
+			this.$router.push('/login')
 		}
 	},
 	methods: {

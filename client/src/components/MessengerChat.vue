@@ -23,19 +23,39 @@
 				</v-tooltip>
 			</v-layout>
 		</v-flex>
+		<v-flex v-if="typing">
+			<v-layout class="to py-0 px-2 top_msg bottom_msg" align-start>
+				<router-link to="/" class="pull_up_single">
+					<v-avatar size="40">
+						<img :src="getFullPath(imageConvo)" :alt="usernameConvo">
+					</v-avatar>
+				</router-link>
+				<div class="mx-2 chat_bubble grey lighten-3">
+					<div class="typing">
+						<div class="typing_point"></div>
+						<div class="typing_point"></div>
+						<div class="typing_point"></div>
+					</div>
+				</div>
+			</v-layout>
+		</v-flex>
 	</v-layout>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
 import utility from '../utility.js'
 
 export default {
 	name: 'MessengerChat',
-	data: () => ({ messages: [] }),
+	data: () => ({
+		messages: [],
+		timer: null
+	}),
 	computed: mapGetters([
 		'user',
+		'typing',
 		'selectedConvo',
 		'profileImage',
 		'imageConvo',
@@ -48,8 +68,10 @@ export default {
 			async handler () {
 				if (this.selectedConvo) {
 					try {
-						const url = `http://134.209.195.36/api/chat/single/${this.selectedConvo}`
-						const result = await this.$http.get(url)
+						const url = `http://134.209.195.36/api/chat/single`
+						const headers = { 'x-auth-token': this.user.token }
+						const data = { id: this.selectedConvo }
+						const result = await this.$http.post(url, data, { headers })
 						this.messages = result.body
 					} catch (err) {
 						console.log('got error here --> ', err)
@@ -66,15 +88,20 @@ export default {
 				}
 			}
 		},
+		typing () {
+			if (this.typing) {
+				clearTimeout(this.timer)
+				this.$nextTick(this.scroll)
+				this.timer = setTimeout(() => this.typingClr(), 1200)
+			}
+		},
 		messages () {
-			setTimeout(() => {
-				const top = document.querySelector('.top_chat')
-				top.scrollTop = top.scrollHeight - top.clientHeight
-			}, 0)
+			this.$nextTick(this.scroll)
 		}
 	},
 	methods: {
 		...utility,
+		...mapActions(['typingClr']),
 		msgSent (msg) {
 			this.messages.push(msg)
 		},
@@ -113,12 +140,54 @@ export default {
 		},
 		push (msg, i) {
 			return !this.last(msg, i) && msg.id_from != this.user.id
+		},
+		scroll () {
+			const top = document.querySelector('.top_chat')
+			top.scrollTop = top.scrollHeight - top.clientHeight
 		}
 	}
 }
 </script>
 
 <style>
+@keyframes point {
+	0% {
+		opacity: .3;
+	},
+	100% {
+		opacity: 1;
+	}
+}
+
+.typing {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.typing_point {
+	margin: 7.5px 2px;
+	width: 5px;
+	height: 5px;
+	background: #555;
+	border-radius: 50%;
+	animation-name: point;
+	animation-duration: .9s;
+	animation-iteration-count:infinite;
+}
+
+.typing_point:nth-child(1) {
+	animation-delay: 0s;
+}
+
+.typing_point:nth-child(2) {
+	animation-delay: .3s;
+}
+
+.typing_point:nth-child(3) {
+	animation-delay: .6s;
+}
+
 .layout.from {
 	flex-direction: row-reverse;
 }

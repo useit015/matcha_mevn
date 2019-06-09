@@ -69,16 +69,20 @@ export const user = {
 				commit('syncMatches', { following, followers })
 			}, 'matches')
 		},
-		syncBlocked: ({ commit }) => {
+		syncBlocked: ({ commit }, id) => {
 			utility.sync(res => {
 				let blocked = []
 				let blockedBy = []
 				if (isArray(res.body)) {
-					blocked =  res.body.filter(cur => cur.blocker == id)
-										.map(cur => cur.blocked),
-					blockedBy =  res.body.filter(cur => cur.blocked == id)
-										.map(cur => cur.blocker)
+					console.log('now is before --> ', id)
+					blocked =  res.body
+						.filter(cur => cur.blocker == id)
+						.map(cur => cur.blocked),
+					blockedBy =  res.body
+						.filter(cur => cur.blocked == id)
+						.map(cur => cur.blocker)
 				}
+				console.log('now i commit --> ', { blocked, blockedBy })
 				commit('syncBlocked', { blocked, blockedBy })
 			}, 'blocked')
 		},
