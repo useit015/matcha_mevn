@@ -2,20 +2,27 @@ const router = require('express').Router()
 const pool = require('../../utility/database')
 const auth = require('../../middleware/auth')
 
-router.post('/block/:id', auth, async (req, res) => {
+router.post('/position', auth, async (req, res) => {
+	if (!req.user.id) res.json({ msg: 'not logged in' })
+	try {
+		const sql = `UPDATE users SET lat = ?, lng = ? WHERE id = ?`
+		await pool.query(sql, [req.body.lat, req.body.lng, req.user.id])
+		res.json('synced position')
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
+router.post('/block', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {
 		let sql = `SELECT * FROM blocked where blocker = ? AND blocked = ?`
 		const data = [req.user.id, req.body.id]
 		const result = await pool.query(sql, data)
 		if (!result.length) {
-			try {
-				sql = `INSERT INTO blocked (blocker, blocked) VALUES (?, ?)`
-				await pool.query(sql, data)
-				res.json({ ok: true })
-			} catch (err) {
-				throw new Error(err)
-			}
+			sql = `INSERT INTO blocked (blocker, blocked) VALUES (?, ?)`
+			await pool.query(sql, data)
+			res.json({ ok: true })
 		} else {
 			res.json({ msg: 'User already Blocked' })
 		}

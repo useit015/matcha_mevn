@@ -99,16 +99,16 @@ router.get('/getblocked', auth, async (req, res) => {
 	}
 })
 
-router.post('/position', auth, async (req, res) => {
-	if (!req.user.id) res.json({ msg: 'not logged in' })
-	try {
-		const sql = `UPDATE users SET lat = ?, lng = ? WHERE id = ?`
-		await pool.query(sql, [req.body.lat, req.body.lng, req.user.id])
-		res.json('synced position')
-	} catch (err) {
-		throw new Error(err)
-	}
-})
+// router.post('/position', auth, async (req, res) => {
+// 	if (!req.user.id) res.json({ msg: 'not logged in' })
+// 	try {
+// 		const sql = `UPDATE users SET lat = ?, lng = ? WHERE id = ?`
+// 		await pool.query(sql, [req.body.lat, req.body.lng, req.user.id])
+// 		res.json('synced position')
+// 	} catch (err) {
+// 		throw new Error(err)
+// 	}
+// })
 
 router.post('/add', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!

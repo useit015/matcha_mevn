@@ -16,6 +16,7 @@ app.use(bodyParser.json())
 app.use('/auth', require('./routes/api/auth'))
 app.use('/api/action', require('./routes/api/actions'))
 app.use('/api/chat', require('./routes/api/chat'))
+app.use('/api/notif', require('./routes/api/notif'))
 app.use('/api/users', require('./routes/api/users'))
 app.use('/static', express.static(`${__dirname}/public`))
 
@@ -34,17 +35,25 @@ io.on('connection', socket => {
 			io.sockets.connected[users[data.id_to]].emit('chat', data)
 		}
 	})
+	socket.on('typing', data => {
+		if (users[data.id_to]) {
+			io.sockets.connected[users[data.id_to]].emit('typing', data)
+		}
+	})
+	socket.on('seenConvo', data => {
+		if (users[data.user]) {
+			io.sockets.connected[users[data.user]].emit('seenConvo', data.convo)
+		}
+	})
 	socket.on('auth', id => {
 		users[id] = socket.id
 		console.log('users are', users)
 	})
 	socket.on('logout', id => {
-		// socket.disconnect()
 		delete users[`${id}`]
 		console.log('user logged out --> ', id)
 	})
 	socket.on('disconnect', () => {
-		console.log('non identified Client disconnected')
 		for (let key of Object.keys(users)) {
 			if (users[key] === socket.id) {
 				delete users[key]
