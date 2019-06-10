@@ -10,7 +10,6 @@ const router = require('express').Router()
 const pool = require('../../utility/database')
 const sendMail = require('../../utility/mail')
 const writeFileAsync = promisify(writeFile)
-// const sign = promisify(jwt.sign)
 const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
 const auth = require('../../middleware/auth')
 
@@ -98,17 +97,6 @@ router.get('/getblocked', auth, async (req, res) => {
 		throw new Error(err)
 	}
 })
-
-// router.post('/position', auth, async (req, res) => {
-// 	if (!req.user.id) res.json({ msg: 'not logged in' })
-// 	try {
-// 		const sql = `UPDATE users SET lat = ?, lng = ? WHERE id = ?`
-// 		await pool.query(sql, [req.body.lat, req.body.lng, req.user.id])
-// 		res.json('synced position')
-// 	} catch (err) {
-// 		throw new Error(err)
-// 	}
-// })
 
 router.post('/add', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!

@@ -47,9 +47,11 @@ router.post('/single', auth, async (req, res) => {
 	try {
 		let sql = `SELECT * FROM chat WHERE id_conversation = ?`
 		const result = await pool.query(sql, [req.body.id])
-		sql = `UPDATE chat SET is_read = 1 WHERE id_conversation = ?`
-		await pool.query(sql, [req.body.id])
-		res.json(result)
+		res.json(result.reverse().slice(0, 70).reverse())
+		sql = `UPDATE chat SET is_read = 1 WHERE id_conversation = ? AND id_from != ?`
+		await pool.query(sql, [req.body.id, req.user.id])
+		sql = `UPDATE notifications SET is_read = 1 WHERE type = 'chat' AND id_conversation = ? AND id_from != ?`
+		await pool.query(sql, [req.body.id, req.user.id])
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -58,8 +60,11 @@ router.post('/single', auth, async (req, res) => {
 router.post('/update', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {
-		let sql = `UPDATE chat SET is_read = 1 WHERE id_conversation = ?`
-		await pool.query(sql, [req.body.id])
+		let sql = `UPDATE chat SET is_read = 1 WHERE id_conversation = ? AND id_from != ?`
+		await pool.query(sql, [req.body.id, req.user.id])
+		sql = `UPDATE notifications SET is_read = 1 WHERE type = 'chat' AND id_conversation = ? AND id_from != ?`
+		await pool.query(sql, [req.body.id, req.user.id])
+		res.json({ ok: true})
 	} catch (err) {
 		throw new Error(err)
 	}

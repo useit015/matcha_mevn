@@ -31,28 +31,22 @@ let users = {}
 io.on('connection', socket => {
 	console.log('New client connected --> ', socket.id)
 	socket.on('chat', data => {
-		if (users[data.id_to]) {
-			io.sockets.connected[users[data.id_to]].emit('chat', data)
-		}
+		const id = users[data.id_to]
+		if (id) io.sockets.connected[id].emit('chat', data)
 	})
 	socket.on('typing', data => {
-		if (users[data.id_to]) {
-			io.sockets.connected[users[data.id_to]].emit('typing', data)
-		}
+		const id = users[data.id_to]
+		if (id) io.sockets.connected[id].emit('typing', data)
 	})
 	socket.on('seenConvo', data => {
-		if (users[data.user]) {
-			io.sockets.connected[users[data.user]].emit('seenConvo', data.convo)
-		}
+		const id = users[data.user]
+		if (id) io.sockets.connected[id].emit('seenConvo', data.convo)
 	})
 	socket.on('auth', id => {
 		users[id] = socket.id
 		console.log('users are', users)
 	})
-	socket.on('logout', id => {
-		delete users[`${id}`]
-		console.log('user logged out --> ', id)
-	})
+	socket.on('logout', id =>  delete users[id])
 	socket.on('disconnect', () => {
 		for (let key of Object.keys(users)) {
 			if (users[key] === socket.id) {
