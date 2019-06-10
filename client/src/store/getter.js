@@ -5,14 +5,25 @@ export const getters = {
 	status: state => state.status,
 	blocked: state => state.blocked,
 	location: state => state.location,
+	seenConvo: state => state.seenConvo,
 	blockedBy: state => state.blockedBy,
 	followers: state => state.followers,
-	following: state => state.following,
-	imageConvo: state => state.imageConvo,
 	newMessage: state => state.newMessage,
-	usernameConvo: state => state.usernameConvo,
 	selectedConvo: state => state.selectedConvo,
 	convos: state => [...state.convos].sort((a, b) => new Date(b.last_update) - new Date(a.last_update)),
+	following: state => state.following,
+	imageConvo: state => {
+		const convo = state.convos.find(cur => cur.id_conversation == state.selectedConvo)
+		return convo ? convo.profile_image : null
+	},
+	usernameConvo: state => {
+		const convo = state.convos.find(cur => cur.id_conversation == state.selectedConvo)
+		return convo ? convo.username : null
+	},
+	idUserConvo: state => {
+		const convo = state.convos.find(cur => cur.id_conversation == state.selectedConvo)
+		return convo ? convo.user_id : null
+	},
 	history: state => {
 		return [
 			...state.visitor.map(cur => ({

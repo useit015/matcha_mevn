@@ -1,18 +1,21 @@
 <template>
 	<v-layout column class="pa-3">
-		<v-flex v-for="(msg, i) in messages" :key="msg.id">
+		<v-flex v-for="(msg, i) in messages" :key="i + key">
 			<v-layout :class="layoutClass(msg, i)" align-start>
 				<v-tooltip lazy z-index="2" left>
 					<template v-slot:activator="{ on }">
 						<router-link :to="`/user/${msg.id_from}`" v-if="showAvatar(msg, i)" :class="avatarClass(msg, i)">
 							<v-avatar size="40">
-								<img v-on="on" :src="avatarSrc(msg)" :alt="usernameConvo">
+								<img v-on="on" :src="getFullPath(imageConvo)" :alt="usernameConvo">
 							</v-avatar>
 						</router-link>
 					</template>
 					<span>{{ usernameConvo }}</span>
 				</v-tooltip>
-				<div class="push" v-if="push(msg, i)"></div>
+				<div :class="pushClass(msg, i)"></div>
+				<v-avatar size="20" v-if="seen(msg, i)" class="mt-2">
+					<img :src="getFullPath(imageConvo)" :alt="usernameConvo">
+				</v-avatar>
 				<v-tooltip lazy z-index="2" :left="msg.id_from == user.id" :right="msg.id_from != user.id">
 					<template v-slot:activator="{ on }">
 						<div :class="bubbleClass(msg)" v-on="on">
@@ -50,16 +53,19 @@ import utility from '../utility.js'
 export default {
 	name: 'MessengerChat',
 	data: () => ({
+		key: 0,
 		messages: [],
 		timer: null
 	}),
 	computed: mapGetters([
 		'user',
 		'typing',
-		'selectedConvo',
-		'profileImage',
-		'imageConvo',
+		'seenConvo',
 		'newMessage',
+		'imageConvo',
+		'idUserConvo',
+		'profileImage',
+		'selectedConvo',
 		'usernameConvo'
 	]),
 	watch: {
@@ -73,19 +79,28 @@ export default {
 						const data = { id: this.selectedConvo }
 						const result = await this.$http.post(url, data, { headers })
 						this.messages = result.body
+						console.log('emiting here --+> ', {
+							user: this.idUserConvo,
+							convo: this.selectedConvo,
+						})
+						this.syncNotif()
+						this.$socket.emit('seenConvo', {
+							user: this.idUserConvo,
+							convo: this.selectedConvo,
+						})
 					} catch (err) {
 						console.log('got error here --> ', err)
 					}
 				}
 			}
 		},
-		newMessage: {
-			immediate: true,
-			handler () {
-				if (this.newMessage && this.selectedConvo == this.newMessage.id_conversation) {
-					this.messages.push(this.newMessage)
-					this.$store.dispatch('messageClr')
-				}
+		messages () {
+			this.$nextTick(this.scroll)
+		},
+		newMessage () {
+			if (this.newMessage && this.selectedConvo == this.newMessage.id_conversation) {
+				this.messages.push(this.newMessage)
+				this.$store.dispatch('messageClr')
 			}
 		},
 		typing () {
@@ -95,13 +110,25 @@ export default {
 				this.timer = setTimeout(() => this.typingClr(), 1200)
 			}
 		},
-		messages () {
-			this.$nextTick(this.scroll)
+		seenConvo () {
+			if (this.seenConvo) {
+				this.messages.forEach((cur, i) => {
+					if (cur.id_from == this.user.id && !cur.is_read) {
+						this.messages[i].is_read = 1
+						this.key++ // ? To Force reRender the messages
+					}
+				})
+				this.seenConvoClr()
+			}
 		}
 	},
 	methods: {
 		...utility,
-		...mapActions(['typingClr']),
+		...mapActions([
+			'syncNotif',
+			'typingClr',
+			'seenConvoClr'
+		]),
 		msgSent (msg) {
 			this.messages.push(msg)
 		},
@@ -112,6 +139,18 @@ export default {
 		last (msg, i) {
 			if (this.messages.length - 1 == i) return true
 			return (this.messages[i + 1].id_from != msg.id_from)
+		},
+		seen (msg, i) {
+			if (msg.id_from == this.user.id && msg.is_read) {
+				while (++i < this.messages.length) {
+					if (this.messages[i].id_from == this.user.id && this.messages[i].is_read) {
+						return false
+					}
+				}
+				return true
+			} else {
+				return false
+			}
 		},
 		layoutClass (msg, i) {
 			return [
@@ -129,17 +168,20 @@ export default {
 				msg.id_from != this.user.id ? 'grey lighten-3' : 'blue lighten-1 white--text'
 			].join(' ')
 		},
+		pushClass (msg, i) {
+			if (!this.last(msg, i) && msg.id_from != this.user.id) {
+				return 'push_left'
+			} else if (!this.seen(msg, i) && msg.id_from == this.user.id) {
+				return 'push_right'
+			} else {
+				return 'd-none'
+			}
+		},
 		showAvatar (msg, i) {
 			return this.last(msg, i) && msg.id_from != this.user.id
 		},
 		avatarClass (msg, i) {
 			return this.last(msg, i) && !this.first(msg, i) ? 'pull_up' : 'pull_up_single'
-		},
-		avatarSrc (msg) {
-			return this.getFullPath(msg.id_from == this.user.id ? this.profileImage : this.imageConvo)
-		},
-		push (msg, i) {
-			return !this.last(msg, i) && msg.id_from != this.user.id
 		},
 		scroll () {
 			const top = document.querySelector('.top_chat')
@@ -239,8 +281,12 @@ export default {
 	border-radius: 1.5rem !important;
 }
 
-.push {
+.push_left {
 	width: 40px;
+}
+
+.push_right {
+	width: 20px;
 }
 
 .pull_up {

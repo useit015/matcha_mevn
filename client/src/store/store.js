@@ -11,23 +11,22 @@ Vue.use(Vuex)
 export const store = new Vuex.Store({
 	strict: true,
 	state: {
-		status: false,
 		user: {},
-		location: { lat: 0, lng: 0 },
-		following: [],
-		followers: [],
-		blockedBy: [],
+		notif: [],
+		convos: [],
 		blocked: [],
 		visitor: [],
 		visited: [],
-		convos: [],
-		notif: [],
+		following: [],
+		followers: [],
+		blockedBy: [],
+		status: false,
+		typing: false,
+		seenConvo: false,
+		newMessage: null,
 		isConnected: false,
 		selectedConvo: null,
-		usernameConvo: null,
-		imageConvo: null,
-		newMessage: null,
-		typing: false
+		location: { lat: 0, lng: 0 }
 	},
 	getters,
 	mutations: {

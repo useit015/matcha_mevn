@@ -34,11 +34,17 @@ export const socket = {
 				} else {
 					console.log(`You've got a message --> `, data)
 					state.notif.push({ ...data, type: 'chat' })
-					const { id_from, id_to } = data
+					state.convos.forEach(cur => {
+						if (cur.id_conversation == data.id_conversation) {
+							cur.last_update = new Date()
+						}
+					})
+					const { id_from, id_to, id_conversation } = data
 					const body = { 
 						id_to,
 						id_from,
-						type: 'chat'
+						type: 'chat',
+						id_conversation
 					}
 					const url = 'http://134.209.195.36/api/notif/add'
 					const res = await Vue.http.post(url, body, { headers })
@@ -54,7 +60,9 @@ export const socket = {
 			}
 		},
 		SOCKET_seenConvo: (state, convo) => {
-			console.log(`goonna update this shit -->`, convo)
+			if (state.selectedConvo == convo) {
+				state.seenConvo = true
+			}
 		}
 	}
 }

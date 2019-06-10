@@ -35,7 +35,7 @@ const getLocationFromIp = async f => {
 const syncLocation = async (location) => {
 	try {
 		const token = localStorage.getItem('token')
-		const url = `http://134.209.195.36/api/users/position`
+		const url = `http://134.209.195.36/api/action/position`
 		const headers = { 'x-auth-token': token }
 		await Vue.http.post(url, location, { headers })
 	} catch (err) {
@@ -52,15 +52,23 @@ export default {
 		const when = moment(getDate(date))
 		return `${when.format('MMMM D, YYYY')} at ${when.format('h:mm A')}`
 	},
-	sync: async (f, type) => {
+	sync: async type => {
 		try {
 			const token = localStorage.getItem('token')
 			const url = `http://134.209.195.36/api/users/get${type}`
 			const headers = { 'x-auth-token': token }
-			const res = await Vue.http.get(url, { headers })
-			if (type == 'blocked')
-			console.log('getting the blocked dudes here --> ', res.body)
-			f(res)
+			return await Vue.http.get(url, { headers })
+		} catch (err) {
+			console.log('error here -->', err)
+		}
+	},
+	syncNotif: async () => {
+		try {
+			const token = localStorage.getItem('token')
+			const url = `http://134.209.195.36/api/notif/all`
+			const headers = { 'x-auth-token': token }
+			const result =  await Vue.http.get(url, { headers })
+			return result.body.msg ? [] : result.body
 		} catch (err) {
 			console.log('error here -->', err)
 		}

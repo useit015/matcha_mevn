@@ -21,9 +21,10 @@ export const auth = {
 			if (user.id) {
 				const { lat, lng } = user
 				commit('locate', { lat, lng })
+				dispatch('getNotif')
+				dispatch('syncHistory')
 				dispatch('syncMatches')
 				dispatch('syncBlocked', user.id)
-				dispatch('syncHistory')
 				localStorage.setItem('token', user.token)
 				commit('login', user)
 			}

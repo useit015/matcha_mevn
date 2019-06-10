@@ -8,15 +8,15 @@
 			<v-spacer></v-spacer>
 			<div v-if="status">
 				<v-btn flat icon large color="grey">
-					<v-badge overlap v-model="newMsg" color="primary" class="mx-2" right>
+					<v-badge overlap :value="!!notifNum" color="primary" class="mx-2" right>
 						<template v-slot:badge>
-							<span>{{ newMsgNum }}</span>
+							<span>{{ notifNum }}</span>
 						</template>
 						<v-icon color="grey">notifications</v-icon>
 					</v-badge>
 				</v-btn>
 				<v-btn flat icon large color="grey">
-					<v-badge overlap v-model="newMsg" color="primary" class="mx-2" right>
+					<v-badge overlap :value="!!newMsgNum" color="primary" class="mx-2" right>
 						<template v-slot:badge>
 							<span>{{ newMsgNum }}</span>
 						</template>
@@ -91,8 +91,8 @@ import utility from '../utility.js'
 export default {
 	name: 'Navbar',
 	data: () => ({
+		notifNum: 0,
 		newMsgNum: 0,
-		newMsg: false,
 		drawer: false,
 		links: [
 			{ icon: 'dashboard', text: 'Home', route: '/', public: true },
@@ -134,12 +134,11 @@ export default {
 		}
 	},
 	watch: {
-		notif () {
-			const chats = this.notif.filter(cur => cur.type = 'chat')
-			console.log('i am the fucking chats -> ', chats)
-			if (chats.length) {
-				this.newMsg = true
-				this.newMsgNum = chats.length
+		notif: {
+			immediate: true,
+			handler () {
+				this.newMsgNum = this.notif.filter(cur => cur.type == 'chat' && !cur.is_read).length
+				this.notifNum = this.notif.filter(cur => cur.type != 'chat' && !cur.is_read).length
 			}
 		}
 	},

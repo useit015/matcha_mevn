@@ -1,5 +1,6 @@
 import utility from '../utility'
-import { isArray } from 'util';
+import { isArray } from 'util'
+import Vue from 'vue'
 
 export const user = {
 	mutations: {
@@ -24,6 +25,9 @@ export const user = {
 			state.blocked = blacklist.blocked
 			state.blockedBy = blacklist.blockedBy
 		},
+		getNotif: (state, notif) => {
+			state.notif = notif
+		}
 	},
 	actions: {
 		updateUser: ({ commit }, user) => {
@@ -52,8 +56,8 @@ export const user = {
 				})
 			}
 		},
-		syncMatches: ({ commit }) => {
-			utility.sync(res => {
+		syncMatches: async ({ commit }) => {
+			try {
 				let following = []
 				let followers = []
 				const merge = cur => ({
@@ -62,32 +66,36 @@ export const user = {
 					username: cur.username,
 					profile_image: cur.profile_image
 				})
+				const res = await utility.sync('matches')
 				if (isArray(res.body)) {
 					following = res.body.filter(cur => cur.matched_id).map(merge),
 					followers = res.body.filter(cur => cur.matcher_id).map(merge)
 				}
 				commit('syncMatches', { following, followers })
-			}, 'matches')
+			} catch (err) {
+				console.log('Got error here --> ', err)
+			}
 		},
-		syncBlocked: ({ commit }, id) => {
-			utility.sync(res => {
+		syncBlocked: async ({ commit }, id) => {
+			try {
 				let blocked = []
 				let blockedBy = []
+				const res = await utility.sync('blocked')
 				if (isArray(res.body)) {
-					console.log('now is before --> ', id)
-					blocked =  res.body
+					blocked = res.body
 						.filter(cur => cur.blocker == id)
 						.map(cur => cur.blocked),
-					blockedBy =  res.body
+					blockedBy = res.body
 						.filter(cur => cur.blocked == id)
 						.map(cur => cur.blocker)
 				}
-				console.log('now i commit --> ', { blocked, blockedBy })
 				commit('syncBlocked', { blocked, blockedBy })
-			}, 'blocked')
+			} catch (err) {
+				console.log('Got error here --> ', err)
+			}
 		},
-		syncHistory: ({ commit }) => {
-			utility.sync(res => {
+		syncHistory: async ({ commit }) => {
+			try {
 				let visitor = []
 				let visited = []
 				const merge = cur => ({
@@ -96,12 +104,23 @@ export const user = {
 					username: cur.username,
 					profile_image: cur.profile_image
 				})
+				const res = await utility.sync('history')
 				if (isArray(res.body)) {
 					visitor = res.body.filter(cur => cur.visitor_id).map(merge),
 					visited = res.body.filter(cur => cur.visited_id).map(merge)
 				}
 				commit('syncHistory', { visitor, visited })
-			}, 'history')
+			} catch (err) {
+				console.log('Got error here --> ', err)
+			}
+		},
+		getNotif: async ({ commit }) => {
+			try {
+				const notif =  await utility.syncNotif()
+				commit('getNotif', notif)
+			} catch (err) {
+				console.log('Got error here --> ', err)
+			}
 		}
 	}
 }

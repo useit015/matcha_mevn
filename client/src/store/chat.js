@@ -1,10 +1,16 @@
 export const chat = {
 	mutations: {
+		seenConvoClr: state => {
+			state.seenConvo = false
+		},
 		typingClr: state => {
 			state.typing = false
 		},
 		messageClr: state => {
 			state.newMessage = null
+		},
+		syncNotif: state => {
+			state.notif = state.notif.filter(cur => !cur.id_conversation || cur.id_conversation != state.selectedConvo)
 		},
 		syncConvo: (state, convo) => {
 			if (!convo) {
@@ -32,6 +38,9 @@ export const chat = {
 		typingClr: ({ commit }) => {
 			commit('typingClr')
 		},
+		seenConvoClr: ({ commit }) => {
+			commit('seenConvoClr')
+		},
 		messageClr: ({ commit }) => {
 			commit('messageClr')
 		},
@@ -44,5 +53,8 @@ export const chat = {
 		updateConvosOrder: ({ commit }, id) => {
 			commit('updateConvosOrder', id)
 		},
+		syncNotif: ({ commit }) => {
+			commit('syncNotif')
+		}
 	}
 }

@@ -74,7 +74,9 @@ export default {
 			}
 		},
 		convos () {
-			if (this.convos.length) this.syncConvo(this.convos[0])
+			if (this.convos.length && !this.selectedConvo) {
+				this.syncConvo(this.convos[0])
+			}
 		}
 	},
 	methods: {
