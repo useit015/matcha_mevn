@@ -75,7 +75,17 @@ export default {
 		},
 		convos () {
 			if (this.convos.length && !this.selectedConvo) {
-				this.syncConvo(this.convos[0])
+				if (this.$route.params.id){
+					for (let index = 0; index < this.convos.length; index++) {
+						if (Number(this.$route.params.id) == this.convos[index].id_conversation || Number(this.$route.params.id) == this.convos[index].user_id){
+							this.syncConvo(this.convos[index])
+							return
+						}
+					}
+					this.$router.push('/error')
+				}
+				else
+					this.syncConvo(this.convos[0])
 			}
 		}
 	},

@@ -47,7 +47,7 @@ export const router = new vueRouter({
 		},
 		{
 			path: '/chat/:id',
-			component: Chat
+			component: Messenger
 		},
 		{
 			path: '/chat',

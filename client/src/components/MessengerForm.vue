@@ -31,14 +31,14 @@ export default {
 	},
 	methods: {
 		async sendMsg (e) {
-			if (this.msg && !e.shiftKey) {
+			if (this.msg && this.msg.trim() && !e.shiftKey) {
 				try {
 					const url = `http://134.209.195.36/api/chat/send`
 					const data = {
 						id_conversation: this.selectedConvo,
 						id_from: this.user.id,
 						id_to: this.toId,
-						message: this.msg
+						message: this.msg.trim()
 					}
 					this.msg = ''
 					this.$emit('msgSent', data)
