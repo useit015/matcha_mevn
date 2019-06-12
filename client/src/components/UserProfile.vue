@@ -208,8 +208,7 @@ export default {
 			return this.getFullPath(this.getProfileImage())
 		},
 		userCantLike () {
-			return false
-			const imgs = this.loggedIn.images
+			const imgs = this.user.images
 			return imgs ? !imgs.length : true
 		},
 		userCanChat () {
