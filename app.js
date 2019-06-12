@@ -18,7 +18,7 @@ app.use('/api/action', require('./routes/api/actions'))
 app.use('/api/chat', require('./routes/api/chat'))
 app.use('/api/notif', require('./routes/api/notif'))
 app.use('/api/users', require('./routes/api/users'))
-app.use('/static', express.static(`${__dirname}/public`))
+app.use(express.static(`${__dirname}/public`))
 
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')))
 
