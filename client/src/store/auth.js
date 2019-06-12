@@ -28,7 +28,6 @@ export const auth = {
 			state.visited = []
 			state.visitor = []
 			state.imageConvo = null
-			state.location = {}
 		}
 	},
 	actions: {
