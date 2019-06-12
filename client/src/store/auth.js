@@ -19,6 +19,7 @@ export const auth = {
 	actions: {
 		login: ({ commit, dispatch }, user) => {
 			if (user.id) {
+				localStorage.setItem('token', user.token)
 				const { lat, lng } = user
 				commit('locate', { lat, lng })
 				dispatch('getNotif')
@@ -26,7 +27,6 @@ export const auth = {
 				dispatch('syncMatches')
 				dispatch('syncConvoAll')
 				dispatch('syncBlocked', user.id)
-				localStorage.setItem('token', user.token)
 				commit('login', user)
 			}
 		},
