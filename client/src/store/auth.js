@@ -14,6 +14,21 @@ export const auth = {
 			state.status = false
 			state.user = {}
 			state.isConnected = false
+			state.typing = false
+			state.blocked = []
+			state.location = {}
+			state.seenConvo = false
+			state.convos = []
+			state.notif = []
+			state.blockedBy = []
+			state.followers = []
+			state.following = []
+			state.newMessage = null
+			state.selectedConvo = null
+			state.visited = []
+			state.visitor = []
+			state.imageConvo = null
+			state.location = {}
 		}
 	},
 	actions: {
@@ -32,6 +47,7 @@ export const auth = {
 		},
 		logout: ({ commit }, id) => {
 			localStorage.removeItem('token')
+			localStorage.clear()
 			commit('logout');
 			(new Vue()).$socket.emit('logout', id)
 		}
