@@ -22,7 +22,7 @@
 					<v-btn icon flat large color="primary" :disabled="userCantLike" @click="match"  class="hidden-xs-only">
 						<v-icon>{{ liked ? 'favorite' : 'favorite_border' }}</v-icon>
 					</v-btn>
-					<v-btn icon flat large color="primary" :disabled="!userCanChat" class="hidden-xs-only mx-0" router :to="`/chat/${user.id}`">
+					<v-btn icon flat large color="primary" :disabled="!userCanChat" class="hidden-xs-only mx-0" @click="goToChat">
 						<v-icon>{{ userCanChat ? 'chat_bubble' : 'chat_bubble_outline' }}</v-icon>
 					</v-btn>
 					<v-speed-dial v-model="fab" direction="bottom" transition="slide-y-reverse-transition" class="speed_list">
@@ -176,26 +176,8 @@ export default {
 		},
 		loggedIn: {
 			immediate: true,
-			async handler () {
-				if (this.loggedIn.id && this.f) {
-					if (this.loggedIn.id == this.$route.params.id) {
-						this.$router.push('/settings')
-					} else {
-						try {
-							const token = localStorage.getItem('token')
-							const url = `http://134.209.195.36/api/users/show/${this.$route.params.id}`
-							const res = await this.$http.get(url, {
-								headers: {
-									'x-auth-token': token
-								}
-							})
-							this.user = { ...res.body, rating: Number(res.body.rating) }
-							this.f = false
-						} catch (err) {
-							console.error(err)
-						}
-					}
-				}
+			handler () {
+				this.fetchUser(this.$route.params.id)
 			}
 		}
 	},
@@ -203,10 +185,13 @@ export default {
 		...mapGetters({
 			loggedIn: 'user',
 			blocked: 'blocked',
+			convos: 'convos',
 			matches: 'matches',
 			location: 'location',
 			following: 'following',
-			blockedBy: 'blockedBy'
+			followers: 'followers',
+			blockedBy: 'blockedBy',
+			profileImage: 'profileImage'
 		}),
 		liked: {
 			get () {
@@ -259,17 +244,21 @@ export default {
 		},
 		distance () {
 			const from = this.location
-			console.log('i am location -> ', this.location)
 			const to = {
 				lat: this.user.lat,
 				lng: this.user.lng
 			}
-			return `${Math.round(this.calculateDistance(from, to))} kms away`
+			const distance = this.calculateDistance(from, to)
+			return `${Math.round(distance)} kms away`
 		},
 	},
 	methods: {
 		...utility,
-		...mapActions(['syncBlocked', 'syncMatches']),
+		...mapActions([
+			'syncBlocked',
+			'syncMatches',
+			'syncConvo'
+		]),
 		changeTab (tab) {
 			this.activeTab = tab
 		},
@@ -279,35 +268,86 @@ export default {
 			return image ? image.name : 'default.jpg'
 		},
 		async match () {
-			const token = localStorage.getItem('token')
 			const url = `http://134.209.195.36/api/action/match`
 			const data = {
 				id: this.$route.params.id,
 				liked: this.liked
 			}
-			const res = await this.$http.post(url, data, {
-				headers: {
-					'x-auth-token': token
+			const headers = { 'x-auth-token': this.loggedIn.token }
+			const res = await this.$http.post(url, data, { headers })
+			if (res.body.ok) {
+				this.liked = !this.liked
+				const data = {
+					date: new Date(),
+					id_from: this.loggedIn.id,
+					username: this.loggedIn.username,
+					profile_image: this.profileImage,
+					id_to: this.$route.params.id
 				}
-			})
-			if (res.body.ok) this.liked = !this.liked
+				if (!this.liked) {
+					if (this.followers.some(cur => cur.id == this.$route.params.id)) {
+						data.type = 'like_back'
+					} else {
+						data.type = 'like'
+					}
+				} else {
+					data.type = 'unlike'
+				}
+				this.$socket.emit('match', data)
+			}
 		},
 		async block () {
-			const token = localStorage.getItem('token')
 			const url = `http://134.209.195.36/api/action/block`
-			const data = { id: this.$route.params.id }
+			let data = { id: this.$route.params.id }
+			const headers =  { 'x-auth-token': this.loggedIn.token }
 			const res = await this.$http.post(url, data, {
-				headers: {
-					'x-auth-token': token
-				}
-			})
-			console.log('i am res --> ', res)
+				headers })
 			if (!res.body.msg) {
 				this.syncBlocked(this.loggedIn.id)
-				this.$router.go(-1)
+				data = {
+					id_from: this.loggedIn.id,
+					id_to: this.$route.params.id
+				}
+				this.$socket.emit('block', data)
+				this.$router.push('/')
 				this.blockDialog = false
 			}
+		},
+		goToChat () {
+			const convo = this.convos.find(cur => cur.user_id == this.user.id)
+			this.syncConvo({
+				username: convo.username,
+				id_conversation: convo.id_conversation,
+				profile_image: convo.profile_image
+			})
+			this.$router.push('/chat')
+		},
+		async fetchUser (id) {
+			if (this.loggedIn.id && this.f) {
+				if (this.loggedIn.id == this.$route.params.id) {
+					this.$router.push('/settings')
+				} else {
+					try {
+						const token = localStorage.getItem('token')
+						const url = `http://134.209.195.36/api/users/show/${id}`
+						const res = await this.$http.get(url, {
+							headers: {
+								'x-auth-token': token
+							}
+						})
+						this.user = { ...res.body, rating: Number(res.body.rating) }
+						this.f = false
+					} catch (err) {
+						console.error(err)
+					}
+				}
+			}
 		}
+	},
+	beforeRouteUpdate (to, from, next) {
+		this.f = true
+		this.fetchUser(to.params.id)
+		next()
 	}
 }
 </script>

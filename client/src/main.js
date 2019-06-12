@@ -28,8 +28,19 @@ Vue.use(new vueIo({
 	}
 }))
 
-String.prototype.has = function(needle) {
-	return this.toLowerCase().includes(needle.toLowerCase())
+String.prototype.has = function (needle) {
+	return this
+		.toLowerCase()
+		.includes(needle.toLowerCase())
+}
+
+String.prototype.escapeHtml = function () {
+	return this
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;")
 }
 
 new Vue({

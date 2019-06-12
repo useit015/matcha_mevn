@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import vueRouter from 'vue-router'
-import Chat from '@/components/Chat'
 import Users from '@/components/Users'
 import About from '@/components/About'
 import Login from '@/components/Login'
@@ -54,6 +53,7 @@ export const router = new vueRouter({
 			component: Messenger
 		},
 		{
+			name: 'user',
 			path: '/user/:id',
 			component: UserProfile
 		}

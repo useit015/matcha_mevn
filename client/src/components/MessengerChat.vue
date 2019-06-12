@@ -18,9 +18,7 @@
 				</v-avatar>
 				<v-tooltip lazy z-index="2" :left="msg.id_from == user.id" :right="msg.id_from != user.id">
 					<template v-slot:activator="{ on }">
-						<div :class="bubbleClass(msg)" v-on="on">
-							{{ msg.message }}
-						</div>
+						<div :class="bubbleClass(msg)" v-on="on" v-html="format(msg.message)"></div>
 					</template>
 					<span>{{ formatTime(msg.created_at) }}</span>
 				</v-tooltip>
@@ -186,6 +184,9 @@ export default {
 		scroll () {
 			const top = document.querySelector('.top_chat')
 			top.scrollTop = top.scrollHeight - top.clientHeight
+		},
+		format (msg) {
+			return msg.replace(/\n/g, '<br/>')
 		}
 	}
 }

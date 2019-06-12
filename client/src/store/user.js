@@ -27,6 +27,12 @@ export const user = {
 		},
 		getNotif: (state, notif) => {
 			state.notif = notif
+		},
+		seenNotif: state => {
+			state.notif = state.notif.map(cur => {
+				if (cur.type != 'chat') cur.is_read = 1
+				return cur
+			})
 		}
 	},
 	actions: {
@@ -121,6 +127,9 @@ export const user = {
 			} catch (err) {
 				console.log('Got error here --> ', err)
 			}
+		},
+		seenNotif: ({ commit }) => {
+			commit('seenNotif')
 		}
 	}
 }

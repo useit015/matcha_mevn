@@ -1,6 +1,6 @@
 <template>
 	<v-layout align-center justify center row class="messenger_form px-3 chat_layout">
-		<v-text-field solo flat outline class="ma-4" append-icon="send" @click:append="sendMsg" label="Type a message..." v-model="msg" @keyup.13="sendMsg"></v-text-field>
+		<v-textarea rows="2" solo flat outline class="ma-4" append-icon="send" @click:append="sendMsg" label="Type a message..." v-model="msg" @keyup.13="sendMsg"></v-textarea>
 	</v-layout>
 </template>
 
@@ -38,7 +38,10 @@ export default {
 						id_conversation: this.selectedConvo,
 						id_from: this.user.id,
 						id_to: this.toId,
-						message: this.msg.trim()
+						message: this.msg
+							.trim()
+							.escapeHtml()
+							.slice(0, 2048)
 					}
 					this.msg = ''
 					this.$emit('msgSent', data)

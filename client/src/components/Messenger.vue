@@ -55,37 +55,16 @@ export default {
 	watch: {
 		user: {
 			immediate: true,
-			async handler () {
-				if (this.user.token) {
-					try {
-						const url = 'http://134.209.195.36/api/chat/all'
-						const headers = { 'x-auth-token': this.user.token }
-						const result = await this.$http.get(url, { headers })
-						this.loaded = true
-						if (!result.body.msg) {
-							this.syncConvoAll(result.body)
-						} else {
-							this.$router.push('/login')
-						}
-					} catch (err) {
-						console.log('Error here --> ', err)
-					}
-				}
+			handler () {
+				if (this.user.id) this.loaded = true
 			}
 		},
-		convos () {
-			if (this.convos.length && !this.selectedConvo) {
-				if (this.$route.params.id){
-					for (let index = 0; index < this.convos.length; index++) {
-						if (Number(this.$route.params.id) == this.convos[index].id_conversation || Number(this.$route.params.id) == this.convos[index].user_id){
-							this.syncConvo(this.convos[index])
-							return
-						}
-					}
-					this.$router.push('/error')
-				}
-				else
+		convos: {
+			immediate: true,
+			handler () {
+				if (this.convos.length && !this.selectedConvo) {
 					this.syncConvo(this.convos[0])
+				}
 			}
 		}
 	},

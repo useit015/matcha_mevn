@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 export const chat = {
 	mutations: {
 		seenConvoClr: state => {
@@ -35,26 +37,18 @@ export const chat = {
 		},
 	},
 	actions: {
-		typingClr: ({ commit }) => {
-			commit('typingClr')
+		typingClr: ({ commit }) => commit('typingClr'),
+		seenConvoClr: ({ commit }) => commit('seenConvoClr'),
+		messageClr: ({ commit }) => commit('messageClr'),
+		syncConvo: ({ commit }, convo) => commit('syncConvo', convo),
+		syncConvoAll: async ({ commit }) => {
+			const token = localStorage.getItem('token')
+			const url = 'http://134.209.195.36/api/chat/all'
+			const headers = { 'x-auth-token': token }
+			const result = await Vue.http.get(url, { headers })
+			if (!result.body.msg) commit('syncConvoAll', result.body)
 		},
-		seenConvoClr: ({ commit }) => {
-			commit('seenConvoClr')
-		},
-		messageClr: ({ commit }) => {
-			commit('messageClr')
-		},
-		syncConvo: ({ commit }, convo) => {
-			commit('syncConvo', convo)
-		},
-		syncConvoAll: ({ commit }, convos) => {
-			commit('syncConvoAll', convos)
-		},
-		updateConvosOrder: ({ commit }, id) => {
-			commit('updateConvosOrder', id)
-		},
-		syncNotif: ({ commit }) => {
-			commit('syncNotif')
-		}
+		updateConvosOrder: ({ commit }, id) => commit('updateConvosOrder', id),
+		syncNotif: ({ commit }) => commit('syncNotif')
 	}
 }

@@ -63,6 +63,29 @@ export const socket = {
 			if (state.selectedConvo == convo) {
 				state.seenConvo = true
 			}
+		},
+		SOCKET_match: (state, data) => {
+			state.notif.push({
+				is_read: 0,
+				type: data.type,
+				date: data.date,
+				id_from: data.id_from,
+				username: data.username,
+				profile_image: data.profile_image,
+			})
+			if (data.type == 'like' || data.type == 'like_back') {
+				state.followers.push({
+					id: data.id_from,
+					profile_image: data.profile_image,
+					username: data.username,
+					match_date: data.date
+				})
+			} else if (data.type == 'unlike') {
+				state.followers = state.followers.filter(cur => cur.id != data.id_from)
+			}
+		},
+		SOCKET_block: (state, id) => {
+			state.blockedBy.push(id)
 		}
 	}
 }

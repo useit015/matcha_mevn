@@ -24,6 +24,7 @@ export const auth = {
 				dispatch('getNotif')
 				dispatch('syncHistory')
 				dispatch('syncMatches')
+				dispatch('syncConvoAll')
 				dispatch('syncBlocked', user.id)
 				localStorage.setItem('token', user.token)
 				commit('login', user)
