@@ -38,4 +38,15 @@ router.get('/all', auth, async (req, res) => {
 	}
 })
 
+router.get('/update', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	try {
+		const sql = `UPDATE notifications SET is_read = 1 WHERE type != 'chat' AND id_to = ?`
+		await pool.query(sql, [req.user.id])
+		res.json({ ok: true})
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
 module.exports = router

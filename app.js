@@ -42,6 +42,14 @@ io.on('connection', socket => {
 		const id = users[data.user]
 		if (id) io.sockets.connected[id].emit('seenConvo', data.convo)
 	})
+	socket.on('match', data => {
+		const id = users[data.id_to]
+		if (id) io.sockets.connected[id].emit('match', data)
+	})
+	socket.on('block', data => {
+		const id = users[data.id_to]
+		if (id) io.sockets.connected[id].emit('block', data.id_from)
+	})
 	socket.on('auth', id => {
 		users[id] = socket.id
 		console.log('users are', users)

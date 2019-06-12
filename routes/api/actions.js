@@ -43,6 +43,8 @@ router.post('/match', auth, async (req, res) => {
 					WHERE id_user1 = ? AND id_user2 = ?
 					OR id_user2 = ? AND id_user1 = ?`
 			await pool.query(sql, [...data, ...data])
+			sql = `INSERT INTO notifications (type, id_from, id_to) VALUES (?, ?, ?)`
+			await pool.query(sql, ['unlike', ...data])
 			res.json({ ok: true })
 		} else {
 			sql = `SELECT * FROM matches where matcher = ? AND matched = ?`
@@ -51,7 +53,7 @@ router.post('/match', auth, async (req, res) => {
 				sql = `INSERT INTO matches (matcher, matched) VALUES (?, ?)`
 				await pool.query(sql, data)
 				sql = `SELECT * FROM matches WHERE matcher = ? AND matched = ?`
-				result = await pool.query(sql, data.reverse())
+				result = await pool.query(sql, [...data].reverse())
 				if (result.length) {
 					sql = `SELECT * FROM conversations
 							WHERE id_user1 = ? AND id_user2 = ?
@@ -64,6 +66,11 @@ router.post('/match', auth, async (req, res) => {
 						sql = `UPDATE conversations SET allowed = 1 WHERE id_conversation = ?`
 						await pool.query(sql, [result[0].id_conversation])
 					}
+					sql = `INSERT INTO notifications (type, id_from, id_to) VALUES (?, ?, ?)`
+					await pool.query(sql, ['like_back', ...data])
+				} else {
+					sql = `INSERT INTO notifications (type, id_from, id_to) VALUES (?, ?, ?)`
+					await pool.query(sql, ['like', ...data])
 				}
 				res.json({ ok: true })
 			} else {
