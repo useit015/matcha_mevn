@@ -282,7 +282,7 @@ export default {
 					date: new Date(),
 					id_from: this.loggedIn.id,
 					username: this.loggedIn.username,
-					profile_image: this.profileImage,
+					profile_image: this.loggedIn.images.find(cur => cur.profile == true).name,
 					id_to: this.$route.params.id
 				}
 				if (!this.liked) {
