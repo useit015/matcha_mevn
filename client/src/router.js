@@ -9,6 +9,7 @@ import Settings from '@/components/Settings'
 import Discover from '@/components/Discover'
 import Messenger from '@/components/Messenger'
 import UserProfile from '@/components/UserProfile'
+import NotFound from '@/components/NotFound'
 
 Vue.use(vueRouter)
 
@@ -56,6 +57,14 @@ export const router = new vueRouter({
 			name: 'user',
 			path: '/user/:id',
 			component: UserProfile
+		},
+		{
+			path: '/404',
+			component: NotFound
+		},
+		{
+			path: '*',
+			redirect: '/404'
 		}
 	]
 })
