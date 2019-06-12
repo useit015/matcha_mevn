@@ -47,7 +47,8 @@ export default {
 	getDate,
 	syncLocation,
 	getLocationFromIp,
-	getFullPath: file => isExternal(file) ? file : `http://134.209.195.36/static/uploads/${file ? file : 'default.jpg'}`,
+	//getFullPath: file => isExternal(file) ? file : `http://134.209.195.36/static/uploads/${file ? file : 'default.jpg'}`,
+	getFullPath: file => isExternal(file) ? file : `http://134.209.195.36/uploads/${file ? file : 'default.jpg'}`,
 	formatTime (date) {
 		const when = moment(getDate(date))
 		return `${when.format('MMMM D, YYYY')} at ${when.format('h:mm A')}`
