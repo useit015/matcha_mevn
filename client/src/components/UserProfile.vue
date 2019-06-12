@@ -257,7 +257,8 @@ export default {
 		...mapActions([
 			'syncBlocked',
 			'syncMatches',
-			'syncConvo'
+			'syncConvo',
+			'syncConvoAll'
 		]),
 		changeTab (tab) {
 			this.activeTab = tab
@@ -293,6 +294,7 @@ export default {
 				} else {
 					data.type = 'unlike'
 				}
+				this.syncConvoAll()
 				this.$socket.emit('match', data)
 			}
 		},
