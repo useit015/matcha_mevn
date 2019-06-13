@@ -248,6 +248,8 @@ router.get('/show/:id', auth, async (req, res) => {
 			user.images = await pool.query(sql, [user.id])
 			sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
 			await pool.query(sql, [req.user.id, req.params.id])
+			sql = `INSERT INTO notifications (type, id_from, id_to) VALUES ('visit', ?, ?)`
+			await pool.query(sql, [req.user.id, req.params.id])
 			res.json(user)
 		} else {
 			res.json('User doesnt exist')

@@ -7,6 +7,10 @@ const http = require('http')
 const socketIo = require('socket.io')
 const port = process.env.PORT || 8080
 const app = express()
+const passport = require('passport');
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use(cors())
 
@@ -39,12 +43,17 @@ io.on('connection', socket => {
 		if (id) io.sockets.connected[id].emit('typing', data)
 	})
 	socket.on('seenConvo', data => {
+		console.log('i am in seenConvo and i got this -> ', data)
 		const id = users[data.user]
 		if (id) io.sockets.connected[id].emit('seenConvo', data.convo)
 	})
 	socket.on('match', data => {
 		const id = users[data.id_to]
 		if (id) io.sockets.connected[id].emit('match', data)
+	})
+	socket.on('visit', data => {
+		const id = users[data.id_to]
+		if (id) io.sockets.connected[id].emit('visit', data)
 	})
 	socket.on('block', data => {
 		const id = users[data.id_to]

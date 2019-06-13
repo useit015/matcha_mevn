@@ -18,19 +18,19 @@ router.get('/all', auth, async (req, res) => {
 	if (!req.user.id) res.json({ msg: 'not logged in' })
 	try {
 		const sql = `SELECT
-					notifications.id_from as id_from,
-					notifications.created_at as date,
-					notifications.is_read as is_read,
-					notifications.type as type,
-					users.username as username,
-					images.name as profile_image
-				FROM notifications
-				INNER JOIN users
-				ON notifications.id_from = users.id
-				INNER JOIN images
-				ON notifications.id_from = images.user_id
-				where notifications.id_to = ?
-				AND images.profile = 1`
+						notifications.id_from as id_from,
+						notifications.created_at as date,
+						notifications.is_read as is_read,
+						notifications.type as type,
+						users.username as username,
+						images.name as profile_image
+					FROM notifications
+					INNER JOIN users
+					ON notifications.id_from = users.id
+					INNER JOIN images
+					ON notifications.id_from = images.user_id
+					where notifications.id_to = ?
+					AND images.profile = 1`
 		const result = await pool.query(sql, [req.user.id])
 		res.json(result)
 	} catch (err) {

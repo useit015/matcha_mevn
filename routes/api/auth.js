@@ -5,6 +5,72 @@ const sign = promisify(jwt.sign)
 const router = require('express').Router()
 const pool = require('../../utility/database')
 const auth = require('../../middleware/auth')
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy
+
+passport.serializeUser((user, done) => {
+	done(null, user.id);
+})
+
+passport.deserializeUser(async (id, done) => {
+	const sql = `SELECT * FROM users WHERE id = ?`
+	const result = await pool.query(sql, [id])
+	done(null, result[0]);
+})
+
+passport.use(
+	new GoogleStrategy({
+		clientID: process.env.OAUTH_ID,
+		clientSecret: process.env.OAUTH_PASS,
+		callbackURL: 'http://useit015.me/auth/google/redirect'
+	}, async (accessToken, refreshToken, profile, done) => {
+		let user, sql, result
+		try {
+			sql = `SELECT * FROM users WHERE google_id = ?`
+			result = await pool.query(sql, [profile.id])
+			if (!result.length) {
+				user = {
+					first_name: profile.name.givenName,
+					last_name: profile.name.familyName,
+					username: profile.displayName,
+					email: profile.id,
+					password: await bcrypt.hash('123456abc', 10),
+					google_id: profile.id,
+				}
+				sql = `INSERT INTO users (first_name, last_name, username,
+						email, password, google_id, vkey, verified)
+						VALUES (?, ?, ?, ?, ?, ?, 'aa', 1)`
+				await pool.query(sql, Object.values(user))
+				sql = `SELECT * From users WHERE google_id = ?`
+				result = await pool.query(sql, [profile.id])
+				if (result.length) {
+					sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
+					const data = {
+						id: result[0].id,
+						name: profile.photos[0].value,
+						profile: 1
+					}
+					await pool.query(sql, Object.values(data))
+				}
+			} else {
+				user = result[0]
+			}
+			const payload = { id: user.id }
+			user.token = await sign(payload, process.env.SECRET, { expiresIn: 7200 })
+		} catch (err) {
+			throw new Error(err)
+		}
+		done(null, user)
+	})
+)
+
+router.get('/google', passport.authenticate('google', {
+	scope: ['profile', 'email']
+}))
+
+router.get('/google/redirect', passport.authenticate('google'), (req, res) => {
+	res.json(req.user);
+})
 
 router.get('/isloggedin', auth, async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
