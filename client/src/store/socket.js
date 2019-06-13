@@ -19,12 +19,14 @@ export const socket = {
 				if (data.id_conversation == state.selectedConvo) {
 					if (!state.newMessage) {
 						state.newMessage = data
-						state.convos.forEach(convo => {
+						state.convos.forEach((convo, i) => {
 							if (convo.id_conversation == state.selectedConvo) {
 								(new Vue()).$socket.emit('seenConvo', {
 									user: convo.user_id,
 									convo: convo.id_conversation,
 								})
+								state.convos[i].message = data.message
+								state.convos[i].message_from = data.id_from
 							}
 						})
 						const url = 'http://134.209.195.36/api/chat/update'

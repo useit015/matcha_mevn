@@ -36,6 +36,9 @@
 								</v-list-tile-content>
 							</v-list-tile>
 						</template>
+						<v-list-tile router to="/notifications" class="see_all">
+							<v-list-tile-title>See all notifications</v-list-tile-title>
+						</v-list-tile>
 					</v-list>
 				</v-menu>
 				<v-menu bottom offset-y v-model="msgMenu" :nudge-width="250">
@@ -49,7 +52,7 @@
 							</v-badge>
 						</v-btn>
 					</template>
-					<v-list class="grey lighten-5 pa-0">
+					<v-list class="grey lighten-5 pa-0 message_list">
 						<template v-for="(item, i) in convos">
 							<v-list-tile :key="i" avatar @click="toUserChat(item)">
 								<v-list-tile-avatar>
@@ -63,11 +66,15 @@
 										</v-layout>
 									</v-list-tile-title>
 									<v-list-tile-sub-title>
-										<span class="notif_date">{{ item.message }}</span>
+										<span v-if="item.message_from == user.id" class="notif_date">You: </span>
+										<span class="notif_date text-truncate">{{ item.message }}</span>
 									</v-list-tile-sub-title>
 								</v-list-tile-content>
 							</v-list-tile>
 						</template>
+						<v-list-tile router to="/chat" class="see_all">
+							<v-list-tile-title>See all chats</v-list-tile-title>
+						</v-list-tile>
 					</v-list>
 				</v-menu>
 			</v-layout>
@@ -250,30 +257,6 @@ export default {
 				console.log('problem with -->', err)
 			}
 		},
-		getNotifMsg (notif) {
-			switch (notif.type) {
-				case 'visit':
-					return ` checked your profile`
-				case 'like':
-					return ` liked you`
-				case 'like_back':
-					return ` liked you back`
-				case 'unlike':
-					return ` unliked you`
-			}
-		},
-		getNotifIcon (type) {
-			switch (type) {
-				case 'visit':
-					return 'visibility'
-				case 'like':
-					return 'favorite'
-				case 'like_back':
-					return 'favorite'
-				case 'unlike':
-					return 'favorite_border'
-			}
-		},
 		formatNotifDate (item) {
 			return moment.utc(item.date ? item.date : item.last_update).fromNow()
 		}
@@ -282,6 +265,20 @@ export default {
 </script>
 
 <style>
+.see_all > a {
+	height: 2rem;
+	font-size: .9em;
+	color: #003656 !important;
+}
+
+.see_all > a > .v-list__tile__title {
+	text-align: center;
+}
+
+.message_list {
+	max-width: 300px;
+}
+
 .notif_username {
 	color: #003656;
 }

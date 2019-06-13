@@ -218,7 +218,7 @@ export default {
 			return false
 		},
 		age () {
-			return new Date().getFullYear() - new Date(this.user.birthdate).getFullYear()
+			return this.user.birthdate ? new Date().getFullYear() - new Date(this.user.birthdate).getFullYear() : ''
 		},
 		lastSeen () {
 			if (this.user.status) return 'online'

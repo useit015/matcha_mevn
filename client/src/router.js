@@ -10,6 +10,7 @@ import Discover from '@/components/Discover'
 import Messenger from '@/components/Messenger'
 import UserProfile from '@/components/UserProfile'
 import NotFound from '@/components/NotFound'
+import Notifications from '@/components/Notifications'
 
 Vue.use(vueRouter)
 
@@ -46,15 +47,14 @@ export const router = new vueRouter({
 			component: Discover
 		},
 		{
-			path: '/chat/:id',
-			component: Messenger
+			path: '/notifications',
+			component: Notifications
 		},
 		{
 			path: '/chat',
 			component: Messenger
 		},
 		{
-			name: 'user',
 			path: '/user/:id',
 			component: UserProfile
 		},

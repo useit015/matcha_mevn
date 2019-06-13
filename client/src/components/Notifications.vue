@@ -1,15 +1,15 @@
 <template>
 	<v-container>
-		<h1 class="heading display-2 text-xs-center text-md-left font-weight-thin pt-4 pb-3 mb-4 hidden-sm-and-down">History</h1>
+		<h1 class="heading display-2 text-xs-center text-md-left font-weight-thin pt-4 pb-3 mb-4 hidden-sm-and-down grey--text">Notifications</h1>
 		<v-timeline align-top dense>
-			<v-timeline-item color="primary" small v-for="(entry, i) in history" :key="i">
+			<v-timeline-item color="primary" small v-for="(entry, i) in notifs" :key="i">
 				<v-layout py-3 class="history_item">
 					<v-flex xs3>
 						<v-tooltip left>
 							<template v-slot:activator="{ on }">
-								<strong class="mt-2 d-block" v-on="on">{{ fromNow(getDate(entry)) }}</strong>
+								<strong class="mt-2 d-block grey--text" v-on="on">{{ fromNow(entry.date) }}</strong>
 							</template>
-							<span>{{ formatTime(entry) }}</span>
+							<span>{{ formatTime(entry.date) }}</span>
 						</v-tooltip>
 					</v-flex>
 					<v-flex pt-0>
@@ -19,12 +19,10 @@
 									<img :src="getFullPath(entry.profile_image)" :alt="entry.username">
 								</v-avatar>
 							</router-link>
-							<span v-if="entry.type !== 'follower' && entry.type !== 'visitor'" class="mr-1">{{ getHistoryAction(entry.type) }}</span>
 							<span>
 								<router-link :to="`/user/${entry.id}`" class="timeline_link">{{ entry.username }}</router-link>
 							</span>
-							<span v-if="entry.type === 'follower' || entry.type === 'visitor'" class="ml-1">{{ getHistoryAction(entry.type) }}</span>
-							<span v-if="entry.type === 'visited'">'s profile</span>
+							<span class="ml-1">{{ getNotifMsg(entry) }}</span>
 						</v-chip>
 					</v-flex>
 				</v-layout>
@@ -38,34 +36,33 @@
 
 <script>
 import moment from 'moment'
-import { mapGetters } from 'vuex'
 import utility from '../utility.js'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
-	name: 'ProfileHistory',
+	name: 'Notifications',
 	data: () => ({ limit: 15 }),
 	computed: {
-		...mapGetters({
-			blocked: 'blocked',
-			hist: 'history'
-		}),
-		history () {
-			return this.hist
-					.filter(cur => !this.blocked.includes(cur.id))
-					.sort((a, b) => new Date(this.getDate(b)) - new Date(this.getDate(a)))
-					.slice(0, this.limit)
+		...mapGetters(['notif']),
+		notChats () {
+			return this.notif.filter(cur => cur.type != 'chat')
+		},
+		notifs () {
+			return this.notChats
+				.sort((a, b) => new Date(b.date) - new Date(a.date))
+				.slice(0, this.limit)
 		},
 		moreToLoad () {
-			return this.limit < this.hist.length - 1
+			return this.limit < this.notChats.length - 1
 		}
 	},
 	methods: {
 		...utility,
-		increaseLimit () {
-			if (this.limit + 11 < this.hist.length) {
+			increaseLimit () {
+			if (this.limit + 11 < this.notChats.length) {
 				this.limit += 10
 			} else {
-				this.limit = this.hist.length - 1
+				this.limit = this.notChats.length - 1
 			}
 		}
 	}

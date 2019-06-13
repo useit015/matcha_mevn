@@ -116,5 +116,32 @@ export default {
 			case 'following':
 				return 'You liked'
 		}
+	},
+	getNotifMsg (notif) {
+		switch (notif.type) {
+			case 'visit':
+				return ` checked your profile`
+			case 'like':
+				return ` liked you`
+			case 'like_back':
+				return ` liked you back`
+			case 'unlike':
+				return ` unliked you`
+		}
+	},
+	getNotifIcon (type) {
+		switch (type) {
+			case 'visit':
+				return 'visibility'
+			case 'like':
+				return 'favorite'
+			case 'like_back':
+				return 'favorite'
+			case 'unlike':
+				return 'favorite_border'
+		}
+	},
+	fromNow (date) {
+		return moment.utc(date).fromNow()
 	}
 }

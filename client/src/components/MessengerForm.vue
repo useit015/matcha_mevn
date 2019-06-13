@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
 	name: 'MessengerForm',
@@ -17,7 +17,10 @@ export default {
 		}
 	},
 	data: () => ({ msg: null }),
-	computed: mapGetters(['user', 'selectedConvo']),
+	computed: mapGetters([
+		'user',
+		'selectedConvo'
+	]),
 	watch: {
 		msg () {
 			if (this.msg.length) {
@@ -31,6 +34,7 @@ export default {
 		}
 	},
 	methods: {
+		...mapActions(['updateConvos']),
 		async sendMsg (e) {
 			if (this.msg && this.msg.trim() && !e.shiftKey) {
 				try {
@@ -45,10 +49,10 @@ export default {
 							.slice(0, 2048)
 					}
 					this.msg = ''
+					this.updateConvos(data)
 					this.$emit('msgSent', data)
 					this.$socket.emit('chat', data)
-					const result = await this.$http.post(url, data)
-					console.log('i sent the msg and got this --> ', result)
+					await this.$http.post(url, data)
 				} catch (err) {
 					console.error(err)
 				}

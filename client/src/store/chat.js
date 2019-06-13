@@ -28,6 +28,14 @@ export const chat = {
 		syncConvoAll: (state, convos) => {
 			state.convos = convos
 		},
+		updateConvos: (state, msg) => {
+			state.convos.forEach((cur, i) => {
+				if (cur.id_conversation == msg.id_conversation) {
+					state.convos[i].message = msg.message
+					state.convos[i].message_from = msg.id_from
+				}
+			})
+		},
 		updateConvosOrder: (state, id) => {
 			state.convos.forEach(cur => {
 				if (cur.id_conversation == id) {
@@ -38,17 +46,18 @@ export const chat = {
 	},
 	actions: {
 		typingClr: ({ commit }) => commit('typingClr'),
-		seenConvoClr: ({ commit }) => commit('seenConvoClr'),
+		syncNotif: ({ commit }) => commit('syncNotif'),
 		messageClr: ({ commit }) => commit('messageClr'),
+		seenConvoClr: ({ commit }) => commit('seenConvoClr'),
 		syncConvo: ({ commit }, convo) => commit('syncConvo', convo),
+		updateConvos: ({ commit }, msg) => commit('updateConvos', msg),
+		updateConvosOrder: ({ commit }, id) => commit('updateConvosOrder', id),
 		syncConvoAll: async ({ commit }) => {
 			const token = localStorage.getItem('token')
 			const url = 'http://134.209.195.36/api/chat/all'
 			const headers = { 'x-auth-token': token }
 			const result = await Vue.http.get(url, { headers })
 			if (!result.body.msg) commit('syncConvoAll', result.body)
-		},
-		updateConvosOrder: ({ commit }, id) => commit('updateConvosOrder', id),
-		syncNotif: ({ commit }) => commit('syncNotif')
+		}
 	}
 }
