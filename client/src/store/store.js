@@ -9,7 +9,6 @@ import { getters } from './getter'
 Vue.use(Vuex)
 
 export const store = new Vuex.Store({
-	strict: true,
 	state: {
 		user: {},
 		notif: [],

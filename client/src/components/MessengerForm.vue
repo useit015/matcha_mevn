@@ -48,6 +48,7 @@ export default {
 					this.$emit('msgSent', data)
 					this.$socket.emit('chat', data)
 					const result = await this.$http.post(url, data)
+					console.log('i sent the msg and got this --> ', result)
 				} catch (err) {
 					console.error(err)
 				}

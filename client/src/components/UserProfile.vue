@@ -208,7 +208,7 @@ export default {
 			return this.getFullPath(this.getProfileImage())
 		},
 		userCantLike () {
-			const imgs = this.user.images
+			const imgs = this.loggedIn.images
 			return imgs ? !imgs.length : true
 		},
 		userCanChat () {
@@ -337,6 +337,15 @@ export default {
 							}
 						})
 						this.user = { ...res.body, rating: Number(res.body.rating) }
+						const data = {
+							date: new Date(),
+							id_from: this.loggedIn.id,
+							username: this.loggedIn.username,
+							profile_image: this.loggedIn.images.find(cur => cur.profile == true).name,
+							id_to: id,
+							type: 'visit'
+						}
+						this.$socket.emit('visit', data)
 						this.f = false
 					} catch (err) {
 						console.error(err)

@@ -32,11 +32,12 @@ export const socket = {
 						await Vue.http.post(url, body, { headers })
 					}
 				} else {
-					console.log(`You've got a message --> `, data)
 					state.notif.push({ ...data, type: 'chat' })
 					state.convos.forEach(cur => {
 						if (cur.id_conversation == data.id_conversation) {
 							cur.last_update = new Date()
+							cur.message = data.message
+							cur.message_from = data.id_from
 						}
 					})
 					const { id_from, id_to, id_conversation } = data
@@ -64,7 +65,7 @@ export const socket = {
 				state.seenConvo = true
 			}
 		},
-		SOCKET_match: (state, data) => {
+		SOCKET_match: async (state, data) => {
 			state.notif.push({
 				is_read: 0,
 				type: data.type,
@@ -80,9 +81,39 @@ export const socket = {
 					username: data.username,
 					match_date: data.date
 				})
+				if (data.type == 'like_back') {
+					const url = 'http://134.209.195.36/api/chat/all'
+					const headers = { 'x-auth-token': state.user.token }
+					const result = await Vue.http.get(url, { headers })
+					state.convos = result.body
+				}
 			} else if (data.type == 'unlike') {
 				state.followers = state.followers.filter(cur => cur.id != data.id_from)
+				state.convos.forEach((cur, i) => {
+					if (cur.user_id == data.id_from) {
+						if (state.selectedConvo == cur.id_conversation) {
+							state.selectedConvo = null
+						}
+						state.convos.splice(i, 1)
+					}
+				})
 			}
+		},
+		SOCKET_visit: (state, data) => {
+			state.notif.push({
+				is_read: 0,
+				type: data.type,
+				date: data.date,
+				id_from: data.id_from,
+				username: data.username,
+				profile_image: data.profile_image,
+			})
+			state.visitor.push({
+				id: data.id_from,
+				profile_image: data.profile_image,
+				username: data.username,
+				visit_date: data.date
+			})
 		},
 		SOCKET_block: (state, id) => {
 			state.blockedBy.push(id)

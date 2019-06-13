@@ -7,7 +7,7 @@
 			</v-toolbar-title>
 			<v-spacer></v-spacer>
 			<v-layout v-if="status" justify-end>
-				<v-menu bottom left offset-y v-model="notifMenu">
+				<v-menu bottom offset-y v-model="notifMenu" :nudge-width="250">
 					<template v-slot:activator="{ on }">
 						<v-btn flat icon large color="grey" v-on="on">
 							<v-badge overlap :value="!!notifNum" color="primary" class="mx-2" right>
@@ -18,32 +18,58 @@
 							</v-badge>
 						</v-btn>
 					</template>
-					<v-list class="grey lighten-5">
+					<v-list class="grey lighten-5 pa-0">
 						<template v-for="(item, i) in notifs">
 							<v-list-tile :key="i" avatar @click="toUserProfile(item.id_from)">
 								<v-list-tile-avatar>
 									<img :src="getFullPath(item.profile_image)">
 								</v-list-tile-avatar>
 								<v-list-tile-content>
-									<v-list-tile-title>
-										{{ item.type }}
+									<v-list-tile-title class="notif_msg">
+										<strong class="notif_username">{{ item.username }}</strong>
+										<span>{{ getNotifMsg(item) }}</span>
 									</v-list-tile-title>
 									<v-list-tile-sub-title>
-										{{ item.username }}
+										<v-icon small color="blue lighten-2" class="mr-2">{{ getNotifIcon(item.type) }}</v-icon>
+										<span class="notif_date">{{ formatNotifDate(item) }}</span>
 									</v-list-tile-sub-title>
 								</v-list-tile-content>
 							</v-list-tile>
 						</template>
 					</v-list>
 				</v-menu>
-				<v-btn flat icon large color="grey">
-					<v-badge overlap :value="!!newMsgNum" color="primary" class="mx-2" right>
-						<template v-slot:badge>
-							<span>{{ newMsgNum }}</span>
+				<v-menu bottom offset-y v-model="msgMenu" :nudge-width="250">
+					<template v-slot:activator="{ on }">
+						<v-btn flat icon large color="grey" v-on="on">
+							<v-badge overlap :value="!!newMsgNum" color="primary" class="mx-2" right>
+								<template v-slot:badge>
+									<span>{{ newMsgNum }}</span>
+								</template>
+								<v-icon color="grey">chat</v-icon>
+							</v-badge>
+						</v-btn>
+					</template>
+					<v-list class="grey lighten-5 pa-0">
+						<template v-for="(item, i) in convos">
+							<v-list-tile :key="i" avatar @click="toUserChat(item)">
+								<v-list-tile-avatar>
+									<img :src="getFullPath(item.profile_image)">
+								</v-list-tile-avatar>
+								<v-list-tile-content>
+									<v-list-tile-title class="notif_msg">
+										<v-layout justify-between>
+											<strong class="notif_username">{{ item.username }}</strong>
+											<span class="ml-auto chat_time">{{ formatNotifDate(item) }}</span>
+										</v-layout>
+									</v-list-tile-title>
+									<v-list-tile-sub-title>
+										<span class="notif_date">{{ item.message }}</span>
+									</v-list-tile-sub-title>
+								</v-list-tile-content>
+							</v-list-tile>
 						</template>
-						<v-icon color="grey">chat</v-icon>
-					</v-badge>
-				</v-btn>
+					</v-list>
+				</v-menu>
 			</v-layout>
 			<div v-if="!status">
 				<v-btn flat color="grey" router to="/login">Login</v-btn>
@@ -102,11 +128,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import utility from '../utility.js'
+import moment from 'moment'
 
 export default {
 	name: 'Navbar',
 	data: () => ({
 		notifMenu: 0,
+		msgMenu: 0,
 		notifNum: 0,
 		newMsgNum: 0,
 		drawer: false,
@@ -163,6 +191,7 @@ export default {
 			'user',
 			'notif',
 			'status',
+			'convos',
 			'profileImage'
 		]),
 		image () {
@@ -200,10 +229,15 @@ export default {
 		...mapActions({
 			in: 'login',
 			out: 'logout',
+			syncConvo: 'syncConvo',
 			seenNotif: 'seenNotif'
 		}),
 		toUserProfile (id) {
 			this.$router.push(`/user/${id}`)
+		},
+		toUserChat (convo) {
+			this.syncConvo(convo)
+			this.$router.push('/chat')
 		},
 		async logout () {
 			try {
@@ -215,7 +249,57 @@ export default {
 			} catch (err) {
 				console.log('problem with -->', err)
 			}
+		},
+		getNotifMsg (notif) {
+			switch (notif.type) {
+				case 'visit':
+					return ` checked your profile`
+				case 'like':
+					return ` liked you`
+				case 'like_back':
+					return ` liked you back`
+				case 'unlike':
+					return ` unliked you`
+			}
+		},
+		getNotifIcon (type) {
+			switch (type) {
+				case 'visit':
+					return 'visibility'
+				case 'like':
+					return 'favorite'
+				case 'like_back':
+					return 'favorite'
+				case 'unlike':
+					return 'favorite_border'
+			}
+		},
+		formatNotifDate (item) {
+			return moment.utc(item.date ? item.date : item.last_update).fromNow()
 		}
 	}
 }
 </script>
+
+<style>
+.notif_username {
+	color: #003656;
+}
+
+.notif_date {
+	font-size: .9em;
+}
+.notif_msg {
+	font-size: .8em;
+}
+.v-list__tile__sub-title {
+	margin-top: -2px;
+}
+.v-menu__content {
+	box-shadow: none !important;
+	border: 1px solid rgba(0, 0, 0, .1);
+}
+.v-list__tile.v-list__tile--link.v-list__tile--avatar.theme--light {
+	border-bottom: 1px solid rgba(0, 0, 0, .1);
+}
+</style>
