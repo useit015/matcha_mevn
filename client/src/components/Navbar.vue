@@ -227,7 +227,6 @@ export default {
 				const headers = { 'x-auth-token': this.user.token }
 				const res = await this.$http.get(url, { headers })
 				this.seenNotif()
-				console.log('i updated the notifs', res)
 			}
 		}
 	},

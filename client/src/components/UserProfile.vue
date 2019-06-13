@@ -177,6 +177,7 @@ export default {
 		loggedIn: {
 			immediate: true,
 			handler () {
+				if (isNaN(this.$route.params.id) || !this.$route.params.id) this.$router.push('/404')
 				this.fetchUser(this.$route.params.id)
 			}
 		}

@@ -14,13 +14,13 @@
 					</v-flex>
 					<v-flex pt-0>
 						<v-chip disabled class="bubble grey lighten-5 px-2 py-2">
-							<router-link :to="`/user/${entry.id}`">
+							<router-link :to="`/user/${entry.id_from}`">
 								<v-avatar>
 									<img :src="getFullPath(entry.profile_image)" :alt="entry.username">
 								</v-avatar>
 							</router-link>
 							<span>
-								<router-link :to="`/user/${entry.id}`" class="timeline_link">{{ entry.username }}</router-link>
+								<router-link :to="`/user/${entry.id_from}`" class="timeline_link">{{ entry.username }}</router-link>
 							</span>
 							<span class="ml-1">{{ getNotifMsg(entry) }}</span>
 						</v-chip>

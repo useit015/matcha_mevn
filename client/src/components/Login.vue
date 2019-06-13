@@ -18,6 +18,11 @@
 				<v-btn flat color="primary" dark to="/register">Don't have an account? Sign up</v-btn>
 			</v-layout>
 		</v-form>
+		<v-layout justify-center align-center>
+			<a href="http://134.209.195.36/auth/google">
+				<v-btn large depressed color="red" dark class="mt-5">Login with google</v-btn>
+			</a>
+		</v-layout>
 	</div>
 </v-container>
 </template>
@@ -52,6 +57,14 @@ export default {
 			v => v.length >= 8 || 'Password must be at least 8 characters long'
 		]
 	}),
+	computed: mapGetters(['user']),
+	watch: {
+		user: {
+			handler () {
+				if (this.user.id) this.$router.push('/')
+			}
+		}
+	},
 	methods: {
 		...utility,
 		...mapActions(['login']),
