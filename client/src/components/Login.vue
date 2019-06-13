@@ -57,7 +57,7 @@ export default {
 			v => v.length >= 8 || 'Password must be at least 8 characters long'
 		]
 	}),
-	computed: mapGetters(['user']),
+	//computed: mapGetters(['user']),
 	watch: {
 		user: {
 			handler () {
