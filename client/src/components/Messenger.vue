@@ -55,8 +55,23 @@ export default {
 	watch: {
 		user: {
 			immediate: true,
-			handler () {
-				if (this.user.id) this.loaded = true
+			async handler () {
+				const token = this.user.token || localStorage.getItem('token')
+				if (token) {
+					try {
+						const url = 'http://134.209.195.36/auth/isloggedin'
+						const headers = { 'x-auth-token': token }
+						const res = await this.$http.get(url, { headers })
+						if (!res.body.msg) {
+							this.loaded = true
+							return
+						}
+					} catch (err) {
+						console.log('Got error here --> ', err)
+					}
+				}
+				this.logout(this.user.id)
+				this.$router.push('/login')
 			}
 		},
 		convos: {
@@ -70,6 +85,7 @@ export default {
 	},
 	methods: {
 		...mapActions([
+			'logout',
 			'syncConvo',
 			'syncConvoAll',
 			'updateConvosOrder'

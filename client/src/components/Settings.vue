@@ -114,34 +114,29 @@ export default {
 		loggedIn: {
 			immediate: true,
 			async handler () {
-				if (!this.loaded) {
-					if (!this.user.id) {
-						try {
-							const token = localStorage.getItem('token')
-							const url = 'http://134.209.195.36/auth/isloggedin'
-							const res = await this.$http.get(url, {
-								headers: {
-									'x-auth-token': token
-								}
-							})
-							if (res.body.msg) {
-								this.$router.push('/login')
-							} else {
-								this.loaded = true
-							}
-						} catch (err) {
-							console.log('problem with -->', err)
+				const token = this.user.token || localStorage.getItem('token')
+				if (token) {
+					try {
+						const url = 'http://134.209.195.36/auth/isloggedin'
+						const headers = { 'x-auth-token': token }
+						const res = await this.$http.get(url, { headers })
+						if (!res.body.msg) {
+							this.loaded = true
+							return
 						}
-					} else {
-						this.loaded = true
+					} catch (err) {
+						console.log('Got error here --> ', err)
 					}
 				}
+				this.logout(this.user.id)
+				this.$router.push('/login')
 			}
 		}
 	},
 	methods: {
 		...utility,
 		...mapActions({
+			logout: 'logout',
 			update: 'updateUser',
 			syncMatches: 'syncMatches',
 			syncHistory: 'syncHistory'
@@ -150,20 +145,15 @@ export default {
 			try {
 				let msg
 				const url = `http://134.209.195.36/api/users/update`
-				const res = await this.$http.post(url, this.user, {
-					headers: {
-						'x-auth-token': this.user.token
-					}
-				})
+				const headers = { 'x-auth-token': this.user.token }
+				const res = await this.$http.post(url, this.user, { headers })
 				if (res && res.body && !res.body.msg) {
 					msg = 'Your account has been updated successfuly'
 					this.showAlert('success', msg)
 					this.update(this.user)
-					console.log(res)
 				} else {
 					msg = 'Ouups something went wrong!'
 					this.showAlert('red', msg)
-					console.log(res)
 				}
 			} catch (err) {
 				console.log('got error here --> ', err)
@@ -175,11 +165,8 @@ export default {
 				const fd = new FormData()
 				fd.append('image', data)
 				const url = `http://134.209.195.36/api/users/image`
-				const res = await this.$http.post(url, fd, {
-					headers: {
-						'x-auth-token': this.user.token
-					}
-				})
+				const headers = { 'x-auth-token': this.user.token }
+				const res = await this.$http.post(url, fd, { headers })
 				if (res && res.body && !res.body.msg) {
 					msg = 'You profile image has been updated successfuly'
 					this.showAlert('success', msg)
@@ -187,7 +174,6 @@ export default {
 				} else {
 					msg = 'Ouups something went wrong!'
 					this.showAlert('red', msg)
-					console.log(res)
 				}
 			} catch (err) {
 				console.log('got error here --> ', err)

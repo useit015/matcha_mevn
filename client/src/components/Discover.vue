@@ -47,7 +47,7 @@
 
 <script>
 import loader from './loader'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import UserCard from './UserCard'
 import countries from '../nats.json'
 
@@ -123,10 +123,12 @@ export default {
 			}))
 			this.loaded = true
 		} else {
+			this.logout(this.user.id)
 			this.$router.push('/login')
 		}
 	},
 	methods: {
+		...mapActions(['logout']),
 		reset () {
 			this.rating = [0, 5]
 			this.age = [18, 85]

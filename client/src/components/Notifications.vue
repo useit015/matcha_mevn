@@ -43,7 +43,10 @@ export default {
 	name: 'Notifications',
 	data: () => ({ limit: 15 }),
 	computed: {
-		...mapGetters(['notif']),
+		...mapGetters([
+			'user',
+			'notif'
+		]),
 		notChats () {
 			return this.notif.filter(cur => cur.type != 'chat')
 		},
@@ -56,9 +59,30 @@ export default {
 			return this.limit < this.notChats.length - 1
 		}
 	},
+	watch: {
+		user: {
+			immediate: true,
+			async handler () {
+				const token = this.user.token || localStorage.getItem('token')
+				if (token) {
+					try {
+						const url = 'http://134.209.195.36/auth/isloggedin'
+						const headers = { 'x-auth-token': token }
+						const res = await this.$http.get(url, { headers })
+						if (!res.body.msg) return
+					} catch (err) {
+						console.log('Got error here --> ', err)
+					}
+				}
+				this.logout(this.user.id)
+				this.$router.push('/login')
+			}
+		}
+	},
 	methods: {
 		...utility,
-			increaseLimit () {
+		...mapActions(['logout']),
+		increaseLimit () {
 			if (this.limit + 11 < this.notChats.length) {
 				this.limit += 10
 			} else {

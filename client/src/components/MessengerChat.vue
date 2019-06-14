@@ -77,10 +77,6 @@ export default {
 						const data = { id: this.selectedConvo }
 						const result = await this.$http.post(url, data, { headers })
 						this.messages = result.body
-						console.log('emiting here --+> ', {
-							user: this.idUserConvo,
-							convo: this.selectedConvo,
-						})
 						this.syncNotif()
 						this.$socket.emit('seenConvo', {
 							user: this.idUserConvo,
