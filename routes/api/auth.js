@@ -8,6 +8,8 @@ const auth = require('../../middleware/auth')
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 
+const tokenExp = { expiresIn: 7200 }
+
 passport.serializeUser((user, done) => {
 	done(null, user.id);
 })
@@ -20,26 +22,24 @@ passport.deserializeUser(async (id, done) => {
 
 passport.use(
 	new GoogleStrategy({
-		clientID: process.env.OAUTH_ID,
-		clientSecret: process.env.OAUTH_PASS,
+		clientID: process.env.OAUTH_GOOGLE_ID,
+		clientSecret: process.env.OAUTH_GOOGLE_PASS,
 		callbackURL: 'http://useit015.me/auth/google/redirect'
 	}, async (accessToken, refreshToken, profile, done) => {
-		let user, sql, result
 		try {
+			let user, sql, result
 			sql = `SELECT * FROM users WHERE google_id = ?`
 			result = await pool.query(sql, [profile.id])
 			if (!result.length) {
 				user = {
+					google_id: profile.id,
+					username: profile.displayName,
 					first_name: profile.name.givenName,
 					last_name: profile.name.familyName,
-					username: profile.displayName,
-					email: profile.id,
-					password: await bcrypt.hash('123456abc', 10),
-					google_id: profile.id,
+					email: profile.emails.find(cur => cur.verified).value
 				}
-				sql = `INSERT INTO users (first_name, last_name, username,
-						email, password, google_id, vkey, verified)
-						VALUES (?, ?, ?, ?, ?, ?, 'aa', 1)`
+				sql = `INSERT INTO users (google_id, username, first_name,
+						last_name, email, verified) VALUES (?, ?, ?, ?, ?, 1)`
 				await pool.query(sql, Object.values(user))
 				sql = `SELECT * From users WHERE google_id = ?`
 				result = await pool.query(sql, [profile.id])
@@ -51,25 +51,29 @@ passport.use(
 						profile: 1
 					}
 					await pool.query(sql, Object.values(data))
+					user = result[0]
 				}
 			} else {
 				user = result[0]
 			}
 			const payload = { id: user.id }
-			user.token = await sign(payload, process.env.SECRET, { expiresIn: 7200 })
+			user.token = await sign(payload, process.env.SECRET, tokenExp)
+			done(null, user)
 		} catch (err) {
-			throw new Error(err)
+			done(err, false)
 		}
-		done(null, user)
 	})
 )
 
 router.get('/google', passport.authenticate('google', {
-	scope: ['profile', 'email']
+	scope: [
+		'https://www.googleapis.com/auth/userinfo.profile',
+		'https://www.googleapis.com/auth/userinfo.email'
+	]
 }))
 
 router.get('/google/redirect', passport.authenticate('google'), (req, res) => {
-	res.json(req.user);
+	res.render('verify', { token: req.user.token })
 })
 
 router.get('/isloggedin', auth, async (req, res) => {
@@ -78,15 +82,19 @@ router.get('/isloggedin', auth, async (req, res) => {
 	try {
 		let sql = `SELECT * FROM users WHERE id = ?`
 		const result = await pool.query(sql, [req.user.id])
-		const user = result[0]
-		delete user.password
-		delete user.verified
-		delete user.tokenExpiration
-		sql = `SELECT * FROM images WHERE user_id = ?`
-		user.images = await pool.query(sql, [user.id])
-		const payload = { id: user.id }
-		user.token = await sign(payload, process.env.SECRET, { expiresIn: 7200 })
-		res.json(user)
+		if (result.length) {
+			const user = result[0]
+			delete user.password
+			delete user.verified
+			delete user.tokenExpiration
+			sql = `SELECT * FROM images WHERE user_id = ?`
+			user.images = await pool.query(sql, [user.id])
+			const payload = { id: user.id }
+			user.token = await sign(payload, process.env.SECRET, tokenExp)
+			res.json(user)
+		} else {
+			res.json({ msg: 'Not logged in' })
+		}
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -109,19 +117,19 @@ router.post('/login', async (req, res) => {
 						sql = `SELECT * FROM images WHERE user_id = ?`
 						user.images = await pool.query(sql, [user.id])
 						const payload = { id: user.id }
-						user.token = await sign(payload, process.env.SECRET, { expiresIn: 7200 })
+						user.token = await sign(payload, process.env.SECRET, tokenExp)
 						res.json(user)
 					} catch (err) {
 						throw new Error(err)
 					}
 				} else {
-					res.json({ ok: false, status: 'wrong pass' })
+					res.json({ msg: 'wrong pass' })
 				}
 			} catch (err) {
 				throw new Error(err)
 			}
 		} else {
-			res.json({ ok: false, status: 'wrong username' })
+			res.json({ msg: 'wrong username' })
 		}
 	} catch (err) {
 		throw new Error(err)
@@ -137,15 +145,18 @@ router.get('/logout', auth, (req, res) => {
 router.get('/verify/:key', async (req, res) => {
 	if (!req.params.key) return res.json({ msg: 'Cant validate' })
 	try {
-		let sql = `SELECT verified FROM users WHERE vkey = ?`
+		let sql = `SELECT verified, id FROM users WHERE vkey = ?`
 		const result = await pool.query(sql, [req.params.key])
 		if (result.length) {
-			if (result[0].verified) return res.json('User already verified')
+			const user = result[0]
+			if (user.verified) return res.json({ msg: 'User already verified' })
 			sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
 			await pool.query(sql, [req.params.key])
-			res.json({ ok: true, status: 'User Verified' })
+			const payload = { id: user.id }
+			const token = await sign(payload, process.env.SECRET, tokenExp)
+			res.render('verify', { token })
 		} else {
-			res.json({ ok: false, status: 'invalid key' })
+			res.json({ msg: 'invalid key' })
 		}
 	} catch (err) {
 		throw new Error(err)

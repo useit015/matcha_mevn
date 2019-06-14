@@ -7,15 +7,17 @@ const http = require('http')
 const socketIo = require('socket.io')
 const port = process.env.PORT || 8080
 const app = express()
-const passport = require('passport');
+const passport = require('passport')
+ejs = require('ejs')
 
 app.use(passport.initialize())
-app.use(passport.session())
 
 app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+
+app.set('view engine', 'ejs')
 
 app.use('/auth', require('./routes/api/auth'))
 app.use('/api/action', require('./routes/api/actions'))

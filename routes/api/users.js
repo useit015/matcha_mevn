@@ -161,7 +161,7 @@ router.post('/install', async (req, res) => {
 			res.json({ ok: true, status: 'User Added' })
 		}
 	} catch (err) {
-		throw new Error(err)
+		console.log('Got error here --> ', err)
 	}
 })
 
