@@ -246,7 +246,7 @@ router.get('/show', auth, async (req, res) => {
 			const aLoc = { lat: a.lat, lng: a.lng }
 			const bLoc = { lat: b.lat, lng: b.lng }
 			const disDelta = distance(userLoc, aLoc) - distance(userLoc, bLoc) 
-			if (!disDelta && userTags.length) {
+			if (!disDelta && userTags && userTags.length) {
 				const disTag = commonTags(b.tags) - commonTags(a.tags)
 				return !disTag ? b.rating - a.rating : disTag
 			} else {
