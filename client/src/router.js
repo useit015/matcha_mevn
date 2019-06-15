@@ -3,13 +3,16 @@ import vueRouter from 'vue-router'
 import Users from '@/components/Users'
 import About from '@/components/About'
 import Login from '@/components/Login'
+import Search from '@/components/Search'
+import Forgot from '@/components/Forgot'
 import install from '@/components/install'
+import Recover from '@/components/Recover'
 import Register from '@/components/Register'
 import Settings from '@/components/Settings'
 import Discover from '@/components/Discover'
+import NotFound from '@/components/NotFound'
 import Messenger from '@/components/Messenger'
 import UserProfile from '@/components/UserProfile'
-import NotFound from '@/components/NotFound'
 import Notifications from '@/components/Notifications'
 
 Vue.use(vueRouter)
@@ -47,6 +50,10 @@ export const router = new vueRouter({
 			component: Discover
 		},
 		{
+			path: '/search',
+			component: Search
+		},
+		{
 			path: '/notifications',
 			component: Notifications
 		},
@@ -57,6 +64,14 @@ export const router = new vueRouter({
 		{
 			path: '/user/:id',
 			component: UserProfile
+		},
+		{
+			path: '/forgot',
+			component: Forgot
+		},
+		{
+			path: '/recover',
+			component: Recover
 		},
 		{
 			path: '/404',

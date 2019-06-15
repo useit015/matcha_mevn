@@ -29,8 +29,9 @@
 						<h4 class="title font-weight-thin mb-4">Interests</h4>
 						<v-combobox :items="tags" v-model="interests" multiple chips deletable-chips outline solo flat color="primary" class="tags_menu mb-5"></v-combobox>
 						<v-btn outline block large color="primary" class="clear_btn" @click="reset"><v-icon>refresh</v-icon></v-btn>
+						<v-btn outline block large color="primary" class="clear_btn" @click="search = true"><v-icon>search</v-icon></v-btn>
 						<v-layout>
-							<v-select v-model="sort" :items="sortTypes" label="Sort By"></v-select>
+							<v-combobox v-model="sort" :items="sortTypes" label="Sort By"></v-combobox>
 							<v-btn icon @click="changeSort">
 								<v-icon :class="`sort_icon ${sortDir < 0 ? 'flip' : ''}`">sort</v-icon>
 							</v-btn>
@@ -39,11 +40,14 @@
 				</v-container>
 			</v-flex>
 			<v-flex xl10 md9 sm12>
-				<v-layout row wrap justify-center>
+				<v-layout row wrap justify-center v-if="search">
 					<v-flex class="user" v-for="user in sorted" :key="user.user_id" xl2 lg3 sm3 ma-3 grow>
 						<user-card :user="user"/>
 					</v-flex>
 				</v-layout>
+				<div v-else>
+					Search to seee
+				</div>
 			</v-flex>
 		</v-layout>
 	</v-container>
@@ -65,6 +69,7 @@ export default {
 	},
 	data () {
 		return {
+			search: false,
 			sortDir: 1,
 			sort: null,
 			users: [],
@@ -108,6 +113,7 @@ export default {
 			'blockedBy'
 		]),
 		filtered () {
+			if (!this.search) return []
 			return this.users
 				.filter(this.filters.self)
 				.filter(this.filters.blocked)
@@ -119,6 +125,7 @@ export default {
 				.filter(this.filters.interest)
 		},
 		sorted () {
+			if (!this.search) return []
 			if (!this.sort || this.sort == 'distance') {
 				return this.sortDir < 0 ? [... this.filtered].reverse() :  this.filtered
 			} 
@@ -149,7 +156,7 @@ export default {
 		const headers = { 'x-auth-token': token }
 		const res = await this.$http.get(url, { headers })
 		if (!res.body.msg) {
-			this.users = res.body.slice(0, 100).map(cur => ({
+			this.users = res.body.map(cur => ({
 				...cur,
 				rating: Number(cur.rating),
 				status: Math.round(Math.random() * 100) % 2
@@ -173,6 +180,7 @@ export default {
 	methods: {
 		...mapActions(['logout']),
 		reset () {
+			this.search = false
 			this.rating = [0, 5]
 			this.age = [18, 85]
 			this.gender = null

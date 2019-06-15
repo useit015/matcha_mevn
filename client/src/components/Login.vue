@@ -15,6 +15,7 @@
 			<v-text-field @keyup.13="log" color="primary" class="my-5" v-model="password" validate-on-blur :rules="passRules" label="Password" required :append-icon="showPass ? 'visibility' : 'visibility_off'" :type="showPass ? 'text' : 'password'" @click:append="showPass = !showPass"></v-text-field>
 			<v-btn block large depressed color="primary" dark @click.prevent="log" class="mt-5">Login</v-btn>
 			<v-layout row justify-end>
+				<v-btn flat color="primary" dark to="/forgot">Forgot password</v-btn>
 				<v-btn flat color="primary" dark to="/register">Don't have an account? Sign up</v-btn>
 			</v-layout>
 		</v-form>
