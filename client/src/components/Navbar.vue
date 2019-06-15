@@ -157,6 +157,11 @@ export default {
 				route: '/discover',
 				public: false
 			}, {
+				icon: 'search',
+				text: 'Search',
+				route: '/search',
+				public: false
+			}, {
 				icon: 'chat',
 				text: 'Chat',
 				route: '/chat',
