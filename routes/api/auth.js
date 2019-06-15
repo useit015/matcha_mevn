@@ -5,25 +5,33 @@ const sign = promisify(jwt.sign)
 const router = require('express').Router()
 const pool = require('../../utility/database')
 const auth = require('../../middleware/auth')
+const sendMail = require('../../utility/mail')
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy
+
+const { randomBytes } = require('crypto')
+const randomHex = () => randomBytes(10).toString('hex')
 
 const tokenExp = { expiresIn: 7200 }
 
 passport.serializeUser((user, done) => {
-	done(null, user.id);
+	done(null, user.id)
 })
 
 passport.deserializeUser(async (id, done) => {
-	const sql = `SELECT * FROM users WHERE id = ?`
-	const result = await pool.query(sql, [id])
-	done(null, result[0]);
+	try {
+		const sql = `SELECT * FROM users WHERE id = ?`
+		const result = await pool.query(sql, [id])
+		done(null, result[0])
+	} catch (err) {
+		done(err, false)
+	}
 })
 
 passport.use(
 	new GoogleStrategy({
-		clientID: process.env.OAUTH_GOOGLE_ID,
-		clientSecret: process.env.OAUTH_GOOGLE_PASS,
+		clientID: process.env.OAUTH_ID,
+		clientSecret: process.env.OAUTH_PASS,
 		callbackURL: 'http://useit015.me/auth/google/redirect'
 	}, async (accessToken, refreshToken, profile, done) => {
 		try {
@@ -36,7 +44,7 @@ passport.use(
 					username: profile.displayName,
 					first_name: profile.name.givenName,
 					last_name: profile.name.familyName,
-					email: profile.emails.find(cur => cur.verified).value
+					email: profile.emails[0].value
 				}
 				sql = `INSERT INTO users (google_id, username, first_name,
 						last_name, email, verified) VALUES (?, ?, ?, ?, ?, 1)`
@@ -157,6 +165,33 @@ router.get('/verify/:key', async (req, res) => {
 			res.render('verify', { token })
 		} else {
 			res.json({ msg: 'invalid key' })
+		}
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
+router.post('/forgot', async (req, res) => {
+	try {
+		const key = randomHex()
+		const sql = `UPDATE users SET rkey = ? WHERE email = ?`
+		const result = await pool.query(sql, [key, req.body.email])
+		if (!result.affectedRows) return res.json({ msg: 'email not found' })
+		sendMail(req.body.email, key)
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
+router.get('/recover', async (req, res) => {
+	try {
+		const key = req.params.key
+		const sql = `SELECT id FROM users WHERE rkey = ?`
+		const result = await pool.query(sql, [key])
+		if (result.length) {
+			const payload = { id: result[0].id }
+			const token = await sign(payload, process.env.SECRET, tokenExp)
+			res.render('recover', { token, key })
 		}
 	} catch (err) {
 		throw new Error(err)

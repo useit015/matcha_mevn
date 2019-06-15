@@ -87,11 +87,11 @@ router.post('/send', async (req, res) => {
 			date: new Date().toISOString().substr(0, 19)
 		}
 		let sql = `INSERT INTO chat (id_conversation, id_from, message, created_at) VALUES (?, ?, ?, ?)`
-		await pool.query(sql, Object.values(msg))
-		sql = `SELECT id FROM chat WHERE id_conversation = ? AND id_from = ? AND created_at = ?`
-		const result = await pool.query(sql, [msg.id_conversation, msg.id_from, msg.date])
+		let result = await pool.query(sql, Object.values(msg))
+		// sql = `SELECT id FROM chat WHERE id_conversation = ? AND id_from = ? AND created_at = ?`
+		// result = await pool.query(sql, [msg.id_conversation, msg.id_from, msg.date])
 		sql = `UPDATE conversations SET last_update = ?, last_msg = ? WHERE id_conversation = ?`
-		await pool.query(sql, [msg.date, result[0].id, msg.id_conversation])
+		await pool.query(sql, [msg.date, result.body.insertId, msg.id_conversation])
 		res.json('Message added')
 	} catch (err) {
 		throw new Error(err)

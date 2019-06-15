@@ -8,7 +8,7 @@ const socketIo = require('socket.io')
 const port = process.env.PORT || 8080
 const app = express()
 const passport = require('passport')
-ejs = require('ejs')
+const ejs = require('ejs')
 
 app.use(passport.initialize())
 

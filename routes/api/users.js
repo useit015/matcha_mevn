@@ -8,6 +8,7 @@ const { promisify } = require('util')
 const { randomBytes } = require('crypto')
 const router = require('express').Router()
 const pool = require('../../utility/database')
+const distance = require('../../utility/distance')
 const sendMail = require('../../utility/mail')
 const writeFileAsync = promisify(writeFile)
 const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
@@ -147,19 +148,19 @@ router.post('/install', async (req, res) => {
 						password, vkey, verified, gender, looking, birthdate, biography,
 						tags, address, city, country, rating, postal_code, phone, lat, lng)
 						VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-		await pool.query(sql, Object.values(user))
-		sql = `SELECT id FROM users WHERE username = ?`
-		const result = await pool.query(sql, [user.username])
-		if (result.length) {
-			sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
-			const data = {
-				id: result[0].id,
-				name: req.body.image,
-				profile: 1
-			}
-			await pool.query(sql, Object.values(data))
-			res.json({ ok: true, status: 'User Added' })
+		const result = await pool.query(sql, Object.values(user))
+		// sql = `SELECT id FROM users WHERE username = ?`
+		// const result = await pool.query(sql, [user.username])
+		// if (result.length) {
+		// }
+		sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
+		const data = {
+			id: result.body.insertId,
+			name: req.body.image,
+			profile: 1
 		}
+		await pool.query(sql, Object.values(data))
+		res.json({ ok: true, status: 'User Added' })
 	} catch (err) {
 		console.log('Got error here --> ', err)
 	}
@@ -229,8 +230,29 @@ router.get('/show', auth, async (req, res) => {
 	try {
 		const sql = `SELECT * FROM users, images
 						WHERE users.id = images.user_id
-						AND images.profile = 1`
-		const result = await pool.query(sql)
+						AND images.profile = 1 ORDER BY rating DESC`
+		let result = await pool.query(sql)
+		let userTags = req.user.tags
+		const userLoc = {
+			lat: req.user.lat,
+			lng: req.user.lng
+		}
+		const commonTags = a => {
+			if (!a || !a.length) return 0
+			const tags = a.split(',')
+			return userTags.split(',').filter(val => -1 !== tags.indexOf(val)).length
+		}
+		result = result.sort((a, b) => {
+			const aLoc = { lat: a.lat, lng: a.lng }
+			const bLoc = { lat: b.lat, lng: b.lng }
+			const disDelta = distance(userLoc, aLoc) - distance(userLoc, bLoc) 
+			if (!disDelta && userTags.length) {
+				const disTag = commonTags(b.tags) - commonTags(a.tags)
+				return !disTag ? b.rating - a.rating : disTag
+			} else {
+				return !disDelta ? b.rating - a.rating : disDelta
+			}
+		})
 		res.json(result)
 	} catch (err) {
 		throw new Error(err)

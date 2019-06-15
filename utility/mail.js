@@ -9,7 +9,7 @@ const sendMail = async (to, key) => {
 			to,
 			subject: "Hello ✔",
 			text: "Hello world?",
-			html: `<a href="http://useit015.me/auth/verify/${key}">Click here</a>`
+			html: `<a href="http://useit015.me/auth/recover/${key}">Click here</a>`
 		})
 	} catch (err) {
 		throw new Error(err)
