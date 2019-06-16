@@ -12,7 +12,7 @@
 				<v-text-field color="primary" class="my-3" validate-on-blur :rules="confPassRules" v-model="passwordConfirm" :counter="12" label="Confirm new password" required :append-icon="showConfPass ? 'visibility' : 'visibility_off'" :type="showConfPass ? 'text' : 'password'" @click:append="showConfPass = !showConfPass" :error-messages="passwordMatch()"></v-text-field>
 			</v-flex>
 			<v-flex md8 sm10 xs12>
-				<v-btn block large depressed color="primary" :disabled="!valid" class="mt-5 white--text">Submit</v-btn>
+				<v-btn block large depressed color="primary" :disabled="!valid" class="mt-5 white--text" @click="submit">Submit</v-btn>
 			</v-flex>
 		</v-layout>
 	</v-form>
@@ -39,29 +39,24 @@ export default {
 		]
 	 }),
 	computed: mapGetters(['user']),
-	async created () {
-		try {
-			const key = this.$route.params.key
-			console.log('i am the key -> ', key)
-			const token = localStorage.getItem('token')
-			const headers = { 'x-auth-token': token }
-			const url = 'http://134.209.195.36/auth/rcheck'
-			const res = await this.$http.post(url, { key }, { headers })
-			// if (!res.body.ok) this.$router.push('/')
-			// this.user = res.body.user
-			console.log('i got this from the derver --> ', res)
-		} catch (err) {
-			console.log('Got error with --> ', err)
-		}
-	},
-	// watcher: {
-	// 	valid () {
-	// 		if (!this.passwordConfirm.length) this.valid = false
-	// 	}
-	// },
 	methods: {
 		passwordMatch () { 
 			return !this.passwordConfirm.length || this.password === this.passwordConfirm ? '' : 'Passwords must match';
+		},
+		async submit () {
+			try {
+				const key = this.$route.params.key
+				console.log('i am the key -> ', key)
+				const token = localStorage.getItem('token')
+				const headers = { 'x-auth-token': token }
+				const url = 'http://134.209.195.36/auth/rcheck'
+				const res = await this.$http.post(url, { key, password: this.password }, { headers })
+				// if (!res.body.ok) this.$router.push('/')
+				// this.user = res.body.user
+				console.log('i got this from the derver --> ', res)
+			} catch (err) {
+				console.log('Got error with --> ', err)
+			}
 		}
 	}
 }
