@@ -29,11 +29,11 @@ export default {
 		async recover (e) {
 			e.preventDefault()
 			const email = this.email
-			if (email.length && /.+@.+/.test(email)) {
+			if (email && email.length && /.+@.+/.test(email)) {
 				const url = `http://134.209.195.36/auth/forgot`
 				const res = await this.$http.post(url, { email })
 				console.log('result here --> ', res)
-				if (!res.body.msg) {
+				if (res.body.ok) {
 					this.showAlert('green', 'Please check your email ..')
 				} else {
 					this.showAlert('red', 'Ouups something went wrong!')
