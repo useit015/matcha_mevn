@@ -6,17 +6,39 @@
 				<h1 class="page-header pass_reset_title display-3 mb-5 font-weight-light grey--text">Reset password</h1>
 			</v-flex>
 			<v-flex md8 sm10 xs12>
-				<v-text-field color="primary" v-model="password" validate-on-blur :rules="passRules" label="New password" required :append-icon="showPass ? 'visibility' : 'visibility_off'" :type="showPass ? 'text' : 'password'" @click:append="showPass = !showPass"></v-text-field>
+				<v-text-field
+					color="primary"
+					v-model="password"
+					validate-on-blur
+					:rules="passRules"
+					label="New password"
+					required
+					:append-icon="showPass ? 'visibility' : 'visibility_off'"
+					:type="showPass ? 'text' : 'password'" @click:append="showPass = !showPass"
+				></v-text-field>
 			</v-flex>
 			<v-flex md8 sm10 xs12>
-				<v-text-field color="primary" class="my-3" validate-on-blur :rules="confPassRules" v-model="passwordConfirm" :counter="12" label="Confirm new password" required :append-icon="showConfPass ? 'visibility' : 'visibility_off'" :type="showConfPass ? 'text' : 'password'" @click:append="showConfPass = !showConfPass" :error-messages="passwordMatch()"></v-text-field>
+				<v-text-field
+					color="primary"
+					class="my-3"
+					validate-on-blur
+					:rules="confPassRules"
+					v-model="passwordConfirm"
+					:counter="12"
+					label="Confirm new password"
+					required
+					:append-icon="showConfPass ? 'visibility' : 'visibility_off'"
+					:type="showConfPass ? 'text' : 'password'"
+					@click:append="showConfPass = !showConfPass"
+					:error-messages="passwordMatch()"
+				></v-text-field>
 			</v-flex>
 			<v-flex md8 sm10 xs12>
 				<v-btn block large depressed color="primary" :disabled="!valid" class="mt-5 white--text" @click="submit">Submit</v-btn>
 			</v-flex>
 		</v-layout>
 	</v-form>
-	<v-btn v-if="!notSub && !loading" large round outline router to="/" color="primary" class="mt-5 py-3 white--text back_btn">
+	<v-btn v-if="!notSub && !loading"largeroundoutlinerouter to="/"color="primary"class="mt-5 py-3 white--text back_btn">
 		<v-icon left dark>arrow_back</v-icon>
 		<span>Go back</span>
 	</v-btn>
@@ -59,6 +81,9 @@ export default {
 		}
 	 }),
 	computed: mapGetters(['user']),
+	created () {
+		router.replace(`/recover/${this.$route.params.key}`)
+	},
 	methods: {
 		passwordMatch () { 
 			return !this.passwordConfirm.length || this.password === this.passwordConfirm ? '' : 'Passwords must match';
@@ -73,19 +98,14 @@ export default {
 					key: this.$route.params.key,
 					password: this.password
 				}
-				// const res = await this.$http.post(url, data, { headers })
-				setTimeout(() => {
-					this.loading = false
-					if (true) {
-						this.notSub = false
-						this.showAlert('green', 'Your password has been reseted!')
-					} else {
-						this.showAlert('red', 'Oups, something went wrong, please try later')
-					}
-				}, 1000);
-				// if (!res.body.ok) this.$router.push('/')
-				// this.user = res.body.user
-				console.log('i got this from the derver --> ', res)
+				const res = await this.$http.post(url, data, { headers })
+				this.loading = false
+				if (res.body.ok) {
+					this.notSub = false
+					this.showAlert('green', 'Your password has been reseted!')
+				} else {
+					this.showAlert('red', 'Oups, something went wrong, please try later')
+				}
 			} catch (err) {
 				console.log('Got error with --> ', err)
 			}

@@ -32,7 +32,7 @@ export default {
 			if (email && email.length && /.+@.+/.test(email)) {
 				const url = `http://134.209.195.36/auth/forgot`
 				const res = await this.$http.post(url, { email })
-				console.log('result here --> ', res)
+				this.email = ''
 				if (res.body.ok) {
 					this.showAlert('green', 'Please check your email ..')
 				} else {
