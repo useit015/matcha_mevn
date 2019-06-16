@@ -82,7 +82,7 @@ export default {
 	 }),
 	computed: mapGetters(['user']),
 	created () {
-		router.replace(`/recover/${this.$route.params.key}`)
+		this.$router.replace(`/recover/${this.$route.params.key}`)
 	},
 	methods: {
 		passwordMatch () { 
