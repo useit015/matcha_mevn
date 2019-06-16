@@ -14,14 +14,14 @@
 			<v-text-field color="primary" class="my-5" v-model="username" validate-on-blur :rules="usernameRules" label="Username" required ></v-text-field>
 			<v-text-field @keyup.13="log" color="primary" class="my-5" v-model="password" validate-on-blur :rules="passRules" label="Password" required :append-icon="showPass ? 'visibility' : 'visibility_off'" :type="showPass ? 'text' : 'password'" @click:append="showPass = !showPass"></v-text-field>
 			<v-btn block large depressed color="primary" dark @click.prevent="log" class="mt-5">Login</v-btn>
-			<v-layout row justify-end>
+			<v-layout row wrap justify-end>
 				<v-btn flat color="primary" dark to="/forgot">Forgot password</v-btn>
 				<v-btn flat color="primary" dark to="/register">Don't have an account? Sign up</v-btn>
 			</v-layout>
 		</v-form>
 		<v-layout justify-center align-center>
-			<a href="http://134.209.195.36/auth/google">
-				<v-btn large depressed color="red" dark class="mt-5">Login with google</v-btn>
+			<a href="http://134.209.195.36/auth/google" class="google">
+				<v-btn large depressed color="red" dark class="mt-3">Login with google</v-btn>
 			</a>
 		</v-layout>
 	</div>
@@ -35,10 +35,10 @@ import utility from '../utility.js'
 export default {
 	name: 'Login',
 	data: () => ({
-		valid: false,
-		showPass: false,
 		username: '',
 		password: '',
+		valid: false,
+		showPass: false,
 		userAdded: false,
 		userFailed: false,
 		nameRules: [
@@ -96,18 +96,25 @@ export default {
 .alert-enter-active, .alert-leave-active, .register {
 	transition: all .5s;
 }
+
 .alert-enter, .alert-leave-to {
 	opacity: 0;
 }
+
 .login, .alert {
 	width: 100%;
 	max-width: 40rem;
 	margin: auto;
 }
+
 .alert {
 	position: absolute;
 	left: 50%;
 	top: 1rem;
 	transform: translateX(-50%);
+}
+
+.google {
+	text-decoration: none;
 }
 </style>

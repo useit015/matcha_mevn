@@ -1,6 +1,6 @@
 <template>
 <v-container class="recover mt-5">
-	<v-form v-model="valid" class="my-4">
+	<v-form v-model="valid" class="my-4" v-if="notSub && !loading">
 		<v-layout wrap justify-center>
 			<v-flex xs12>
 				<h1 class="page-header pass_reset_title display-3 mb-5 font-weight-light grey--text">Reset password</h1>
@@ -16,17 +16,32 @@
 			</v-flex>
 		</v-layout>
 	</v-form>
+	<v-btn v-if="!notSub && !loading" large round outline router to="/" color="primary" class="mt-5 py-3 white--text back_btn">
+		<v-icon left dark>arrow_back</v-icon>
+		<span>Go back</span>
+	</v-btn>
+	<loader v-if="loading"/>
+	<alert :data="alert"></alert>
 </v-container>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import loader from './loader'
+import Alert from './Alert'
+import { mapGetters } from 'vuex'
+
 export default {
 	name: 'Recover',
+	components: {
+		Alert,
+		loader
+	},
 	data: () => ({
 		password: '',
 		passwordConfirm: '',
+		notSub: true,
 		valid: false,
+		loading: false,
 		showPass: false,
 		showConfPass: false,
 		passRules: [
@@ -36,7 +51,12 @@ export default {
 		],
 		confPassRules: [
 			v => !!v || 'This field is required'
-		]
+		],
+		alert: {
+			state: false,
+			color: '',
+			text: ''
+		}
 	 }),
 	computed: mapGetters(['user']),
 	methods: {
@@ -44,20 +64,39 @@ export default {
 			return !this.passwordConfirm.length || this.password === this.passwordConfirm ? '' : 'Passwords must match';
 		},
 		async submit () {
+			this.loading = true
 			try {
-				const key = this.$route.params.key
-				console.log('i am the key -> ', key)
 				const token = localStorage.getItem('token')
 				const headers = { 'x-auth-token': token }
 				const url = 'http://134.209.195.36/auth/rcheck'
-				const res = await this.$http.post(url, { key, password: this.password }, { headers })
+				const data= {
+					key: this.$route.params.key,
+					password: this.password
+				}
+				// const res = await this.$http.post(url, data, { headers })
+				setTimeout(() => {
+					this.loading = false
+					if (true) {
+						this.notSub = false
+						this.showAlert('green', 'Your password has been reseted!')
+					} else {
+						this.showAlert('red', 'Oups, something went wrong, please try later')
+					}
+				}, 1000);
 				// if (!res.body.ok) this.$router.push('/')
 				// this.user = res.body.user
 				console.log('i got this from the derver --> ', res)
 			} catch (err) {
 				console.log('Got error with --> ', err)
 			}
-		}
+		},
+		showAlert (color, text) {
+			this.alert = {
+				state: true,
+				color,
+				text
+			}
+		},
 	}
 }
 </script>
@@ -65,5 +104,13 @@ export default {
 <style>
 .pass_reset_title {
 	text-align: center;
+}
+
+.back_btn:hover,
+.back_btn {
+	position: absolute;
+	top: 30%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 }
 </style>

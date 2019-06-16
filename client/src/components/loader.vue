@@ -27,9 +27,9 @@ export default { name: 'loader' }
 .cs-loader-inner {
 	position: absolute;
 	transform: translateY(-50%, -50%);
-	top: 50%;
+	top: 40%;
 	left: 10%;
-	width: calc(100vw - 200px);
+	width: calc(100vw - 20%);
 	color: var(--color-primary);
 	padding: 0 100px;
 	text-align: center;
