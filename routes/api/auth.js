@@ -171,6 +171,20 @@ router.get('/verify/:key', async (req, res) => {
 	}
 })
 
+router.post('/rcheck', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	try {
+		console.log('i am in rcheck -->', req)
+		const hash = await bcrypt.hash(req.body.password, 10)
+		const sql = `UPDATE users set password = ?, rkey = '' WHERE id = ? AND rkey = ?`
+		const result = await pool.query(sql, [hash, req.user.id, req.body.key])
+		if (!result.affectedRows) return res.json({ msg: 'something went wrong' })
+		res.json({ ok: true })
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
 router.post('/forgot', async (req, res) => {
 	try {
 		const key = randomHex()
@@ -178,12 +192,13 @@ router.post('/forgot', async (req, res) => {
 		const result = await pool.query(sql, [key, req.body.email])
 		if (!result.affectedRows) return res.json({ msg: 'email not found' })
 		sendMail(req.body.email, key)
+		res.json({ ok: true })
 	} catch (err) {
 		throw new Error(err)
 	}
 })
 
-router.get('/recover', async (req, res) => {
+router.get('/recover/:key', async (req, res) => {
 	try {
 		const key = req.params.key
 		const sql = `SELECT id FROM users WHERE rkey = ?`
@@ -193,6 +208,37 @@ router.get('/recover', async (req, res) => {
 			const token = await sign(payload, process.env.SECRET, tokenExp)
 			res.render('recover', { token, key })
 		}
+		else {
+			res.redirect('/404')
+		}
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
+router.post('/kcheck', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	try {
+		const key = req.body.key
+		const sql = `SELECT id FROM users WHERE rkey = ?`
+		const result = await pool.query(sql, [key])
+		if (result.length) {
+			res.json({ ok: true })
+		}
+		else {
+			res.json({ msg: 'Invalid key' })
+		}
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
+router.get('/kdestroy', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	try {
+		const sql = `UPDATE users SET rkey = '' WHERE id = ?`
+		const result = await pool.query(sql, [req.user.id])
+		res.json({ ok: true })
 	} catch (err) {
 		throw new Error(err)
 	}
