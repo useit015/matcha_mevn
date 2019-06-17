@@ -35,8 +35,7 @@ router.post('/report', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {
 		let sql = `UPDATE users SET reports = reports + 1 WHERE id = ?`
-		const data = [req.body.id]
-		const result = await pool.query(sql, data)
+		const result = await pool.query(sql, [req.body.id])
 		if (result.affectedRows == 1) {
 			res.json({ ok: true })
 		} else {
