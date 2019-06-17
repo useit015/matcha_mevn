@@ -63,7 +63,7 @@ export default {
 		passwordConfirm: '',
 		notSub: true,
 		valid: false,
-		loading: false,
+		loading: true,
 		showPass: false,
 		showConfPass: false,
 		passRules: [
@@ -81,8 +81,24 @@ export default {
 		}
 	 }),
 	computed: mapGetters(['user']),
-	created () {
-		this.$router.replace(`/recover/${this.$route.params.key}`)
+	async created() {
+		try {
+			const token = localStorage.getItem('token')
+			const headers = { 'x-auth-token': token }
+			const url = 'http://134.209.195.36/auth/kcheck'
+			const data= {
+				key: this.$route.params.key
+			}
+			const res = await this.$http.post(url, data, { headers })
+			this.loading = false
+			if (res.body.ok) {
+				this.$router.replace(`/recover/${this.$route.params.key}`)
+			} else {
+				this.$router.push('/404')
+			}
+		} catch (err) {
+			console.log('Got error with --> ', err)
+		}
 	},
 	methods: {
 		passwordMatch () { 
