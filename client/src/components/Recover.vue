@@ -132,11 +132,15 @@ export default {
 				color,
 				text
 			}
-		},
+		}
+	},
+	async beforeDestroy () {
+		const headers = { 'x-auth-token': this.user.token }
+		const url = 'http://134.209.195.36/auth/kdestroy'
+		await this.$http.get(url, { headers })
 	}
 }
 </script>
-
 <style>
 .pass_reset_title {
 	text-align: center;
