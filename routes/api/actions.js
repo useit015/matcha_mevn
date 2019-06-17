@@ -31,6 +31,22 @@ router.post('/block', auth, async (req, res) => {
 	}
 })
 
+router.post('/report', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	try {
+		let sql = `UPDATE users SET reports = reports + 1 WHERE id = ?`
+		const data = [req.body.id]
+		const result = await pool.query(sql, data)
+		if (!result.affectedRows == 1) {
+			res.json({ ok: true })
+		} else {
+			res.json({ msg: 'Cannot report user' })
+		}
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
 router.post('/match', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {

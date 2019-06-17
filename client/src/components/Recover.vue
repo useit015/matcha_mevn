@@ -38,7 +38,7 @@
 			</v-flex>
 		</v-layout>
 	</v-form>
-	<v-btn v-if="!notSub && !loading"largeroundoutlinerouter to="/"color="primary"class="mt-5 py-3 white--text back_btn">
+	<v-btn v-if="!notSub && !loading" large round outline router to="/" color="primary" class="mt-5 py-3 white--text back_btn">
 		<v-icon left dark>arrow_back</v-icon>
 		<span>Go back</span>
 	</v-btn>

@@ -100,7 +100,7 @@
 			<v-card-actions>
 				<v-spacer></v-spacer>
 				<v-btn color="primary" flat @click="reportDialog = false">Close</v-btn>
-				<v-btn color="primary" flat @click="reportDialog = false">Report</v-btn>
+				<v-btn color="primary" flat @click="reportUser">Report</v-btn>
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -311,8 +311,8 @@ export default {
 					id_to: this.$route.params.id
 				}
 				this.$socket.emit('block', data)
-				this.$router.push('/')
 				this.blockDialog = false
+				this.$router.push('/')
 			}
 		},
 		goToChat () {
@@ -352,6 +352,20 @@ export default {
 						console.error(err)
 					}
 				}
+			}
+		},
+		async reportUser() {
+			const url = `http://134.209.195.36/api/action/report`
+			let data = { id: this.$route.params.id }
+			const headers =  { 'x-auth-token': this.loggedIn.token }
+			const res = await this.$http.post(url, data, {
+				headers })
+			if (!res.body.msg) {
+				this.reportDialog = false
+				console.log('user reported   ->', this.user.id)
+			}
+			else {
+				console.log(res.body.msg)
 			}
 		}
 	},
