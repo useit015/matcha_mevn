@@ -70,7 +70,7 @@ export const router = new vueRouter({
 			component: Forgot
 		},
 		{
-			path: '/recover/:key',
+			path: '/recover',
 			component: Recover
 		},
 		{
