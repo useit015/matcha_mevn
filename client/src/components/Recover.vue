@@ -89,9 +89,8 @@ export default {
 			const url = 'http://134.209.195.36/auth/kcheck'
 			const res = await this.$http.post(url, { key }, { headers })
 			this.loading = false
-			console.log('i am res.body --> ', res.body)
 			if (res.body.ok) {
-				this.$router.replace(`/recover/${this.$route.params.key}`)
+				this.$router.replace(`/recover`)
 			} else {
 				this.$router.push('/404')
 			}
@@ -134,7 +133,7 @@ export default {
 	async beforeDestroy () {
 		const headers = { 'x-auth-token': this.user.token }
 		const url = 'http://134.209.195.36/auth/kdestroy'
-		await this.$http.get(url, { headers })
+		// await this.$http.get(url, { headers })
 	}
 }
 </script>
