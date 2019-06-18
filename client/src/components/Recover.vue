@@ -84,12 +84,10 @@ export default {
 	async created() {
 		try {
 			const token = localStorage.getItem('token')
+			const key = localStorage.getItem('key')
 			const headers = { 'x-auth-token': token }
 			const url = 'http://134.209.195.36/auth/kcheck'
-			const data= {
-				key: this.$route.params.key
-			}
-			const res = await this.$http.post(url, data, { headers })
+			const res = await this.$http.post(url, { key }, { headers })
 			this.loading = false
 			console.log('i am res.body --> ', res.body)
 			// if (res.body.ok) {
@@ -109,12 +107,10 @@ export default {
 			this.loading = true
 			try {
 				const token = localStorage.getItem('token')
+				const key = localStorage.getItem('key')
 				const headers = { 'x-auth-token': token }
 				const url = 'http://134.209.195.36/auth/rcheck'
-				const data= {
-					key: this.$route.params.key,
-					password: this.password
-				}
+				const data= { key, password: this.password }
 				const res = await this.$http.post(url, data, { headers })
 				this.loading = false
 				if (res.body.ok) {
