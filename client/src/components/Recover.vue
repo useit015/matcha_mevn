@@ -91,11 +91,12 @@ export default {
 			}
 			const res = await this.$http.post(url, data, { headers })
 			this.loading = false
-			if (res.body.ok) {
-				this.$router.replace(`/recover/${this.$route.params.key}`)
-			} else {
-				this.$router.push('/404')
-			}
+			console.log('i am res.body --> ', res.body)
+			// if (res.body.ok) {
+			// 	this.$router.replace(`/recover/${this.$route.params.key}`)
+			// } else {
+			// 	this.$router.push('/404')
+			// }
 		} catch (err) {
 			console.log('Got error with --> ', err)
 		}
