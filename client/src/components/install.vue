@@ -14,7 +14,7 @@ export default {
 	data () {
 		return {
 			users: 1,
-			nats: countries
+			nats: countries,
 		}
 	},
 	methods: {
@@ -32,7 +32,7 @@ export default {
 						email: cur.email,
 						password: '123456abc',
 						gender: cur.gender,
-						looking: cur.gender == 'female' ? 'male' : 'female',
+						looking: ['both', 'female', 'male'][Math.floor(Math.random() * 3)],
 						birthdate: cur.dob.date.slice(0, 10),
 						biography: '',
 						tags: '',

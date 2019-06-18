@@ -46,7 +46,7 @@
 				<v-text-field :disabled="!isEditing" color="primary" label="Postal Code" type="number" v-model="user.postal_code"/>
 			</v-flex>
 			<v-flex xs12>
-				<vue-tags-input :disabled="!isEditing" v-model="tag" :tags="tags" @tags-changed="newTags => tags = newTags"/>
+				<vue-tags-input :max-tags="50" :maxlength="100" :autocomplete-items="formatedTags" :add-on-key="tagEsc" :disabled="!isEditing" v-model="tag" :tags="tags" @tags-changed="newTags => tags = newTags"/>
 			</v-flex>
 			<v-flex xs12>
 				<v-textarea :disabled="!isEditing" color="primary" label="Bio" v-model="user.biography"/>
@@ -60,6 +60,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { VueTagsInput, createTags } from '@johmun/vue-tags-input'
 import utility from '../utility.js'
 import moment from 'moment'
@@ -75,6 +76,15 @@ export default {
 			tags: [],
 			genders: ['male', 'female'],
 			looking: ['male', 'female', 'both'],
+			tagEsc: [13, ':', ',', ';']
+		}
+	},
+	computed: {
+		...mapGetters({ allTags: 'tags' }),
+		formatedTags (val) {
+			return createTags(this.allTags).filter(cur => {
+				return cur.text.toLowerCase().indexOf(this.tag.toLowerCase()) != -1
+			})
 		}
 	},
 	props: {
@@ -89,7 +99,9 @@ export default {
 			immediate: true
 		},
 		tags: function() {
-			this.user.tags = this.tags.map(cur => cur.text.toLowerCase()).join(',')
+			this.user.tags = this.tags
+				.map(cur => cur.text.toLowerCase())
+				.join(',')
 		}
 	},
 	methods: {
@@ -130,13 +142,26 @@ export default {
 	left: 50%;
 	transform: translate(-50%, 25%);
 	width: 0;
-	height: 1.5px;
+	height: 1.2px;
 	background: var(--color-primary);
 	transition: width .2s ease-in-out;
 }
 
 .ti-tag {
 	background: var(--color-primary) !important;
+}
+
+.ti-autocomplete {
+	border: 1px solid var(--color-primary) !important;
+	transform: translate(-.5px, -1.2px);
+}
+
+.ti-item {
+	background-color: #fafafa !important;
+}
+
+.ti-item.ti-selected-item {
+	background-color: var(--color-primary) !important;
 }
 
 .vue-tags-input.ti-disabled > .ti-input > .ti-tags > .ti-tag {

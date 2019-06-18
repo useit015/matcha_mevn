@@ -50,7 +50,14 @@ export default {
 	getFullPath: file => isExternal(file) ? file : `http://134.209.195.36/uploads/${file ? file : 'default.jpg'}`,
 	formatTime (date) {
 		const when = moment(getDate(date))
-		return `${when.format('MMMM D, YYYY')} at ${when.format('h:mm A')}`
+		const now = moment()
+		let fmt = 'M/DD/YY, h:mm A'
+		if (now.diff(when, 'weeks', true) < 1) {
+			fmt = 'ddd h:mm A'
+		} else if (now.diff(when, 'years', true) < 1) {
+			fmt = 'MMMM D, YYYY, h:mm A'
+		}
+		return when.format(fmt)
 	},
 	sync: async type => {
 		try {

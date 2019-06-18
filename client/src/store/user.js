@@ -1,6 +1,6 @@
 import utility from '../utility'
 import { isArray } from 'util'
-import Vue from 'vue'
+// import Vue from 'vue'
 
 export const user = {
 	mutations: {
@@ -27,6 +27,9 @@ export const user = {
 		},
 		getNotif: (state, notif) => {
 			state.notif = notif
+		},
+		getTags: (state, tags) => {
+			state.tags = tags
 		},
 		seenNotif: state => {
 			state.notif = state.notif.map(cur => {
@@ -116,6 +119,14 @@ export const user = {
 					visited = res.body.filter(cur => cur.visited_id).map(merge)
 				}
 				commit('syncHistory', { visitor, visited })
+			} catch (err) {
+				console.log('Got error here --> ', err)
+			}
+		},
+		getTags: async ({ commit }) => {
+			try {
+				const tags =  await utility.sync('tags')
+				commit('getTags', tags.body)
 			} catch (err) {
 				console.log('Got error here --> ', err)
 			}

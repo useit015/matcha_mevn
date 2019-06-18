@@ -154,7 +154,7 @@ export default {
 		const token = localStorage.getItem('token')
 		const url = 'http://134.209.195.36/api/users/show'
 		const headers = { 'x-auth-token': token }
-		const res = await this.$http.get(url, { headers })
+		const res = await this.$http.post(url, {filter:false}, { headers })
 		if (!res.body.msg) {
 			this.users = res.body.map(cur => ({
 				...cur,

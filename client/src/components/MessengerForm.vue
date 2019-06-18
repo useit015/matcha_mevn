@@ -1,6 +1,6 @@
 <template>
 	<v-layout v-if="selectedConvo" align-center justify center row class="messenger_form px-3 chat_layout">
-		<v-textarea rows="2" solo flat outline class="ma-4" append-icon="send" @click:append="sendMsg" label="Type a message..." v-model="msg" @keyup.13="sendMsg"></v-textarea>
+		<v-textarea rows="1" solo flat outline class="ma-4 send_msg" append-icon="send" @click:append="sendMsg" label="Type a message..." v-model="msg" @keyup.13="sendMsg"></v-textarea>
 	</v-layout>
 	<p v-else>Get matches to start chating with sexy girls or boys or both</p>
 </template>
@@ -65,5 +65,10 @@ export default {
 <style>
 .v-text-field--outline.v-text-field--single-line input {
 	margin-top: 0 !important;
+}
+.send_msg > .v-input__control > .v-input__slot > .v-text-field__slot > textarea {
+	resize: none !important;
+	overflow-y: hidden;
+	margin-top: 5px;
 }
 </style>

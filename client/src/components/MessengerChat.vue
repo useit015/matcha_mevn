@@ -1,6 +1,8 @@
 <template>
 	<v-layout column class="pa-3">
+		<v-img v-if="!limit" class="chat_load" src="https://i.giphy.com/media/uyCJt0OOhJBiE/giphy.webp"></v-img>
 		<v-flex v-for="(msg, i) in messages" :key="i + key">
+			<h3 class="date_spacer subheading mb-2 mt-4" v-if="newConvo(msg, i)">{{ formatTime(msg.created_at) }}</h3>
 			<v-layout :class="layoutClass(msg, i)" align-start>
 				<v-tooltip lazy z-index="2" left>
 					<template v-slot:activator="{ on }">
@@ -18,7 +20,7 @@
 				</v-avatar>
 				<v-tooltip lazy z-index="2" :left="msg.id_from == user.id" :right="msg.id_from != user.id">
 					<template v-slot:activator="{ on }">
-						<div :class="bubbleClass(msg)" v-on="on" v-html="format(msg.message)"></div>
+						<div :class="bubbleClass(msg)" v-on="on">{{msg.message}}</div>
 					</template>
 					<span>{{ formatTime(msg.created_at) }}</span>
 				</v-tooltip>
@@ -44,16 +46,18 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
 import utility from '../utility.js'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
 	name: 'MessengerChat',
 	data: () => ({
 		key: 0,
 		messages: [],
-		timer: null
+		page:0,
+		timer: null,
+		limit: false
 	}),
 	computed: mapGetters([
 		'user',
@@ -71,11 +75,11 @@ export default {
 			immediate: true,
 			async handler () {
 				if (this.selectedConvo) {
+					this.page = 0
+					this.limit = false
 					try {
-						const url = `http://134.209.195.36/api/chat/single`
-						const headers = { 'x-auth-token': this.user.token }
-						const data = { id: this.selectedConvo }
-						const result = await this.$http.post(url, data, { headers })
+						const result = await this.getChat()
+						this.checkLimit(result.body)
 						this.messages = result.body
 						this.syncNotif()
 						this.$socket.emit('seenConvo', {
@@ -89,7 +93,7 @@ export default {
 			}
 		},
 		messages () {
-			this.$nextTick(this.scroll)
+			if (this.page < 2) this.$nextTick(this.scroll)
 		},
 		newMessage () {
 			if (this.newMessage && this.selectedConvo == this.newMessage.id_conversation) {
@@ -116,6 +120,19 @@ export default {
 			}
 		}
 	},
+	created () {
+		this.$nextTick(() => {
+			const top = document.querySelector('.top_chat')
+			top.addEventListener('scroll', async e => {
+				if (!this.limit && top.scrollTop <= 10) {
+					const result = await this.getChat()
+					this.checkLimit(result.body)
+					this.messages = [...result.body, ...this.messages]
+					top.scrollTop = 150
+				}
+			})
+		})
+	},
 	methods: {
 		...utility,
 		...mapActions([
@@ -123,16 +140,23 @@ export default {
 			'typingClr',
 			'seenConvoClr'
 		]),
+		checkLimit (res) {
+			if (res.length < 50) {
+				this.limit = true
+			} else {
+				this.page++
+			}
+		},
 		msgSent (msg) {
 			this.messages.push(msg)
 		},
 		first (msg, i) {
 			if (!i) return true
-			return (this.messages[i - 1].id_from != msg.id_from)
+			return this.messages[i - 1].id_from != msg.id_from
 		},
 		last (msg, i) {
 			if (this.messages.length - 1 == i) return true
-			return (this.messages[i + 1].id_from != msg.id_from)
+			return this.messages[i + 1].id_from != msg.id_from
 		},
 		seen (msg, i) {
 			if (msg.id_from == this.user.id && msg.is_read) {
@@ -177,12 +201,27 @@ export default {
 		avatarClass (msg, i) {
 			return this.last(msg, i) && !this.first(msg, i) ? 'pull_up' : 'pull_up_single'
 		},
+		newConvo (msg, i) {
+			if (!i) return true
+			return moment(msg.created_at).diff(this.messages[i - 1].created_at, 'minutes', true) > 60
+		},
 		scroll () {
 			const top = document.querySelector('.top_chat')
 			top.scrollTop = top.scrollHeight - top.clientHeight
 		},
-		format (msg) {
-			return msg.replace(/\n/g, '<br/>')
+		async getChat () {
+			try {
+				const url = `http://134.209.195.36/api/chat/single`
+				const headers = { 'x-auth-token': this.user.token }
+				const data = {
+					id: this.selectedConvo,
+					page: this.page,
+				}
+				const result = await this.$http.post(url, data, { headers })
+				return result
+			} catch (err) {
+				console.log('got error here --> ', err)
+			}
 		}
 	}
 }
@@ -238,12 +277,13 @@ export default {
 	letter-spacing: .75px;
 	padding: .6rem 1rem;
 	margin-bottom: .2rem;
+	overflow-x: hidden;
+	white-space: pre-wrap;
 }
 
 .chat_bubble.grey, .chat_bubble.blue {
 	border: .5px solid rgba(0, 0, 0, .05);
 	border-color: rgba(0, 0, 0, .05) !important;
-
 }
 
 .layout.from > .chat_bubble {
@@ -292,5 +332,17 @@ export default {
 
 .pull_up_single {
 	margin-top: -2px;
+}
+
+.chat_load {
+	width: 2.5rem;
+	height: 2.5rem;
+	margin: 0 auto;
+}
+
+.date_spacer {
+	color: #777;
+	font-size: 1.1em !important;
+	text-align: center;
 }
 </style>

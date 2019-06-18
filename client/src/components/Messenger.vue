@@ -120,7 +120,7 @@ export default {
 
 .top_chat {
 	flex: 1 0 90% !important;
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 .bottom {

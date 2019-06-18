@@ -1,5 +1,6 @@
 export const getters = {
 	user: state => state.user,
+	tags: state => state.tags,
 	notif: state => state.notif,
 	typing: state => state.typing,
 	status: state => state.status,
