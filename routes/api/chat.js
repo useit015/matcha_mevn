@@ -51,10 +51,11 @@ router.get('/all', auth, async (req, res) => {
 
 router.post('/single', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	const page = req.body.page
 	try {
-		let sql = `SELECT * FROM chat WHERE id_conversation = ?`
-		const result = await pool.query(sql, [req.body.id])
-		res.json(result.reverse().slice(0, 70).reverse())
+		let sql = `SELECT * FROM chat WHERE id_conversation = ? ORDER BY created_at DESC LIMIT ?, 50`
+		const result = await pool.query(sql, [req.body.id, page * 50])
+		res.json(result.reverse())
 		sql = `UPDATE chat SET is_read = 1 WHERE id_conversation = ? AND id_from != ?`
 		await pool.query(sql, [req.body.id, req.user.id])
 		sql = `UPDATE notifications SET is_read = 1 WHERE type = 'chat' AND id_conversation = ? AND id_from != ?`
@@ -88,10 +89,8 @@ router.post('/send', async (req, res) => {
 		}
 		let sql = `INSERT INTO chat (id_conversation, id_from, message, created_at) VALUES (?, ?, ?, ?)`
 		let result = await pool.query(sql, Object.values(msg))
-		// sql = `SELECT id FROM chat WHERE id_conversation = ? AND id_from = ? AND created_at = ?`
-		// result = await pool.query(sql, [msg.id_conversation, msg.id_from, msg.date])
 		sql = `UPDATE conversations SET last_update = ?, last_msg = ? WHERE id_conversation = ?`
-		await pool.query(sql, [msg.date, result.body.insertId, msg.id_conversation])
+		await pool.query(sql, [msg.date, result.insertId, msg.id_conversation])
 		res.json('Message added')
 	} catch (err) {
 		throw new Error(err)

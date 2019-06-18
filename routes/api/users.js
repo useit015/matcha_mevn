@@ -99,6 +99,17 @@ router.get('/getblocked', auth, async (req, res) => {
 	}
 })
 
+router.get('/gettags', auth, async (req, res) => {
+	if (!req.user.id) res.json({ msg: 'not logged in' })
+	try {
+		const sql = `SELECT value FROM tags`
+		const result = await pool.query(sql)
+		res.json(result.map(cur => cur.value))
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
 router.post('/add', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
 	try {
@@ -149,13 +160,9 @@ router.post('/install', async (req, res) => {
 						tags, address, city, country, rating, postal_code, phone, lat, lng)
 						VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 		const result = await pool.query(sql, Object.values(user))
-		// sql = `SELECT id FROM users WHERE username = ?`
-		// const result = await pool.query(sql, [user.username])
-		// if (result.length) {
-		// }
 		sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
 		const data = {
-			id: result.body.insertId,
+			id: result.insertId,
 			name: req.body.image,
 			profile: 1
 		}
@@ -199,7 +206,20 @@ router.post('/update', auth, async (req, res) => {
 						country = ?, rating = ?, postal_code = ?, phone = ?
 					WHERE id = ?`
 			await pool.query(sql, Object.values(user))
-			res.json({ ok: true, status: 'User Updated' }) 
+			res.json({ ok: true, status: 'User Updated' })
+			sql = `SELECT value FROM tags`
+			result = await pool.query(sql)
+			const tags = result.map(cur => cur.value)
+			user.tags.split(',').forEach(async cur => {
+				if (!tags.includes(cur)) {
+					try {
+						const sql = `INSERT INTO tags (value) VALUES (?)`
+						await pool.query(sql, [cur])
+					} catch (err) {
+						throw new Error(err)
+					}
+				}
+			})
 		} else {
 			res.json({ ok: false, status: 'User not found' })
 		}
@@ -225,34 +245,42 @@ router.post('/image', [auth, upload.single('image')], async (req, res) => {
 	}
 })
 
-router.get('/show', auth, async (req, res) => {
-	if (!req.user.id) return res.json({ msg: 'not logged in' })
+router.post('/show', auth, async (req, res) => {
+	const user = req.user
+	if (!user.id) return res.json({ msg: 'not logged in' })
 	try {
 		const sql = `SELECT * FROM users, images
 						WHERE users.id = images.user_id
 						AND images.profile = 1 ORDER BY rating DESC`
 		let result = await pool.query(sql)
-		let userTags = req.user.tags
+		let userTags = user.tags
 		const userLoc = {
-			lat: req.user.lat,
-			lng: req.user.lng
+			lat: user.lat,
+			lng: user.lng
 		}
 		const commonTags = a => {
 			if (!a || !a.length) return 0
 			const tags = a.split(',')
 			return userTags.split(',').filter(val => -1 !== tags.indexOf(val)).length
 		}
-		result = result.sort((a, b) => {
-			const aLoc = { lat: a.lat, lng: a.lng }
-			const bLoc = { lat: b.lat, lng: b.lng }
-			const disDelta = distance(userLoc, aLoc) - distance(userLoc, bLoc) 
-			if (!disDelta && userTags && userTags.length) {
-				const disTag = commonTags(b.tags) - commonTags(a.tags)
-				return !disTag ? b.rating - a.rating : disTag
-			} else {
-				return !disDelta ? b.rating - a.rating : disDelta
-			}
-		})
+		result = result
+			.filter(cur => {
+				if (!req.body.filter) return true
+				if (user.looking == 'both') return cur.looking == 'both'
+				if (user.looking != user.gender) return cur.looking != 'both' && cur.gender != user.gender && cur.gender != cur.looking
+				if (user.looking == user.gender) return cur.looking != 'both' && cur.gender == user.gender && cur.gender == cur.looking
+				return false
+			}).sort((a, b) => {
+				const aLoc = { lat: a.lat, lng: a.lng }
+				const bLoc = { lat: b.lat, lng: b.lng }
+				const disDelta = distance(userLoc, aLoc) - distance(userLoc, bLoc) 
+				if (!disDelta && userTags && userTags.length) {
+					const disTag = commonTags(b.tags) - commonTags(a.tags)
+					return !disTag ? b.rating - a.rating : disTag
+				} else {
+					return !disDelta ? b.rating - a.rating : disDelta
+				}
+			})
 		res.json(result)
 	} catch (err) {
 		throw new Error(err)
