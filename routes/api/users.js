@@ -249,7 +249,7 @@ router.post('/show', auth, async (req, res) => {
 	const user = req.user
 	if (!user.id) return res.json({ msg: 'not logged in' })
 	try {
-		const sql = `SELECT * FROM users, images
+		const sql = `SELECT *, GET_RATING(users.id) as testrating FROM users, images
 						WHERE users.id = images.user_id
 						AND images.profile = 1 ORDER BY rating DESC`
 		let result = await pool.query(sql)
