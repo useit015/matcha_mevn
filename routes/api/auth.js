@@ -203,12 +203,14 @@ router.get('/recover/:key', async (req, res) => {
 		const key = req.params.key
 		const sql = `SELECT id FROM users WHERE rkey = ?`
 		const result = await pool.query(sql, [key])
+		console.log('>> I GOT THIS FROM DB --> ', result.length)
 		if (result.length) {
 			const payload = { id: result[0].id }
 			const token = await sign(payload, process.env.SECRET, tokenExp)
+			console.log('>> TOKEN --> ', token)
+			console.log('>> KEY --> ', key)
 			res.render('recover', { token, key })
-		}
-		else {
+		} else {
 			res.redirect('/404')
 		}
 	} catch (err) {
@@ -224,8 +226,7 @@ router.post('/kcheck', auth, async (req, res) => {
 		const result = await pool.query(sql, [key])
 		if (result.length) {
 			res.json({ ok: true })
-		}
-		else {
+		} else {
 			res.json({ msg: 'Invalid key' })
 		}
 	} catch (err) {

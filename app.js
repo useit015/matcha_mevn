@@ -63,13 +63,18 @@ io.on('connection', socket => {
 	})
 	socket.on('auth', id => {
 		users[id] = socket.id
+		io.emit('online', Object.keys(users))
 		console.log('users are', users)
 	})
-	socket.on('logout', id =>  delete users[id])
+	socket.on('logout', id => {
+		delete users[id]
+		io.emit('online', Object.keys(users))
+	})
 	socket.on('disconnect', () => {
 		for (let key of Object.keys(users)) {
 			if (users[key] === socket.id) {
 				delete users[key]
+				io.emit('online', Object.keys(users))
 				console.log('Client disconnected --> ', socket.id)
 				socket.disconnect( )
 			}
