@@ -30,8 +30,13 @@ router.get('/all', auth, async (req, res) => {
 					INNER JOIN images
 					ON notifications.id_from = images.user_id
 					where notifications.id_to = ?
-					AND images.profile = 1`
-		const result = await pool.query(sql, [req.user.id])
+					AND images.profile = 1 
+					AND users.id NOT IN (
+						SELECT blocker FROM blocked WHERE blocked = ? 
+						UNION 
+						SELECT blocked FROM blocked WHERE blocker = ?
+					)`
+		const result = await pool.query(sql, [req.user.id, req.user.id, req.user.id])
 		res.json(result)
 	} catch (err) {
 		throw new Error(err)
