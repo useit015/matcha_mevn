@@ -22,6 +22,8 @@ router.post('/block', auth, async (req, res) => {
 		if (!result.length) {
 			sql = `INSERT INTO blocked (blocker, blocked) VALUES (?, ?)`
 			await pool.query(sql, data)
+			sql = `UPDATE conversations SET allowed = 0 WHERE (id_from = ? AND id_to = ?) OR (id_from = ? AND id_to = ?) `
+			await pool.query(sql, [req.user.id, req.body.id, req.body.id, req.user.id])
 			res.json({ ok: true })
 		} else {
 			res.json({ msg: 'User already Blocked' })

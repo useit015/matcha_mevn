@@ -1,5 +1,5 @@
 <template>
-<div class="discover">
+<div v-if="isComplet()" class="discover">
 	<v-container class="pt-5 px-0" v-if="loaded">
 		<v-layout wrap justify-center>
 			<v-flex xl2 md3 sm10>
@@ -61,6 +61,11 @@
 		</v-layout>
 	</v-container>
 	<loader v-else/>
+</div>
+<div v-else>
+	<v-layout row wrap justify-center>
+		<h2 class="display-2 text-xs-center text-md-left font-weight-thin pt-4 pb-3 mb-4 hidden-sm-and-down grey--text">Complet your profile to discover users that matchs you !</h2>
+	</v-layout>
 </div>
 </template>
 
@@ -209,6 +214,9 @@ export default {
 			this.users.forEach((user, i) => {
 				this.users[i].status = this.online.includes(user.user_id)
 			})
+		},
+		isComplet () {
+			return this.user.gender && this.user.gender.length && this.user.looking && this.user.biography && this.user.tags && this.user.images.length
 		}
 	}
 }
