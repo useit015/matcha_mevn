@@ -280,11 +280,12 @@ export default {
 			const res = await this.$http.post(url, data, { headers })
 			if (res.body.ok) {
 				this.liked = !this.liked
+				const profileImg = this.loggedIn.images.find(cur => cur.profile == true)
 				const data = {
 					date: new Date(),
 					id_from: this.loggedIn.id,
 					username: this.loggedIn.username,
-					profile_image: this.loggedIn.images.find(cur => cur.profile == true).name,
+					profile_image: profileImg ? profileImg.name : 'default.jpg',
 					id_to: this.$route.params.id
 				}
 				if (!this.liked) {
@@ -335,7 +336,11 @@ export default {
 						const headers = { 'x-auth-token': this.loggedIn.token }
 						const url = `http://134.209.195.36/api/users/show/${id}`
 						const res = await this.$http.get(url, { headers })
+						if (res.body.msg) {
+							this.$router.push('/404')
+						}
 						this.user = { ...res.body, rating: Number(res.body.rating) }
+						const profileImg = this.loggedIn.images.find(cur => cur.profile == true)
 						if (this.online.includes(this.user.id)) {
 							this.user.status = true
 						}
@@ -343,7 +348,7 @@ export default {
 							date: new Date(),
 							id_from: this.loggedIn.id,
 							username: this.loggedIn.username,
-							profile_image: this.loggedIn.images.find(cur => cur.profile == true).name,
+							profile_image: profileImg ? profileImg.name : 'default.jpg',
 							id_to: id,
 							type: 'visit'
 						}
