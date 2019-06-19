@@ -302,7 +302,7 @@ router.get('/show/:id', auth, async (req, res) => {
 			await pool.query(sql, [req.user.id, req.params.id])
 			res.json(user)
 		} else {
-			res.json('User doesnt exist')
+			res.json({msg:'User doesnt exist'})
 		}
 	} catch (err) {
 		throw new Error(err)
