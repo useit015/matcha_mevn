@@ -1,48 +1,48 @@
 <template>
-	<v-layout column class="pa-3">
-		<v-img v-if="!limit" class="chat_load" src="https://i.giphy.com/media/uyCJt0OOhJBiE/giphy.webp"></v-img>
-		<v-flex v-for="(msg, i) in messages" :key="i + key">
-			<h3 class="date_spacer subheading mb-2 mt-4" v-if="newConvo(msg, i)">{{ formatTime(msg.created_at) }}</h3>
-			<v-layout :class="layoutClass(msg, i)" align-start>
-				<v-tooltip lazy z-index="2" left>
-					<template v-slot:activator="{ on }">
-						<router-link :to="`/user/${msg.id_from}`" v-if="showAvatar(msg, i)" :class="avatarClass(msg, i)">
-							<v-avatar size="40">
-								<img v-on="on" :src="getFullPath(imageConvo)" :alt="usernameConvo">
-							</v-avatar>
-						</router-link>
-					</template>
-					<span>{{ usernameConvo }}</span>
-				</v-tooltip>
-				<div :class="pushClass(msg, i)"></div>
-				<v-avatar size="20" v-if="seen(msg, i)" class="mt-2">
+<v-layout column class="pa-3">
+	<v-img v-if="!limit" class="chat_load" :src="loadGif"></v-img>
+	<v-flex v-for="(msg, i) in messages" :key="i + key">
+		<h3 class="date_spacer subheading mb-2 mt-4" v-if="newConvo(msg, i)">{{ formatTime(msg.created_at) }}</h3>
+		<v-layout :class="layoutClass(msg, i)" align-start>
+			<v-tooltip lazy z-index="2" left>
+				<template v-slot:activator="{ on }">
+					<router-link :to="`/user/${msg.id_from}`" v-if="showAvatar(msg, i)" :class="avatarClass(msg, i)">
+						<v-avatar size="40">
+							<img v-on="on" :src="getFullPath(imageConvo)" :alt="usernameConvo">
+						</v-avatar>
+					</router-link>
+				</template>
+				<span>{{ usernameConvo }}</span>
+			</v-tooltip>
+			<div :class="pushClass(msg, i)"></div>
+			<v-avatar size="20" v-if="seen(msg, i)" class="mt-2">
+				<img :src="getFullPath(imageConvo)" :alt="usernameConvo">
+			</v-avatar>
+			<v-tooltip lazy z-index="2" :left="msg.id_from == user.id" :right="msg.id_from != user.id">
+				<template v-slot:activator="{ on }">
+					<div :class="bubbleClass(msg)" v-on="on">{{msg.message}}</div>
+				</template>
+				<span>{{ formatTime(msg.created_at) }}</span>
+			</v-tooltip>
+		</v-layout>
+	</v-flex>
+	<v-flex v-if="typing">
+		<v-layout class="to py-0 px-2 top_msg bottom_msg" align-start>
+			<router-link to="/" class="pull_up_single">
+				<v-avatar size="40">
 					<img :src="getFullPath(imageConvo)" :alt="usernameConvo">
 				</v-avatar>
-				<v-tooltip lazy z-index="2" :left="msg.id_from == user.id" :right="msg.id_from != user.id">
-					<template v-slot:activator="{ on }">
-						<div :class="bubbleClass(msg)" v-on="on">{{msg.message}}</div>
-					</template>
-					<span>{{ formatTime(msg.created_at) }}</span>
-				</v-tooltip>
-			</v-layout>
-		</v-flex>
-		<v-flex v-if="typing">
-			<v-layout class="to py-0 px-2 top_msg bottom_msg" align-start>
-				<router-link to="/" class="pull_up_single">
-					<v-avatar size="40">
-						<img :src="getFullPath(imageConvo)" :alt="usernameConvo">
-					</v-avatar>
-				</router-link>
-				<div class="mx-2 chat_bubble grey lighten-3">
-					<div class="typing">
-						<div class="typing_point"></div>
-						<div class="typing_point"></div>
-						<div class="typing_point"></div>
-					</div>
+			</router-link>
+			<div class="mx-2 chat_bubble grey lighten-3">
+				<div class="typing">
+					<div class="typing_point"></div>
+					<div class="typing_point"></div>
+					<div class="typing_point"></div>
 				</div>
-			</v-layout>
-		</v-flex>
-	</v-layout>
+			</div>
+		</v-layout>
+	</v-flex>
+</v-layout>
 </template>
 
 <script>
@@ -57,7 +57,8 @@ export default {
 		messages: [],
 		page:0,
 		timer: null,
-		limit: false
+		limit: false,
+		loadGif: 'https://i.giphy.com/media/uyCJt0OOhJBiE/giphy.webp'
 	}),
 	computed: mapGetters([
 		'user',

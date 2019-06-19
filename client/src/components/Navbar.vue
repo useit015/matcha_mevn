@@ -1,135 +1,135 @@
 <template>
-	<nav>
-		<v-toolbar flat app>
-			<v-toolbar-side-icon class="grey--text" @click="drawer = !drawer"></v-toolbar-side-icon>
-			<v-toolbar-title class="text-uppercase grey--text">
-				<span>M</span><span class="font-weight-light">atcha</span>
-			</v-toolbar-title>
-			<v-spacer></v-spacer>
-			<v-layout v-if="status" justify-end>
-				<v-menu bottom offset-y v-model="notifMenu" :nudge-width="250">
-					<template v-slot:activator="{ on }">
-						<v-btn flat icon large color="grey" v-on="on">
-							<v-badge overlap :value="!!notifNum" color="primary" class="mx-2" right>
-								<template v-slot:badge>
-									<span>{{ notifNum }}</span>
-								</template>
-								<v-icon color="grey">notifications</v-icon>
-							</v-badge>
-						</v-btn>
-					</template>
-					<v-list class="grey lighten-5 pa-0">
-						<template v-for="(item, i) in notifs">
-							<v-list-tile :key="i" avatar @click="toUserProfile(item.id_from)">
-								<v-list-tile-avatar>
-									<img :src="getFullPath(item.profile_image)">
-								</v-list-tile-avatar>
-								<v-list-tile-content>
-									<v-list-tile-title class="notif_msg">
-										<strong class="notif_username">{{ item.username }}</strong>
-										<span>{{ getNotifMsg(item) }}</span>
-									</v-list-tile-title>
-									<v-list-tile-sub-title>
-										<v-icon small color="blue lighten-2" class="mr-2">{{ getNotifIcon(item.type) }}</v-icon>
-										<span class="notif_date">{{ formatNotifDate(item) }}</span>
-									</v-list-tile-sub-title>
-								</v-list-tile-content>
-							</v-list-tile>
-						</template>
-						<v-list-tile router to="/notifications" class="see_all">
-							<v-list-tile-title>See all notifications</v-list-tile-title>
+<nav>
+	<v-toolbar flat app>
+		<v-toolbar-side-icon class="grey--text" @click="drawer = !drawer"></v-toolbar-side-icon>
+		<v-toolbar-title class="text-uppercase grey--text">
+			<span>M</span><span class="font-weight-light">atcha</span>
+		</v-toolbar-title>
+		<v-spacer></v-spacer>
+		<v-layout v-if="status" justify-end>
+			<v-menu bottom offset-y v-model="notifMenu" :nudge-width="250">
+				<template v-slot:activator="{ on }">
+					<v-btn flat icon large color="grey" v-on="on">
+						<v-badge overlap :value="!!notifNum" color="primary" class="mx-2" right>
+							<template v-slot:badge>
+								<span>{{ notifNum }}</span>
+							</template>
+							<v-icon color="grey">notifications</v-icon>
+						</v-badge>
+					</v-btn>
+				</template>
+				<v-list class="grey lighten-5 pa-0">
+					<template v-for="(item, i) in notifs">
+						<v-list-tile :key="i" avatar @click="toUserProfile(item.id_from)">
+							<v-list-tile-avatar>
+								<img :src="getFullPath(item.profile_image)">
+							</v-list-tile-avatar>
+							<v-list-tile-content>
+								<v-list-tile-title class="notif_msg">
+									<strong class="notif_username">{{ item.username }}</strong>
+									<span>{{ getNotifMsg(item) }}</span>
+								</v-list-tile-title>
+								<v-list-tile-sub-title>
+									<v-icon small color="blue lighten-2" class="mr-2">{{ getNotifIcon(item.type) }}</v-icon>
+									<span class="notif_date">{{ formatNotifDate(item) }}</span>
+								</v-list-tile-sub-title>
+							</v-list-tile-content>
 						</v-list-tile>
-					</v-list>
-				</v-menu>
-				<v-menu bottom offset-y v-model="msgMenu" :nudge-width="250">
-					<template v-slot:activator="{ on }">
-						<v-btn flat icon large color="grey" v-on="on">
-							<v-badge overlap :value="!!newMsgNum" color="primary" class="mx-2" right>
-								<template v-slot:badge>
-									<span>{{ newMsgNum }}</span>
-								</template>
-								<v-icon color="grey">chat</v-icon>
-							</v-badge>
-						</v-btn>
 					</template>
-					<v-list class="grey lighten-5 pa-0 message_list">
-						<template v-for="(item, i) in convos">
-							<v-list-tile :key="i" avatar @click="toUserChat(item)">
-								<v-list-tile-avatar>
-									<img :src="getFullPath(item.profile_image)">
-								</v-list-tile-avatar>
-								<v-list-tile-content>
-									<v-list-tile-title class="notif_msg">
-										<v-layout justify-between>
-											<strong class="notif_username">{{ item.username }}</strong>
-											<span class="ml-auto chat_time">{{ formatNotifDate(item) }}</span>
-										</v-layout>
-									</v-list-tile-title>
-									<v-list-tile-sub-title>
-										<span v-if="item.message_from == user.id" class="notif_date">You: </span>
-										<span class="notif_date text-truncate">{{ item.message }}</span>
-									</v-list-tile-sub-title>
-								</v-list-tile-content>
-							</v-list-tile>
-						</template>
-						<v-list-tile router to="/chat" class="see_all">
-							<v-list-tile-title>See all chats</v-list-tile-title>
-						</v-list-tile>
-					</v-list>
-				</v-menu>
-			</v-layout>
-			<div v-if="!status">
-				<v-btn flat color="grey" router to="/login">Login</v-btn>
-				<v-btn flat color="grey" router to="/register">Sign Up</v-btn>
-			</div>
-		</v-toolbar>
-		<v-navigation-drawer v-model="drawer" app fixed class="primary">
-			<v-list>
-				<v-list-tile avatar>
-					<v-layout align-center justify-center v-if="status">
-						<v-list-tile-avatar>
-							<img :src="image">
-						</v-list-tile-avatar>
-						<v-list-tile-content>
-							<v-list-tile-title class="white--text text-capitalize font-weight-light subheading">
-								{{ user.username }}
-							</v-list-tile-title>
-						</v-list-tile-content>
-					</v-layout>
-					<v-list-tile-action class="ml-auto">
-						<v-btn icon @click.stop="drawer = !drawer" class="ml-auto">
-							<v-icon class="white--text">chevron_left</v-icon>
-						</v-btn>
-					</v-list-tile-action>
-				</v-list-tile>
-				<v-divider></v-divider>
-				<div v-for="link in links" :key="link.text">
-					<v-list-tile v-if="link.public || status" router :to="link.route">
-						<v-list-tile-action>
-							<v-icon class="white--text">
-								{{ link.icon }}
-							</v-icon>
-						</v-list-tile-action>
-						<v-list-tile-content>
-							<v-list-tile-title class="white--text">
-								{{ link.text }}
-							</v-list-tile-title>
-						</v-list-tile-content>
+					<v-list-tile router to="/notifications" class="see_all">
+						<v-list-tile-title>See all notifications</v-list-tile-title>
 					</v-list-tile>
-				</div>
-				<v-list-tile v-if="status" @click="logout">
+				</v-list>
+			</v-menu>
+			<v-menu bottom offset-y v-model="msgMenu" :nudge-width="250">
+				<template v-slot:activator="{ on }">
+					<v-btn flat icon large color="grey" v-on="on">
+						<v-badge overlap :value="!!newMsgNum" color="primary" class="mx-2" right>
+							<template v-slot:badge>
+								<span>{{ newMsgNum }}</span>
+							</template>
+							<v-icon color="grey">chat</v-icon>
+						</v-badge>
+					</v-btn>
+				</template>
+				<v-list class="grey lighten-5 pa-0 message_list">
+					<template v-for="(item, i) in convos">
+						<v-list-tile :key="i" avatar @click="toUserChat(item)">
+							<v-list-tile-avatar>
+								<img :src="getFullPath(item.profile_image)">
+							</v-list-tile-avatar>
+							<v-list-tile-content>
+								<v-list-tile-title class="notif_msg">
+									<v-layout justify-between>
+										<strong class="notif_username">{{ item.username }}</strong>
+										<span class="ml-auto chat_time">{{ formatNotifDate(item) }}</span>
+									</v-layout>
+								</v-list-tile-title>
+								<v-list-tile-sub-title>
+									<span v-if="item.message_from == user.id" class="notif_date">You: </span>
+									<span class="notif_date text-truncate">{{ item.message }}</span>
+								</v-list-tile-sub-title>
+							</v-list-tile-content>
+						</v-list-tile>
+					</template>
+					<v-list-tile router to="/chat" class="see_all">
+						<v-list-tile-title>See all chats</v-list-tile-title>
+					</v-list-tile>
+				</v-list>
+			</v-menu>
+		</v-layout>
+		<div v-if="!status">
+			<v-btn flat color="grey" router to="/login">Login</v-btn>
+			<v-btn flat color="grey" router to="/register">Sign Up</v-btn>
+		</div>
+	</v-toolbar>
+	<v-navigation-drawer v-model="drawer" app fixed class="primary">
+		<v-list>
+			<v-list-tile avatar>
+				<v-layout align-center justify-center v-if="status">
+					<v-list-tile-avatar>
+						<img :src="image">
+					</v-list-tile-avatar>
+					<v-list-tile-content>
+						<v-list-tile-title class="white--text text-capitalize font-weight-light subheading">
+							{{ user.username }}
+						</v-list-tile-title>
+					</v-list-tile-content>
+				</v-layout>
+				<v-list-tile-action class="ml-auto">
+					<v-btn icon @click.stop="drawer = !drawer" class="ml-auto">
+						<v-icon class="white--text">chevron_left</v-icon>
+					</v-btn>
+				</v-list-tile-action>
+			</v-list-tile>
+			<v-divider></v-divider>
+			<div v-for="link in links" :key="link.text">
+				<v-list-tile v-if="link.public || status" router :to="link.route">
 					<v-list-tile-action>
-						<v-icon class="white--text">exit_to_app</v-icon>
+						<v-icon class="white--text">
+							{{ link.icon }}
+						</v-icon>
 					</v-list-tile-action>
 					<v-list-tile-content>
 						<v-list-tile-title class="white--text">
-							Logout
+							{{ link.text }}
 						</v-list-tile-title>
 					</v-list-tile-content>
 				</v-list-tile>
-			</v-list>
-		</v-navigation-drawer>
-	</nav>
+			</div>
+			<v-list-tile v-if="status" @click="logout">
+				<v-list-tile-action>
+					<v-icon class="white--text">exit_to_app</v-icon>
+				</v-list-tile-action>
+				<v-list-tile-content>
+					<v-list-tile-title class="white--text">
+						Logout
+					</v-list-tile-title>
+				</v-list-tile-content>
+			</v-list-tile>
+		</v-list>
+	</v-navigation-drawer>
+</nav>
 </template>
 
 <script>

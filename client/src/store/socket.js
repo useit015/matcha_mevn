@@ -50,8 +50,7 @@ export const socket = {
 						id_conversation
 					}
 					const url = 'http://134.209.195.36/api/notif/add'
-					const res = await Vue.http.post(url, body, { headers })
-					console.log('notif addded => ', res)
+					await Vue.http.post(url, body, { headers })
 				}
 			} catch (err) {
 				console.log('error here -->', err)
@@ -119,6 +118,9 @@ export const socket = {
 		},
 		SOCKET_block: (state, id) => {
 			state.blockedBy.push(id)
+		},
+		SOCKET_online: (state, online) => {
+			state.online = online.filter(cur => cur != state.user.id).map(cur => Number(cur))
 		}
 	}
 }

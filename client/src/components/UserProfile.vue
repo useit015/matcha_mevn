@@ -179,15 +179,17 @@ export default {
 			handler () {
 				if (isNaN(this.$route.params.id) || !this.$route.params.id) this.$router.push('/404')
 				this.fetchUser(this.$route.params.id)
+
 			}
 		}
 	},
 	computed: {
 		...mapGetters({
 			loggedIn: 'user',
-			blocked: 'blocked',
+			online: 'online',
 			convos: 'convos',
 			matches: 'matches',
+			blocked: 'blocked',
 			location: 'location',
 			following: 'following',
 			followers: 'followers',
@@ -330,14 +332,13 @@ export default {
 					this.$router.push('/settings')
 				} else {
 					try {
-						const token = localStorage.getItem('token')
+						const headers = { 'x-auth-token': this.loggedIn.token }
 						const url = `http://134.209.195.36/api/users/show/${id}`
-						const res = await this.$http.get(url, {
-							headers: {
-								'x-auth-token': token
-							}
-						})
+						const res = await this.$http.get(url, { headers })
 						this.user = { ...res.body, rating: Number(res.body.rating) }
+						if (this.online.includes(this.user.id)) {
+							this.user.status = true
+						}
 						const data = {
 							date: new Date(),
 							id_from: this.loggedIn.id,
@@ -362,7 +363,7 @@ export default {
 				headers })
 			if (!res.body.msg) {
 				this.reportDialog = false
-				console.log('user reported   ->', this.user.id)
+				console.log('user reported ->', this.user.id)
 			}
 			else {
 				console.log(res.body.msg)

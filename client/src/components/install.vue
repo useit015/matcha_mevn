@@ -1,10 +1,10 @@
 <template>
-	<v-container>
-		<v-layout>
-			<v-text-field v-model="users"></v-text-field>
-			<v-btn color="primary" outline large @click="install">Install</v-btn>
-		</v-layout>
-	</v-container>
+<v-container>
+	<v-layout>
+		<v-text-field v-model="users"></v-text-field>
+		<v-btn color="primary" outline large @click="install">Install</v-btn>
+	</v-layout>
+</v-container>
 </template>
 
 <script>

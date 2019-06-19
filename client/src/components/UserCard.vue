@@ -1,31 +1,31 @@
 <template>
-	<v-card router :to="`/user/${user.user_id}`">
-		<v-layout column justify-center align-center class="pt-1">
-			<v-layout justify-space-between class="top pa-2">
-				<v-chip disabled outline small color="grey lighten-1" class="ml-2">{{ distance }}</v-chip>
-				<v-tooltip bottom class="status_container">
-					<template v-slot:activator="{ on }">
-						<v-icon :color="`${user.status ? 'green' : 'grey'} lighten-2`" class="status_icon mr-3" small v-on="on">fiber_manual_record</v-icon>
-					</template>
-					<span>{{ lastSeen }}</span>
-				</v-tooltip>
-			</v-layout>
-			<v-avatar size="120">
-				<v-img :src="profileImage(user.name)" aspect-ratio="1"></v-img>
-			</v-avatar>
-			<h5 class="name headline text-capitalize mt-2 mb-4">{{ user.first_name }}</h5>
-			<v-layout align-start justify-center>
-				<p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
-				<v-rating readonly dense small :value="user.rating" half-increments class="rating"></v-rating>
-			</v-layout>
-			<v-layout justify-center align-center class="body-1 text-capitalize bottom mb-0 mt-auto py-2 px-4 grey lighten-5">
-				<v-icon color="primary" class="cake_icon px-1" small>cake</v-icon>
-				<span class="pr-1">{{ age }}</span>
-				<v-icon color="primary lighten-1" class="location_icon px-1" small>place</v-icon>
-				<span class="text-truncate">{{ `${user.city}, ${user.country}` }}</span>
-			</v-layout>
+<v-card router :to="`/user/${user.user_id}`">
+	<v-layout column justify-center align-center class="pt-1">
+		<v-layout justify-space-between class="top pa-2">
+			<v-chip disabled outline small color="grey lighten-1" class="ml-2">{{ distance }}</v-chip>
+			<v-tooltip bottom class="status_container">
+				<template v-slot:activator="{ on }">
+					<v-icon :color="`${user.status ? 'green' : 'grey'} lighten-2`" class="status_icon mr-3" small v-on="on">fiber_manual_record</v-icon>
+				</template>
+				<span>{{ lastSeen }}</span>
+			</v-tooltip>
 		</v-layout>
-	</v-card>
+		<v-avatar size="120">
+			<v-img :src="profileImage(user.name)" aspect-ratio="1"></v-img>
+		</v-avatar>
+		<h5 class="name headline text-capitalize mt-2 mb-4">{{ user.first_name }}</h5>
+		<v-layout align-start justify-center>
+			<p class="caption text-capitalize rating_value">{{ user.rating.toFixed(1) }}</p>
+			<v-rating readonly dense small :value="user.rating" half-increments class="rating"></v-rating>
+		</v-layout>
+		<v-layout justify-center align-center class="body-1 text-capitalize bottom mb-0 mt-auto py-2 px-4 grey lighten-5">
+			<v-icon color="primary" class="cake_icon px-1" small>cake</v-icon>
+			<span class="pr-1">{{ age }}</span>
+			<v-icon color="primary lighten-1" class="location_icon px-1" small>place</v-icon>
+			<span class="text-truncate">{{ `${user.city}, ${user.country}` }}</span>
+		</v-layout>
+	</v-layout>
+</v-card>
 </template>
 
 <script>

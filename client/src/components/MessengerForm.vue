@@ -1,8 +1,8 @@
 <template>
-	<v-layout v-if="selectedConvo" align-center justify center row class="messenger_form px-3 chat_layout">
-		<v-textarea rows="1" solo flat outline class="ma-4 send_msg" append-icon="send" @click:append="sendMsg" label="Type a message..." v-model="msg" @keyup.13="sendMsg"></v-textarea>
-	</v-layout>
-	<p v-else>Get matches to start chating with sexy girls or boys or both</p>
+<v-layout v-if="selectedConvo" align-center justify center row class="messenger_form px-3 chat_layout">
+	<v-textarea rows="1" solo flat outline class="ma-4 send_msg" append-icon="send" @click:append="sendMsg" label="Type a message..." v-model="msg" @keyup.13="sendMsg"></v-textarea>
+</v-layout>
+<p v-else>Get matches to start chating with sexy girls or boys or both</p>
 </template>
 
 <script>

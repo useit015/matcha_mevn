@@ -133,7 +133,7 @@ export default {
 	async beforeDestroy () {
 		const headers = { 'x-auth-token': this.user.token }
 		const url = 'http://134.209.195.36/auth/kdestroy'
-		// await this.$http.get(url, { headers })
+		await this.$http.get(url, { headers })
 	}
 }
 </script>

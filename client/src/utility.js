@@ -3,7 +3,7 @@ import moment from 'moment'
 
 const isExternal = url => url && (url.indexOf(':') > -1 || url.indexOf('//') > -1 || url.indexOf('www.') > -1)
 
-const getDate = (item) => {
+const getDate = item => {
 	if (!item) return new Date()
 	switch (item.type) {
 		case 'visitor':
@@ -32,7 +32,7 @@ const getLocationFromIp = async f => {
 	}
 }
 
-const syncLocation = async (location) => {
+const syncLocation = async location => {
 	try {
 		const token = localStorage.getItem('token')
 		const url = `http://134.209.195.36/api/action/position`

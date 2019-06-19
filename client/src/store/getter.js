@@ -3,6 +3,7 @@ export const getters = {
 	tags: state => state.tags,
 	notif: state => state.notif,
 	typing: state => state.typing,
+	online: state => state.online,
 	status: state => state.status,
 	blocked: state => state.blocked,
 	location: state => state.location,

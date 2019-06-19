@@ -1,24 +1,22 @@
 <template>
-<div>
-	<v-container fluid grid-list-md class="messenger pa-3" v-if="loaded">
-		<v-layout row wrap class="parent">
-			<v-flex xs3 class="left">
-				<MessengerList :convos="convos"/>
-			</v-flex>
-			<v-flex xs9 class="right">
-				<v-layout column class="chat_layout">
-					<v-flex xs9 class="top_chat">
-						<MessengerChat ref="chat"/>
-					</v-flex>
-					<v-flex xs3 class="bottom">
-						<MessengerForm @msgSent="messageSent" :toId="getToId()"/>
-					</v-flex>
-				</v-layout>
-			</v-flex>
-		</v-layout>
-	</v-container>
-	<loader v-else/>
-</div>
+<v-container fluid grid-list-md class="messenger pa-3" v-if="loaded">
+	<v-layout row wrap class="parent">
+		<v-flex xs3 class="left">
+			<MessengerList :convos="convos"/>
+		</v-flex>
+		<v-flex xs9 class="right">
+			<v-layout column class="chat_layout">
+				<v-flex xs9 class="top_chat">
+					<MessengerChat ref="chat"/>
+				</v-flex>
+				<v-flex xs3 class="bottom">
+					<MessengerForm @msgSent="messageSent" :toId="getToId()"/>
+				</v-flex>
+			</v-layout>
+		</v-flex>
+	</v-layout>
+</v-container>
+<loader v-else/>
 </template>
 
 <script>

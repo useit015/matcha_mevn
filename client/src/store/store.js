@@ -14,6 +14,7 @@ export const store = new Vuex.Store({
 		tags: [],
 		notif: [],
 		convos: [],
+		online: [],
 		blocked: [],
 		visitor: [],
 		visited: [],

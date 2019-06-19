@@ -1,6 +1,18 @@
 <template>
 	<div class="editor">
-		<canvas id="canvas__editor" :width="canvasWidth" :height="canvasHeight" ref="canvas" @dragover.prevent @drop="onDrop" @mousedown="onDragStart" @mouseup="onDragEnd" @mousemove="onMouseMove" @click="clicked" v-bind:class="cursor"></canvas>
+		<canvas
+			id="canvas__editor"
+			:width="canvasWidth"
+			:height="canvasHeight"
+			ref="canvas"
+			@dragover.prevent
+			@drop="onDrop"
+			@mousedown="onDragStart"
+			@mouseup="onDragEnd"
+			@mousemove="onMouseMove"
+			@click="clicked"
+			v-bind:class="cursor"
+		></canvas>
 		<input type="file" id='profileInput' @change="fileSelected" accept="image/*" class="d-none">
 	</div>
 </template>

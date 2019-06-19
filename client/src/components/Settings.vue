@@ -1,55 +1,53 @@
 <template>
-<div>
-	<v-layout column class="settings" v-if="loaded">
-		<div class="parallax"></div>
-		<v-layout class="py-0 strap grey lighten-3">
-			<v-container py-0>
-				<v-layout>
-					<v-flex xs12 sm8 md4 class="avatar">
-						<v-avatar slot="offset" class="mx-auto d-block" size="200">
-							<img :src="profileImage" class="avatar__img">
-							<div class="avatar__btn">
-								<v-fab-transition>
-									<v-btn color="grey lighten-5" fab small @click.stop="openEditor">
-										<v-icon>add_a_photo</v-icon>
-									</v-btn>
-								</v-fab-transition>
-							</div>
-						</v-avatar>
-					</v-flex>
-					<profile-tabs settings :active="activeTab" @change-tab="changeTab"></profile-tabs>
-				</v-layout>
-			</v-container>
-		</v-layout>
-		<v-container fill-height grid-list-xl class="profile">
-			<v-layout justify-center wrap>
-				<v-flex xs12 sm8 md4>
-					<profile-badge :user="user" settings></profile-badge>
+<v-layout column class="settings" v-if="loaded">
+	<div class="parallax"></div>
+	<v-layout class="py-0 strap grey lighten-3">
+		<v-container py-0>
+			<v-layout>
+				<v-flex xs12 sm8 md4 class="avatar">
+					<v-avatar slot="offset" class="mx-auto d-block" size="200">
+						<img :src="profileImage" class="avatar__img">
+						<div class="avatar__btn">
+							<v-fab-transition>
+								<v-btn color="grey lighten-5" fab small @click.stop="openEditor">
+									<v-icon>add_a_photo</v-icon>
+								</v-btn>
+							</v-fab-transition>
+						</div>
+					</v-avatar>
 				</v-flex>
-				<v-flex xs12 sm10 md8 class="main pa-0 grey--text">
-					<profile-tabs settings :active="activeTab" @change-tab="changeTab" mobile></profile-tabs>
-					<v-tabs-items v-model="activeTab">
-						<v-tab-item value="tab-profile">
-							<profile-form :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
-						</v-tab-item>
-						<v-tab-item value="tab-photo">
-							<profile-gallery :images="user.images"></profile-gallery>
-						</v-tab-item>
-						<v-tab-item value="tab-history">
-							<profile-history></profile-history>
-						</v-tab-item>
-						<v-tab-item value="tab-setting">
-							<profile-settings></profile-settings>
-						</v-tab-item>
-					</v-tabs-items>
-				</v-flex>
+				<profile-tabs settings :active="activeTab" @change-tab="changeTab"></profile-tabs>
 			</v-layout>
 		</v-container>
-		<alert :data="alert"></alert>
-		<profile-editor @update-image="updateImage" ref="profile_editor"></profile-editor>
 	</v-layout>
-	<loader v-else/>
-</div>
+	<v-container fill-height grid-list-xl class="profile">
+		<v-layout justify-center wrap>
+			<v-flex xs12 sm8 md4>
+				<profile-badge :user="user" settings></profile-badge>
+			</v-flex>
+			<v-flex xs12 sm10 md8 class="main pa-0 grey--text">
+				<profile-tabs settings :active="activeTab" @change-tab="changeTab" mobile></profile-tabs>
+				<v-tabs-items v-model="activeTab">
+					<v-tab-item value="tab-profile">
+						<profile-form :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
+					</v-tab-item>
+					<v-tab-item value="tab-photo">
+						<profile-gallery :images="user.images"></profile-gallery>
+					</v-tab-item>
+					<v-tab-item value="tab-history">
+						<profile-history></profile-history>
+					</v-tab-item>
+					<v-tab-item value="tab-setting">
+						<profile-settings></profile-settings>
+					</v-tab-item>
+				</v-tabs-items>
+			</v-flex>
+		</v-layout>
+	</v-container>
+	<alert :data="alert"></alert>
+	<profile-editor @update-image="updateImage" ref="profile_editor"></profile-editor>
+</v-layout>
+<loader v-else/>
 </template>
 
 <script>
