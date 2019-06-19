@@ -24,7 +24,7 @@ router.post('/block', auth, async (req, res) => {
 			await pool.query(sql, data)
 			sql = `UPDATE conversations SET allowed = 0 WHERE (id_user1 = ? AND id_user2 = ?) OR (id_user1 = ? AND id_user2 = ?)`
 			await pool.query(sql, [req.user.id, req.body.id, req.body.id, req.user.id])
-			sql = `DELETE FROM matches WHERE (id_user1 = ? AND id_user2 = ?) OR (id_user1 = ? AND id_user2 = ?)`
+			sql = `DELETE FROM matches WHERE (matcher = ? AND matched = ?) OR (matcher = ? AND matched = ?)`
 			await pool.query(sql, [req.user.id, req.body.id, req.body.id, req.user.id])
 			res.json({ ok: true })
 		} else {
