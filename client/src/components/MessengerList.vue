@@ -14,7 +14,7 @@
 			<v-list-tile-title>{{ convo.username }}</v-list-tile-title>
 		</v-list-tile-content>
 		<v-list-tile-action>
-			<v-icon :color="convo.status ? 'teal' : 'grey'">fiber_manual_record</v-icon>
+			<v-icon small :color="convo.status ? 'green' : 'grey'">fiber_manual_record</v-icon>
 		</v-list-tile-action>
 	</v-list-tile>
 </v-list>
@@ -32,7 +32,21 @@ export default {
 			default: () => { return [] }
 		}
 	},
-	computed: mapGetters(['notif']),
+	computed: mapGetters([
+		'online',
+		'notif'
+	]),
+	watch: {
+		online: {
+			immediate: true,
+			handler () {
+				this.convos.forEach((cur, i) => {
+					this.convos[i].status = this.online.includes(cur.user_id)
+				})
+				console.log('i am all the convos >>->>', this.convos)
+			}
+		}
+	},
 	methods: {
 		...utility,
 		...mapActions(['syncConvo']),

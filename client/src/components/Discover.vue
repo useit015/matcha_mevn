@@ -27,7 +27,18 @@
 						<h4 class="title font-weight-thin mb-4">Near</h4>
 						<v-text-field class="loaction_input mb-5" color="primary" hide-details outline solo flat append-icon="place" v-model="location"></v-text-field>
 						<h4 class="title font-weight-thin mb-4">Interests</h4>
-						<v-combobox :items="tags" v-model="interests" multiple chips deletable-chips hide-details outline solo flat color="primary" class="tags_menu mb-5"></v-combobox>
+						<v-autocomplete
+							v-model="interests"
+							:items="allTags"
+							solo
+							flat
+							outline
+							multiple
+							deletable-chips
+							hide-details
+							class="tags_menu mb-5"
+							chips>
+						</v-autocomplete>
 						<v-layout align-center justify-between class="mb-4">
 							<h4 class="title font-weight-thin">Sort by</h4>
 							<v-btn flat icon class="sort_btn" color="primary" @click="changeSort">
@@ -104,13 +115,14 @@ export default {
 		}
 	},
 	computed: {
-		...mapGetters([
-			'user',
-			'status',
-			'online',
-			'blocked',
-			'blockedBy'
-		]),
+		...mapGetters({
+			user: 'user',
+			allTags: 'tags',
+			status: 'status',
+			online: 'online',
+			blocked: 'blocked',
+			blockedBy: 'blockedBy'
+		}),
 		filtered () {
 			return this.users
 				.filter(this.filters.self)
@@ -183,9 +195,11 @@ export default {
 	methods: {
 		...mapActions(['logout']),
 		reset () {
-			this.rating = [0, 5]
-			this.age = [18, 85]
+			this.sortDir = 1
+			this.sort = null
 			this.gender = null
+			this.age = [18, 85]
+			this.rating = [0, 5]
 			this.location = null
 		},
 		changeSort () {
@@ -245,12 +259,12 @@ export default {
 	box-shadow: none;
 } */
 
-.v-menu__content.menuable__content__active.v-autocomplete__content {
+/* .v-menu__content.menuable__content__active.v-autocomplete__content {
 	border: 2px solid var(--color-primary);
 	box-shadow: none;
 	border-top: none;
 	transform: translateY(-3px);
-}
+} */
 
 .v-select-list.v-card.theme--light > .v-list,
 .theme--light.v-btn-toggle,
