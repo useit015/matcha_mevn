@@ -14,7 +14,6 @@
 		@keyup.13="sendMsg"
 	></v-textarea>
 </v-layout>
-<p v-else>Get matches to start chating with sexy girls or boys or both</p>
 </template>
 
 <script>

@@ -17,6 +17,7 @@
 			<v-icon small :color="convo.status ? 'green' : 'grey'">fiber_manual_record</v-icon>
 		</v-list-tile-action>
 	</v-list-tile>
+	<p v-if="convos.length == 0">No conversations</p>
 </v-list>
 </template>
 

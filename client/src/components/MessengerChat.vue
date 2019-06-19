@@ -1,6 +1,6 @@
 <template>
-<v-layout column class="pa-3">
-	<v-img v-if="!limit" class="chat_load" :src="loadGif"></v-img>
+<v-layout v-if="selectedConvo" column class="pa-3">
+	<v-img v-if="!limit && selectedConvo" class="chat_load" :src="loadGif"></v-img>
 	<v-flex v-for="(msg, i) in messages" :key="i + key">
 		<h3 class="date_spacer subheading mb-2 mt-4" v-if="newConvo(msg, i)">{{ formatTime(msg.created_at) }}</h3>
 		<v-layout :class="layoutClass(msg, i)" align-start>
@@ -43,6 +43,7 @@
 		</v-layout>
 	</v-flex>
 </v-layout>
+<h2 v-else class="display-2 text-xs-center text-md-left font-weight-thin pt-4 pb-3 mb-4 hidden-sm-and-down grey--text" >Get matched to start chatting with other users</h2>
 </template>
 
 <script>
