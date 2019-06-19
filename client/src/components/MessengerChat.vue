@@ -233,7 +233,7 @@ export default {
 @keyframes point {
 	0% {
 		opacity: .3;
-	},
+	}
 	100% {
 		opacity: 1;
 	}
