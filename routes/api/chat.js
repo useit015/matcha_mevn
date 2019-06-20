@@ -91,8 +91,14 @@ router.post('/send', async (req, res) => {
 			message: req.body.message,
 			date: new Date().toISOString().substr(0, 19)
 		}
-		let sql = `INSERT INTO chat (id_conversation, id_from, message, created_at) VALUES (?, ?, ?, ?)`
-		let result = await pool.query(sql, Object.values(msg))
+		if (msg.length > 2048)
+			return res.json({msg:'Message too long'})
+		let sql = `SELECT * FROM conversations WHERE id_conversation = ? AND (id_user1 = ? OR id_user2 = ?)`
+		let result = await pool.query(sql, [msg.id_conversation, msg.id_from, msg.id_from])
+		if (!result.length)
+			return res.json({msg:'Bad conversation'})
+		sql = `INSERT INTO chat (id_conversation, id_from, message, created_at) VALUES (?, ?, ?, ?)`
+		result = await pool.query(sql, Object.values(msg))
 		sql = `UPDATE conversations SET last_update = ?, last_msg = ? WHERE id_conversation = ?`
 		await pool.query(sql, [msg.date, result.insertId, msg.id_conversation])
 		res.json('Message added')
