@@ -8,6 +8,7 @@ const socketIo = require('socket.io')
 const port = process.env.PORT || 8080
 const app = express()
 const passport = require('passport')
+const pool = require('./utility/database')
 const ejs = require('ejs')
 
 app.use(passport.initialize())
@@ -67,12 +68,24 @@ io.on('connection', socket => {
 		console.log('users are', users)
 	})
 	socket.on('logout', id => {
+		try {
+			const sql = `UPDATE users SET status = NOW() WHERE id = ?`
+			pool.query(sql, [id])
+		} catch (err) {
+			throw new Error(err)
+		}
 		delete users[id]
 		io.emit('online', Object.keys(users))
 	})
 	socket.on('disconnect', () => {
 		for (let key of Object.keys(users)) {
 			if (users[key] === socket.id) {
+				try {
+					const sql = `UPDATE users SET status = NOW() WHERE id = ?`
+					pool.query(sql, [key])
+				} catch (err) {
+					throw new Error(err)
+				}
 				delete users[key]
 				io.emit('online', Object.keys(users))
 				console.log('Client disconnected --> ', socket.id)

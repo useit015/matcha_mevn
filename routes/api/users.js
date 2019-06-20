@@ -2,8 +2,8 @@ const moment = require('moment')
 const multer = require('multer')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { writeFile } = require('fs')
-const { dirname } = require('path')
+const { writeFile, unlink } = require('fs')
+const { dirname, resolve } = require('path')
 const { promisify } = require('util')
 const { randomBytes } = require('crypto')
 const router = require('express').Router()
@@ -11,41 +11,56 @@ const pool = require('../../utility/database')
 const distance = require('../../utility/distance')
 const sendMail = require('../../utility/mail')
 const writeFileAsync = promisify(writeFile)
+const unlinkAsync = promisify(unlink)
 const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
 const auth = require('../../middleware/auth')
 
 const randomHex = () => randomBytes(10).toString('hex')
 
 router.get('/getmatches', auth, async (req, res) => {
-	if (!req.user.id) res.json({ msg: 'not logged in' })
+	if (!req.user.id) return res.json({ msg: 'not logged in' })
 	try {
 		let sql
 		sql = `SELECT
 					matches.matched as matched_id,
 					matches.created_at as match_date,
 					users.username as username,
-					images.name as profile_image
+					images.name as profile_image,
+					images.profile as profile
 				FROM matches
 				INNER JOIN users
 				ON matches.matched = users.id
-				INNER JOIN images
+				LEFT JOIN images
 				ON matches.matched = images.user_id
-				where matches.matcher = ?
-				AND images.profile = 1`
-		const following = await pool.query(sql, [req.user.id])
+				WHERE matches.matcher = ?`
+		let following = await pool.query(sql, [req.user.id])
+		following = following.filter((cur, i) => {
+			for (let index = 0; index < following.length; index++) {
+				if (i != index && following[index].username == cur.username)
+					return cur.profile
+			}
+			return true
+		})
 		sql = `SELECT
 					matches.matcher as matcher_id,
 					matches.created_at as match_date,
 					users.username as username,
-					images.name as profile_image
+					images.name as profile_image,
+					images.profile as profile
 				FROM matches
 				INNER JOIN users
 				ON matches.matcher = users.id
-				INNER JOIN images
+				LEFT JOIN images
 				ON matches.matcher = images.user_id
-				where matches.matched = ?
-				AND images.profile = 1`
-		const followers = await pool.query(sql, [req.user.id])		
+				WHERE matches.matched = ?`
+		let followers = await pool.query(sql, [req.user.id])
+		followers = followers.filter((cur, i) => {
+			for (let index = 0; index < followers.length; index++) {
+				if (i != index && followers[index].username == cur.username)
+					return cur.profile
+			}
+			return true
+		})
 		res.json([...following, ...followers])
 	} catch (err) {
 		throw new Error(err)
@@ -53,7 +68,7 @@ router.get('/getmatches', auth, async (req, res) => {
 })
 
 router.get('/gethistory', auth, async (req, res) => {
-	if (!req.user.id) res.json({ msg: 'not logged in' })
+	if (!req.user.id) return res.json({ msg: 'not logged in' })
 	try {
 		let sql
 		sql = `SELECT
@@ -68,7 +83,14 @@ router.get('/gethistory', auth, async (req, res) => {
 				ON history.visitor = images.user_id
 				WHERE history.visited = ?
 				AND images.profile = 1`
-		const visitors = await pool.query(sql, [req.user.id])
+		let visitors = await pool.query(sql, [req.user.id])
+		visitors = visitors.filter((cur, i) => {
+			for (let index = 0; index < visitors.length; index++) {
+				if (i != index && visitors[index].username == cur.username)
+					return cur.profile
+			}
+			return true
+		})
 		sql = `SELECT
 					history.visited as visited_id,
 					history.created_at as visit_date,
@@ -81,7 +103,14 @@ router.get('/gethistory', auth, async (req, res) => {
 				ON history.visited = images.user_id
 				WHERE history.visitor = ?
 				AND images.profile = 1`
-		const visited = await pool.query(sql, [req.user.id])		
+		let visited = await pool.query(sql, [req.user.id])
+		visited = visited.filter((cur, i) => {
+			for (let index = 0; index < visited.length; index++) {
+				if (i != index && visited[index].username == cur.username)
+					return cur.profile
+			}
+			return true
+		})
 		res.json([...visitors, ...visited])
 	} catch (err) {
 		throw new Error(err)
@@ -89,7 +118,7 @@ router.get('/gethistory', auth, async (req, res) => {
 })
 
 router.get('/getblocked', auth, async (req, res) => {
-	if (!req.user.id) res.json({ msg: 'not logged in' })
+	if (!req.user.id) return res.json({ msg: 'not logged in' })
 	try {
 		const sql = `SELECT * FROM blocked where blocker = ? OR blocked = ?`
 		const blacklist = await pool.query(sql, [req.user.id, req.user.id])
@@ -121,12 +150,19 @@ router.post('/add', async (req, res) => {
 			password: await bcrypt.hash(req.body.password, 10),
 			vkey: randomHex()
 		}
-		const sql = `INSERT INTO users (first_name, last_name,
-						username, email, password, vkey)
-						VALUES (?, ?, ?, ?, ?, ?)`
-		await pool.query(sql, Object.values(user))
-		sendMail(user.email, user.vkey)
-		res.json({ ok: true, status: 'User Added' })
+		let sql = `SELECT email, username FROM users WHERE username = ? OR email = ?`
+		let result = await pool.query(sql, Object.values(user))
+		if (!result.length) {
+			sql = `INSERT INTO users (first_name, last_name,
+							username, email, password, vkey)
+							VALUES (?, ?, ?, ?, ?, ?)`
+			result = await pool.query(sql, Object.values(user))
+			sendMail(user.email, user.vkey)
+			if (result.affectedRows) {
+				return res.json({ ok: true, status: 'User Added' })
+			}
+		}
+		res.json({ msg: 'Something went wrong'})
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -149,7 +185,6 @@ router.post('/install', async (req, res) => {
 			address: req.body.address,
 			city: req.body.city,
 			country: req.body.country,
-			rating: req.body.rating,
 			postal_code: req.body.postal_code,
 			phone: req.body.phone,
 			lat: req.body.lat,
@@ -157,8 +192,8 @@ router.post('/install', async (req, res) => {
 		}
 		let sql = `INSERT INTO users (first_name, last_name, username, email,
 						password, vkey, verified, gender, looking, birthdate, biography,
-						tags, address, city, country, rating, postal_code, phone, lat, lng)
-						VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+						tags, address, city, country, postal_code, phone, lat, lng)
+						VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 		const result = await pool.query(sql, Object.values(user))
 		sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, ?)`
 		const data = {
@@ -174,7 +209,7 @@ router.post('/install', async (req, res) => {
 })
 
 router.post('/update', auth, async (req, res) => {
-	if (!req.user.id) res.json({ msg: 'Not logged in' })
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {
 		let sql, result
 		sql = `SELECT * FROM users WHERE id = ?`
@@ -229,17 +264,51 @@ router.post('/update', auth, async (req, res) => {
 })
 
 router.post('/image', [auth, upload.single('image')], async (req, res) => {
-	if (!req.user.id) res.json({ msg: 'Not logged in' })
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {
 		const base64Data = req.body.image.replace(/^data:image\/png;base64,/, '')
 		const uploadDir = `${dirname(dirname(__dirname))}/public/uploads/`
 		const imgName = `${req.user.id}-${randomHex()}.png`
-		await writeFileAsync(uploadDir + imgName, base64Data, 'base64')
-		let sql = `UPDATE images SET profile = 0 WHERE user_id = ?`
-		await pool.query(sql, [req.user.id])
-		sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, 1)`
-		await pool.query(sql, [req.user.id, imgName])
-		res.json({ ok: true, status: 'Image Updated', name: imgName })
+		let sql = `SELECT * FROM images WHERE user_id = ?`
+		let result = await pool.query(sql, [req.user.id])
+		if (result.length < 5) {
+			await writeFileAsync(uploadDir + imgName, base64Data, 'base64')
+			sql = `UPDATE images SET profile = 0 WHERE user_id = ?`
+			await pool.query(sql, [req.user.id])
+			sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, 1)`
+			result = await pool.query(sql, [req.user.id, imgName])
+			res.json({ ok: true, status: 'Image Updated', name: imgName, id:result.insertId })
+		} else {
+			res.json({ msg: 'user has 5 photos' })
+		}
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
+router.post('/image/del', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	const isExternal = url => url && (url.indexOf(':') > -1 || url.indexOf('//') > -1 || url.indexOf('www.') > -1)
+	try {
+		let sql = `SELECT * FROM images WHERE id = ? AND user_id = ?`
+		let result = await pool.query(sql, [req.body.id, req.user.id])
+		if (result.length) {
+			if (!isExternal(result[0].name)) {
+				try {
+					unlinkAsync(resolve(dirname(dirname(__dirname)), 'public/uploads', result[0].name))
+				} catch (err) {
+					throw new Error(err)
+				}
+			}
+			sql = `DELETE FROM images WHERE id = ? AND user_id = ?`
+			result = await pool.query(sql, [req.body.id, req.user.id])
+			if (req.body.profile) {
+				sql = `UPDATE images SET profile = 1 WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`
+				const result = await pool.query(sql, [req.user.id])
+			}
+			if (result.affectedRows) return res.json({ ok: true})
+		}
+		res.json({ msg: 'Something went wrong'})
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -249,7 +318,7 @@ router.post('/show', auth, async (req, res) => {
 	const user = req.user
 	if (!user.id) return res.json({ msg: 'not logged in' })
 	try {
-		const sql = `SELECT *, GET_RATING(users.id) as testrating FROM users, images
+		const sql = `SELECT *, GET_RATING(users.id) AS rating FROM users, images
 						WHERE users.id = images.user_id
 						AND images.profile = 1 ORDER BY rating DESC`
 		let result = await pool.query(sql)
@@ -290,7 +359,7 @@ router.post('/show', auth, async (req, res) => {
 router.get('/show/:id', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'not logged in' })
 	try {
-		let sql = `SELECT * FROM users WHERE id = ?`
+		let sql = `SELECT *, GET_RATING(users.id) AS rating FROM users WHERE id = ?`
 		const result = await pool.query(sql, [req.params.id])
 		if (result.length) {
 			const user = result[0]

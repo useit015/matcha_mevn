@@ -18,10 +18,9 @@ router.get('/all', auth, async (req, res) => {
 						images.profile
 					FROM conversations
 					INNER JOIN users ON conversations.id_user2 = users.id
-					INNER JOIN images ON conversations.id_user2 = images.user_id
+					LEFT JOIN images ON conversations.id_user2 = images.user_id
 					LEFT JOIN chat ON conversations.last_msg = chat.id
 					WHERE conversations.id_user1 = ?
-					AND images.profile = 1
 					AND conversations.allowed = 1
 					UNION SELECT
 						users.id as user_id,
@@ -36,13 +35,18 @@ router.get('/all', auth, async (req, res) => {
 						images.profile
 					FROM conversations
 					INNER JOIN users ON conversations.id_user1 = users.id
-					INNER JOIN images ON conversations.id_user1 = images.user_id
+					LEFT JOIN images ON conversations.id_user1 = images.user_id
 					LEFT JOIN chat ON conversations.last_msg = chat.id
 					WHERE conversations.id_user2 = ?
-					AND images.profile = 1
 					AND conversations.allowed = 1`
-		const result = await pool.query(sql, [req.user.id, req.user.id])
-		
+		let result = await pool.query(sql, [req.user.id, req.user.id])
+		result = result.filter((cur, i) => {
+			for (let index = 0; index < result.length; index++) {
+				if (i != index && result[index].user_id == cur.user_id)
+					return cur.profile
+			}
+			return true
+		})
 		res.json(result)
 	} catch (err) {
 		throw new Error(err)
