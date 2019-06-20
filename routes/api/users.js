@@ -229,7 +229,6 @@ router.post('/update', auth, async (req, res) => {
 				address: req.body.address,
 				city: req.body.city,
 				country: req.body.country,
-				rating: req.body.rating,
 				postal_code: req.body.postal_code,
 				phone: req.body.phone,
 				id: req.user.id
@@ -238,7 +237,7 @@ router.post('/update', auth, async (req, res) => {
 						first_name = ?, last_name = ?, username = ?,
 						email = ?, gender = ?, looking = ?, birthdate = ?,
 						biography = ?, tags = ?, \`address\` = ?, city = ?,
-						country = ?, rating = ?, postal_code = ?, phone = ?
+						country = ?, postal_code = ?, phone = ?
 					WHERE id = ?`
 			await pool.query(sql, Object.values(user))
 			res.json({ ok: true, status: 'User Updated' })
