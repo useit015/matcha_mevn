@@ -230,6 +230,10 @@ router.post('/update', auth, async (req, res) => {
 		return res.json({msg:'Username is invalid'})
 	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
 		return res.json({msg:'Password is invalid'})
+	if (!req.body.gender && req.body.gender != 'male' && req.body.gender != 'female')
+		return res.json({msg:'Gender is invalid'})
+	if (!req.body.looking && req.body.looking != 'male' && req.body.looking != 'female' && req.body.looking != 'both')
+		return res.json({msg:'Looking is invalid'})
 	try {
 		let sql, result
 		sql = `SELECT * FROM users WHERE id = ?`
@@ -284,6 +288,7 @@ router.post('/update', auth, async (req, res) => {
 
 router.post('/image', [auth, upload.single('image')], async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	console.log(req.body)
 	try {
 		const base64Data = req.body.image.replace(/^data:image\/png;base64,/, '')
 		const uploadDir = `${dirname(dirname(__dirname))}/public/uploads/`
