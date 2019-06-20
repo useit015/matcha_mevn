@@ -140,8 +140,16 @@ router.get('/gettags', auth, async (req, res) => {
 })
 
 router.post('/add', async (req, res) => {
-	// ! MUST VALIDATE INPUT !!!!
-	console.log(/.+@.+/.test(req.body.email))
+	if (!req.body.first_name || req.body.first_name.length < 3)
+		return res.json({msg:'First name is invalid'})
+	if (!req.body.last_name || req.body.last_name.length < 3)
+		return res.json({msg:'Last name is invalid'})
+	if (!req.body.email || !(/.+@.+/.test(req.body.email)))
+		return res.json({msg:'Email is invalid'})
+	if (!req.body.username || req.body.username.length < 8)
+		return res.json({msg:'Username is invalid'})
+	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
+		return res.json({msg:'Password is invalid'})
 	try {
 		const user = {
 			first_name: req.body.first_name,
@@ -210,7 +218,18 @@ router.post('/install', async (req, res) => {
 })
 
 router.post('/update', auth, async (req, res) => {
-	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.user.id)
+		return res.json({ msg: 'Not logged in' })
+	if (!req.body.first_name || req.body.first_name.length < 3)
+		return res.json({msg:'First name is invalid'})
+	if (!req.body.last_name || req.body.last_name.length < 3)
+		return res.json({msg:'Last name is invalid'})
+	if (!req.body.email || !(/.+@.+/.test(req.body.email)))
+		return res.json({msg:'Email is invalid'})
+	if (!req.body.username || req.body.username.length < 8)
+		return res.json({msg:'Username is invalid'})
+	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
+		return res.json({msg:'Password is invalid'})
 	try {
 		let sql, result
 		sql = `SELECT * FROM users WHERE id = ?`
