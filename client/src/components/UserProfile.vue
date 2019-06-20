@@ -14,7 +14,7 @@
 					<profile-tabs :active="activeTab" @change-tab="changeTab"></profile-tabs>
 					<v-tooltip bottom>
 						<template v-slot:activator="{ on }">
-							<v-icon :color="`${user.status ? 'green' : 'grey'} lighten-2`" class="profile-status_icon mx-3 hidden-xs-only" small v-on="on">fiber_manual_record</v-icon>
+							<v-icon :color="`${isOnline ? 'green' : 'grey'} lighten-2`" class="profile-status_icon mx-3 hidden-xs-only" small v-on="on">fiber_manual_record</v-icon>
 						</template>
 						<span>{{ lastSeen }}</span>
 					</v-tooltip>
@@ -161,28 +161,6 @@ export default {
 			]
 		}
 	},
-	watch: {
-		blocked: {
-			immediate: true,
-			handler () {
-				const id = Number(this.$route.params.id)
-				if (Array.isArray(this.blocked) && this.blocked.includes(id)) {
-					this.$router.push('/')
-				}
-				if (Array.isArray(this.blockedBy) && this.blockedBy.includes(id)) {
-					this.$router.push('/')
-				}
-			}
-		},
-		loggedIn: {
-			immediate: true,
-			handler () {
-				if (isNaN(this.$route.params.id) || !this.$route.params.id) this.$router.push('/404')
-				this.fetchUser(this.$route.params.id)
-
-			}
-		}
-	},
 	computed: {
 		...mapGetters({
 			loggedIn: 'user',
@@ -224,10 +202,10 @@ export default {
 			return this.user.birthdate ? new Date().getFullYear() - new Date(this.user.birthdate).getFullYear() : ''
 		},
 		lastSeen () {
-			if (this.user.status) return 'online'
-			if (this.user.tokenExpiration)
-				return moment(this.user.tokenExpiration).subtract(2, 'hours').fromNow()
-			return moment(this.user.created_at).fromNow()
+			if (this.isOnline) return 'online'
+			if (this.user.status)
+				return moment(this.user.status).utc().fromNow()
+			return moment(this.user.created_at).utc().fromNow()
 		},
 		informations () {
 			return [
@@ -253,6 +231,33 @@ export default {
 			const distance = this.calculateDistance(from, to)
 			return `${Math.round(distance)} kms away`
 		},
+		isOnline () {
+			return  this.online.includes(this.user.id)
+		}
+	},
+	watch: {
+		blocked: {
+			immediate: true,
+			handler () {
+				const id = Number(this.$route.params.id)
+				if (Array.isArray(this.blocked) && this.blocked.includes(id)) {
+					this.$router.push('/')
+				}
+				if (Array.isArray(this.blockedBy) && this.blockedBy.includes(id)) {
+					this.$router.push('/')
+				}
+			}
+		},
+		loggedIn: {
+			immediate: true,
+			handler () {
+				if (isNaN(this.$route.params.id) || !this.$route.params.id) this.$router.push('/404')
+				this.fetchUser(this.$route.params.id)
+			}
+		},
+		isOnline () {
+			if (!this.isOnline) this.user.status = new Date()
+		}
 	},
 	methods: {
 		...utility,
@@ -267,7 +272,7 @@ export default {
 		},
 		getProfileImage () {
 			if (!this.user || !this.user.images) return 'default.jpg'
-			const image = this.user.images.filter(cur => cur.profile == true)[0]
+			const image = this.user.images.find(cur => cur.profile == true)
 			return image ? image.name : 'default.jpg'
 		},
 		async match () {
@@ -278,6 +283,7 @@ export default {
 			}
 			const headers = { 'x-auth-token': this.loggedIn.token }
 			const res = await this.$http.post(url, data, { headers })
+			console.log('res.body --->', res.body)
 			if (res.body.ok) {
 				this.liked = !this.liked
 				const profileImg = this.loggedIn.images.find(cur => cur.profile == true)
@@ -305,8 +311,7 @@ export default {
 			const url = `http://134.209.195.36/api/action/block`
 			let data = { id: this.$route.params.id }
 			const headers =  { 'x-auth-token': this.loggedIn.token }
-			const res = await this.$http.post(url, data, {
-				headers })
+			const res = await this.$http.post(url, data, { headers })
 			if (!res.body.msg) {
 				this.syncBlocked(this.loggedIn.id)
 				data = {
@@ -320,12 +325,14 @@ export default {
 		},
 		goToChat () {
 			const convo = this.convos.find(cur => cur.user_id == this.user.id)
-			this.syncConvo({
-				username: convo.username,
-				id_conversation: convo.id_conversation,
-				profile_image: convo.profile_image
-			})
-			this.$router.push('/chat')
+			if (convo) {
+				this.syncConvo({
+					username: convo.username,
+					id_conversation: convo.id_conversation,
+					profile_image: convo.profile_image
+				})
+				this.$router.push('/chat')
+			}
 		},
 		async fetchUser (id) {
 			if (this.loggedIn.id && this.f) {

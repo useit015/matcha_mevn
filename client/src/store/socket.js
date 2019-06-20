@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import utility from '../utility'
 
 export const socket = {
 	mutations: {
@@ -118,6 +119,16 @@ export const socket = {
 		},
 		SOCKET_block: (state, id) => {
 			state.blockedBy.push(id)
+			const convo = state.convos.find(cur => cur.user_id == id)
+			const arr = ['visitor', 'visited', 'notif', 'convos', 'followers', 'following']
+			arr.forEach(cur => state[cur] = utility.filterBlocked(state, cur))
+			// state.notif = state.notif.filter(cur => !utility.isBlocked(cur.id_from))
+			// state.convos = state.convos.filter(cur => !utility.isBlocked(cur.user_id))
+			// state.visitors = state.visitors.filter(cur => !utility.isBlocked(cur.id))
+			// state.visited = state.visited.filter(cur => !utility.isBlocked(cur.id))
+			// state.followers = state.followers.filter(cur => !utility.isBlocked(cur.id))
+			// state.following = state.following.filter(cur => !utility.isBlocked(cur.id))
+			if (convo && state.selectedConvo == convo.id_conversation) state.selectedConvo = null
 		},
 		SOCKET_online: (state, online) => {
 			state.online = online.filter(cur => cur != state.user.id).map(cur => Number(cur))

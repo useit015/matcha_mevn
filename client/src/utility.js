@@ -43,8 +43,22 @@ const syncLocation = async location => {
 	}
 }
 
+const isBlocked = (state, id) => state.blocked.includes(id) || state.blockedBy.includes(id)
+
+const getId = tab => {
+	switch (tab) {
+		case 'notif':
+			return 'id_from'
+		case 'convos':
+			return 'user_id'
+		default:
+			return 'id'
+	}
+}
+
 export default {
 	getDate,
+	isBlocked,
 	syncLocation,
 	getLocationFromIp,
 	getFullPath: file => isExternal(file) ? file : `http://134.209.195.36/uploads/${file ? file : 'default.jpg'}`,
@@ -147,6 +161,9 @@ export default {
 			case 'unlike':
 				return 'favorite_border'
 		}
+	},
+	filterBlocked (state, type) {
+		return state[type].filter(cur => !isBlocked(state, cur[getId(type)]))
 	},
 	fromNow (date) {
 		return moment.utc(date).fromNow()

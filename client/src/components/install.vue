@@ -42,7 +42,6 @@ export default {
 						postal_code: cur.location.postcode,
 						phone: cur.cell,
 						image: cur.picture.large,
-						rating: Math.random() * 5,
 						lat: cur.location.coordinates.latitude,
 						lng: cur.location.coordinates.longitude
 					}

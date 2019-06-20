@@ -61,9 +61,9 @@ export default {
 		},
 		lastSeen () {
 			if (this.user.status) return 'online'
-			if (this.user.tokenExpiration)
-				return moment(this.user.tokenExpiration).subtract(2, 'hours').fromNow()
-			return moment(this.user.created_at).fromNow()
+			if (this.user.lastSeen)
+				return moment(this.user.lastSeen).utc().fromNow()
+			return moment(this.user.created_at).utc().fromNow()
 		}
 	},
 	methods: {
