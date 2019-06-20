@@ -141,6 +141,7 @@ router.get('/gettags', auth, async (req, res) => {
 
 router.post('/add', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
+	console.log(/.+@.+/.test(req.body.email))
 	try {
 		const user = {
 			first_name: req.body.first_name,
