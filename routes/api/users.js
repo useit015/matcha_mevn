@@ -152,7 +152,7 @@ router.post('/add', async (req, res) => {
 			vkey: randomHex()
 		}
 		let sql = `SELECT email, username FROM users WHERE username = ? OR email = ?`
-		let result = await pool.query(sql, [username, email])
+		let result = await pool.query(sql, [user.username, user.email])
 		if (!result.length) {
 			sql = `INSERT INTO users (first_name, last_name,
 							username, email, password, vkey)
