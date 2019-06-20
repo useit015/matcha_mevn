@@ -288,7 +288,6 @@ router.post('/update', auth, async (req, res) => {
 
 router.post('/image', [auth, upload.single('image')], async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
-	console.log(req.body)
 	try {
 		const base64Data = req.body.image.replace(/^data:image\/png;base64,/, '')
 		const uploadDir = `${dirname(dirname(__dirname))}/public/uploads/`
