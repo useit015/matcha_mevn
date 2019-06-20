@@ -1,63 +1,76 @@
 <template>
-<v-dialog v-model="dialog" max-width="500" persistent>
-	<v-card class="grey lighten-3">
-		<v-layout column align-center justify-center pt-4>
-			<vue-avatar :width=400 :height=400 :border=0 ref="vueavatar" @vue-avatar-editor:image-ready="onImageReady" class="mb-3"></vue-avatar>
-			<vue-avatar-scale ref="vueavatarscale" @vue-avatar-editor-scale:change-scale="onChangeScale" :width=250 :min=1 :max=3 :step=0.02></vue-avatar-scale>
-		</v-layout>
-		<v-card-actions>
-			<v-spacer></v-spacer>
-			<v-btn flat color="primary" @click="closeEditor">Cancel</v-btn>
-			<v-btn flat color="primary" @click="saveClicked">Save</v-btn>
-		</v-card-actions>
-	</v-card>
-</v-dialog>
+<div>
+	<v-dialog v-model="dialog" max-width="500" persistent>
+		<v-card class="grey lighten-3">
+			<v-layout column align-center justify-center pt-4>
+				<vue-avatar :width=400 :height=400 :border=0 ref="vueavatar" @vue-avatar-editor:image-ready="onImageReady" class="mb-3"></vue-avatar>
+				<vue-avatar-scale ref="vueavatarscale" @vue-avatar-editor-scale:change-scale="onChangeScale" :width=250 :min=1 :max=3 :step=0.02></vue-avatar-scale>
+			</v-layout>
+			<v-card-actions>
+				<v-spacer></v-spacer>
+				<v-btn flat color="primary" @click="closeEditor">Cancel</v-btn>
+				<v-btn flat color="primary" @click="saveClicked">Save</v-btn>
+			</v-card-actions>
+		</v-card>
+	</v-dialog>
+	<alert :data="alert"></alert>
+</div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import utility from '../utility.js'
-import VueAvatar from './VueAvatar.vue'
-import VueAvatarScale from './VueAvatarScale.vue'
+import Alert from './Alert'
+import VueAvatar from './VueAvatar'
+import VueAvatarScale from './VueAvatarScale'
 
 export default {
 	name: 'ProfileEditor',
 	components: {
+		Alert,
 		VueAvatar,
 		VueAvatarScale
 	},
-	data() {
-		return {
-			dialog: false
+	data: () => ({
+		dialog: false,
+		alert: {
+			state: false,
+			color: '',
+			text: ''
 		}
-	},
-	props: {
-		user: {
-			type: Object,
-			default: () => {
-				return {}
-			}
-		}
-	},
+	}),
+	computed: mapGetters(['user']),
 	methods: {
 		...utility,
-		closeEditor() {
+		closeEditor () {
 			this.dialog = false
 			this.$refs.vueavatar.init()
 		},
-		pickFile() {
-			this.$refs.vueavatar.clicked()
-			this.dialog = true
+		pickFile () {
+			if (this.user.images.length < 5) {
+				this.$refs.vueavatar.clicked()
+				this.dialog = true
+			} else {
+				this.showAlert('red', 'Max photos if five, you must delete one in order to add')
+			}
 		},
 		onChangeScale (scale) {
 			this.$refs.vueavatar.changeScale(scale)
 		},
-		saveClicked(){
+		saveClicked () {
 			this.$emit('update-image', this.$refs.vueavatar.getImageScaled().toDataURL())
 			this.$refs.vueavatarscale.reset()
 			this.dialog = false
 		},
-		onImageReady(scale){
+		onImageReady (scale) {
 			this.$refs.vueavatarscale.setScale(scale)
+		},
+		showAlert (color, text) {
+			this.alert = {
+				state: true,
+				color,
+				text
+			}
 		}
 	}
 }

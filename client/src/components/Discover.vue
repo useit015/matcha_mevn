@@ -212,6 +212,7 @@ export default {
 		},
 		whoIsUp () {
 			this.users.forEach((user, i) => {
+				this.users[i].lastSeen = this.users[i].status
 				this.users[i].status = this.online.includes(user.user_id)
 			})
 		},

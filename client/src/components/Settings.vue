@@ -168,7 +168,7 @@ export default {
 				if (res && res.body && !res.body.msg) {
 					msg = 'You profile image has been updated successfuly'
 					this.showAlert('success', msg)
-					this.$store.commit('updateProfileImage', res.body.name)
+					this.$store.commit('updateProfileImage', res.body)
 				} else {
 					msg = 'Ouups something went wrong!'
 					this.showAlert('red', msg)

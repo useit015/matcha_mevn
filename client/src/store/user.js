@@ -1,29 +1,30 @@
 import utility from '../utility'
 import { isArray } from 'util'
-// import Vue from 'vue'
 
 export const user = {
 	mutations: {
 		updateTags: (state, tags) => state.user.tags = tags.map(cur => cur.text.toLowerCase()).join(','),
 		updateUser: (state, user) => state.user = user,
-		updateProfileImage: (state, image) => {
+		updateProfileImage: (state, data) => {
 			state.user.images.filter(cur => cur.profile).forEach(cur => cur.profile = 0)
-			state.user.images.push({ name: image, profile: 1 })
+			state.user.images.push({ name: data.name, profile: 1, id:data.id })
 		},
 		locate: (state, location) => {
 			state.location = location
 		},
 		syncHistory: (state, history) => {
-			state.visitor = history.visitor
-			state.visited = history.visited
+			state.visitor = history.visitor.filter(cur => !utility.isBlocked(state, cur.id))
+			state.visited = history.visited.filter(cur => !utility.isBlocked(state, cur.id))
 		},
 		syncMatches: (state, matches) => {
-			state.followers = matches.followers
-			state.following = matches.following
+			state.followers = matches.followers.filter(cur => !utility.isBlocked(state, cur.id))
+			state.following = matches.following.filter(cur => !utility.isBlocked(state, cur.id))
 		},
 		syncBlocked: (state, blacklist) => {
 			state.blocked = blacklist.blocked
 			state.blockedBy = blacklist.blockedBy
+			const arr = ['visitor', 'visited', 'notif', 'convos', 'followers', 'following']
+			arr.forEach(cur => state[cur] = utility.filterBlocked(state, cur))
 		},
 		getNotif: (state, notif) => {
 			state.notif = notif
@@ -36,6 +37,12 @@ export const user = {
 				if (cur.type != 'chat') cur.is_read = 1
 				return cur
 			})
+		},
+		delImg: (state, id) => {
+			state.user.images = state.user.images.filter(cur => cur.id != id)
+			if (state.user.images.length && !state.user.images.find(cur => cur.profile)) {
+				state.user.images[state.user.images.length - 1].profile = true
+			}
 		}
 	},
 	actions: {
@@ -141,6 +148,9 @@ export const user = {
 		},
 		seenNotif: ({ commit }) => {
 			commit('seenNotif')
+		},
+		delImg: ({ commit }, id) => {
+			commit('delImg', id)
 		}
 	}
 }
