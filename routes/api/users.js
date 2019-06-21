@@ -221,19 +221,19 @@ router.post('/update', auth, async (req, res) => {
 	if (!req.user.id)
 		return res.json({ msg: 'Not logged in' })
 	if (!req.body.first_name || req.body.first_name.length < 3)
-		return res.json({msg:'First name is invalid'})
+		return res.json({ msg:'First name is invalid' })
 	if (!req.body.last_name || req.body.last_name.length < 3)
-		return res.json({msg:'Last name is invalid'})
+		return res.json({ msg:'Last name is invalid' })
 	if (!req.body.email || !(/.+@.+/.test(req.body.email)))
-		return res.json({msg:'Email is invalid'})
+		return res.json({ msg:'Email is invalid' })
 	if (!req.body.username || req.body.username.length < 8)
-		return res.json({msg:'Username is invalid'})
+		return res.json({ msg:'Username is invalid' })
 	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
-		return res.json({msg:'Password is invalid'})
+		return res.json({ msg:'Password is invalid' })
 	if (!req.body.gender && req.body.gender != 'male' && req.body.gender != 'female')
-		return res.json({msg:'Gender is invalid'})
+		return res.json({ msg:'Gender is invalid' })
 	if (!req.body.looking && req.body.looking != 'male' && req.body.looking != 'female' && req.body.looking != 'both')
-		return res.json({msg:'Looking is invalid'})
+		return res.json({ msg:'Looking is invalid' })
 	try {
 		let sql, result
 		sql = `SELECT * FROM users WHERE id = ?`
@@ -355,24 +355,27 @@ router.post('/show', auth, async (req, res) => {
 			const tags = a.split(',')
 			return userTags.split(',').filter(val => -1 !== tags.indexOf(val)).length
 		}
-		result = result
-			.filter(cur => {
-				if (!req.body.filter) return true
-				if (user.looking == 'both') return cur.looking == 'both'
-				if (user.looking != user.gender) return cur.looking != 'both' && cur.gender != user.gender && cur.gender != cur.looking
-				if (user.looking == user.gender) return cur.looking != 'both' && cur.gender == user.gender && cur.gender == cur.looking
-				return false
-			}).sort((a, b) => {
-				const aLoc = { lat: a.lat, lng: a.lng }
-				const bLoc = { lat: b.lat, lng: b.lng }
-				const disDelta = distance(userLoc, aLoc) - distance(userLoc, bLoc) 
-				if (!disDelta && userTags && userTags.length) {
-					const disTag = commonTags(b.tags) - commonTags(a.tags)
-					return !disTag ? b.rating - a.rating : disTag
-				} else {
-					return !disDelta ? b.rating - a.rating : disDelta
-				}
-			})
+		result = result.filter(cur => {
+			if (!req.body.filter)
+				return true
+			if (user.looking == 'both')
+				return cur.looking == 'both'
+			if (user.looking != user.gender)
+				return cur.looking != 'both' && cur.gender != user.gender && cur.gender != cur.looking
+			if (user.looking == user.gender)
+				return cur.looking != 'both' && cur.gender == user.gender && cur.gender == cur.looking
+			return false
+		}).sort((a, b) => {
+			const aLoc = { lat: a.lat, lng: a.lng }
+			const bLoc = { lat: b.lat, lng: b.lng }
+			const disDelta = distance(userLoc, aLoc) - distance(userLoc, bLoc) 
+			if (!disDelta && userTags && userTags.length) {
+				const disTag = commonTags(b.tags) - commonTags(a.tags)
+				return !disTag ? b.rating - a.rating : disTag
+			} else {
+				return !disDelta ? b.rating - a.rating : disDelta
+			}
+		})
 		res.json(result)
 	} catch (err) {
 		throw new Error(err)

@@ -90,19 +90,16 @@ router.get('/isloggedin', auth, async (req, res) => {
 	try {
 		let sql = `SELECT * FROM users WHERE id = ?`
 		const result = await pool.query(sql, [req.user.id])
-		if (result.length) {
-			const user = result[0]
-			delete user.password
-			delete user.verified
-			delete user.tokenExpiration
-			sql = `SELECT * FROM images WHERE user_id = ?`
-			user.images = await pool.query(sql, [user.id])
-			const payload = { id: user.id }
-			user.token = await sign(payload, process.env.SECRET, tokenExp)
-			res.json(user)
-		} else {
-			res.json({ msg: 'Not logged in' })
-		}
+		if (!result.length) return res.json({ msg: 'Not logged in' })
+		const user = result[0]
+		delete user.password
+		delete user.verified
+		delete user.tokenExpiration
+		sql = `SELECT * FROM images WHERE user_id = ?`
+		user.images = await pool.query(sql, [user.id])
+		const payload = { id: user.id }
+		user.token = await sign(payload, process.env.SECRET, tokenExp)
+		res.json(user)
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -113,31 +110,21 @@ router.post('/login', async (req, res) => {
 	try {
 		let sql = `SELECT * FROM users WHERE username = ?`
 		let result = await pool.query(sql, [req.body.username])
-		if (result.length && result[0].verified) {
-			const user = result[0]
-			try {
-				result = await bcrypt.compare(req.body.password, user.password)
-				if (result) {
-					try {
-						delete user.password
-						delete user.verified
-						delete user.tokenExpiration
-						sql = `SELECT * FROM images WHERE user_id = ?`
-						user.images = await pool.query(sql, [user.id])
-						const payload = { id: user.id }
-						user.token = await sign(payload, process.env.SECRET, tokenExp)
-						res.json(user)
-					} catch (err) {
-						throw new Error(err)
-					}
-				} else {
-					res.json({ msg: 'wrong pass' })
-				}
-			} catch (err) {
-				throw new Error(err)
-			}
-		} else {
-			res.json({ msg: 'wrong username' })
+		if (!result.length || !result[0].verified) return res.json({ msg: 'wrong username' })
+		const user = result[0]
+		try {
+			result = await bcrypt.compare(req.body.password, user.password)
+			if (!result) return res.json({ msg: 'wrong pass' })
+			delete user.password
+			delete user.verified
+			delete user.tokenExpiration
+			sql = `SELECT * FROM images WHERE user_id = ?`
+			user.images = await pool.query(sql, [user.id])
+			const payload = { id: user.id }
+			user.token = await sign(payload, process.env.SECRET, tokenExp)
+			res.json(user)
+		} catch (err) {
+			throw new Error(err)
 		}
 	} catch (err) {
 		throw new Error(err)
@@ -155,17 +142,14 @@ router.get('/verify/:key', async (req, res) => {
 	try {
 		let sql = `SELECT verified, id FROM users WHERE vkey = ?`
 		const result = await pool.query(sql, [req.params.key])
-		if (result.length) {
-			const user = result[0]
-			if (user.verified) return res.json({ msg: 'User already verified' })
-			sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
-			await pool.query(sql, [req.params.key])
-			const payload = { id: user.id }
-			const token = await sign(payload, process.env.SECRET, tokenExp)
-			res.render('verify', { token })
-		} else {
-			res.json({ msg: 'invalid key' })
-		}
+		if (!result.length) return res.json({ msg: 'invalid key' })
+		const user = result[0]
+		if (user.verified) return res.json({ msg: 'User already verified' })
+		sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
+		await pool.query(sql, [req.params.key])
+		const payload = { id: user.id }
+		const token = await sign(payload, process.env.SECRET, tokenExp)
+		res.render('verify', { token })
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -174,7 +158,6 @@ router.get('/verify/:key', async (req, res) => {
 router.post('/rcheck', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {
-		console.log('i am in rcheck -->', req)
 		const hash = await bcrypt.hash(req.body.password, 10)
 		const sql = `UPDATE users set password = ?, rkey = '' WHERE id = ? AND rkey = ?`
 		const result = await pool.query(sql, [hash, req.user.id, req.body.key])
@@ -203,16 +186,10 @@ router.get('/recover/:key', async (req, res) => {
 		const key = req.params.key
 		const sql = `SELECT id FROM users WHERE rkey = ?`
 		const result = await pool.query(sql, [key])
-		console.log('>> I GOT THIS FROM DB --> ', result.length)
-		if (result.length) {
-			const payload = { id: result[0].id }
-			const token = await sign(payload, process.env.SECRET, tokenExp)
-			console.log('>> TOKEN --> ', token)
-			console.log('>> KEY --> ', key)
-			res.render('recover', { token, key })
-		} else {
-			res.redirect('/404')
-		}
+		if (!result.length) return res.redirect('/404')
+		const payload = { id: result[0].id }
+		const token = await sign(payload, process.env.SECRET, tokenExp)
+		res.render('recover', { token, key })
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -224,11 +201,8 @@ router.post('/kcheck', auth, async (req, res) => {
 		const key = req.body.key
 		const sql = `SELECT id FROM users WHERE rkey = ?`
 		const result = await pool.query(sql, [key])
-		if (result.length) {
-			res.json({ ok: true })
-		} else {
-			res.json({ msg: 'Invalid key' })
-		}
+		if (!result.length) return res.json({ msg: 'Invalid key' })
+		res.json({ ok: true })
 	} catch (err) {
 		throw new Error(err)
 	}
