@@ -14,7 +14,12 @@
 			<v-list-tile-title>{{ convo.username }}</v-list-tile-title>
 		</v-list-tile-content>
 		<v-list-tile-action>
-			<v-icon small :color="convo.status ? 'green' : 'grey'">fiber_manual_record</v-icon>
+			<v-icon v-if="notTyping(convo)" small :color="convo.status ? 'green' : 'grey'">fiber_manual_record</v-icon>
+			<div v-else class="typing">
+				<div class="typing_point"></div>
+				<div class="typing_point"></div>
+				<div class="typing_point"></div>
+			</div>
 		</v-list-tile-action>
 	</v-list-tile>
 	<p v-if="convos.length == 0">No conversations</p>
@@ -27,16 +32,20 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
 	name: 'MessengerList',
+	data: () => ({ }),
 	props: {
 		convos: {
 			type: Array,
 			default: () => { return [] }
 		}
 	},
-	computed: mapGetters([
-		'online',
-		'notif'
-	]),
+	computed: {
+		...mapGetters([
+			'online',
+			'notif',
+			'typingSec'
+		])
+	},
 	watch: {
 		online: {
 			immediate: true,
@@ -44,7 +53,6 @@ export default {
 				this.convos.forEach((cur, i) => {
 					this.convos[i].status = this.online.includes(cur.user_id)
 				})
-				console.log('i am all the convos >>->>', this.convos)
 			}
 		}
 	},
@@ -61,7 +69,20 @@ export default {
 				})
 				return sum
 			}
+		},
+		notTyping (convo) {
+			if (this.typingSec.status) {
+				const conv = this.typingSec.convos.find(cur => cur.id_conversation == convo.id_conversation)
+				return !conv
+			}
+			return true
 		}
 	}
 }
 </script>
+
+<style scoped>
+.typing_point {
+	background: var(--color-primary);
+}
+</style>

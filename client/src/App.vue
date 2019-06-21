@@ -105,4 +105,42 @@ html {
 .main {
 	margin-top: -2.75rem;
 }
+
+@keyframes point {
+	0% {
+		opacity: .3;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.typing {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.typing_point {
+	margin: 7.5px 2px;
+	width: 5px;
+	height: 5px;
+	background: var(--color-primary);
+	border-radius: 50%;
+	animation-name: point;
+	animation-duration: .9s;
+	animation-iteration-count:infinite;
+}
+
+.typing_point:nth-child(1) {
+	animation-delay: 0s;
+}
+
+.typing_point:nth-child(2) {
+	animation-delay: .3s;
+}
+
+.typing_point:nth-child(3) {
+	animation-delay: .6s;
+}
 </style>

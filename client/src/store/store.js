@@ -22,7 +22,10 @@ export const store = new Vuex.Store({
 		followers: [],
 		blockedBy: [],
 		status: false,
-		typing: false,
+		typingSec: {
+			status: false,
+			convos: []
+		},
 		seenConvo: false,
 		newMessage: null,
 		isConnected: false,

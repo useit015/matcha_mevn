@@ -57,21 +57,26 @@ export default {
 		key: 0,
 		messages: [],
 		page:0,
-		timer: null,
+		timer: {},
 		limit: false,
 		loadGif: 'https://i.giphy.com/media/uyCJt0OOhJBiE/giphy.webp'
 	}),
-	computed: mapGetters([
-		'user',
-		'typing',
-		'seenConvo',
-		'newMessage',
-		'imageConvo',
-		'idUserConvo',
-		'profileImage',
-		'selectedConvo',
-		'usernameConvo'
-	]),
+	computed: {
+		...mapGetters([
+			'user',
+			'typingSec',
+			'seenConvo',
+			'newMessage',
+			'imageConvo',
+			'idUserConvo',
+			'profileImage',
+			'selectedConvo',
+			'usernameConvo'
+		]),
+		typing () {
+			return this.typingSec.status && this.typingSec.convos.find(cur => cur.id_conversation == this.selectedConvo)
+		}
+	},
 	watch: {
 		selectedConvo: {
 			immediate: true,
@@ -100,14 +105,12 @@ export default {
 		newMessage () {
 			if (this.newMessage && this.selectedConvo == this.newMessage.id_conversation) {
 				this.messages.push(this.newMessage)
-				this.$store.dispatch('messageClr')
+				this.messageClr()
 			}
 		},
 		typing () {
 			if (this.typing) {
-				clearTimeout(this.timer)
 				this.$nextTick(this.scroll)
-				this.timer = setTimeout(() => this.typingClr(), 1200)
 			}
 		},
 		seenConvo () {
@@ -139,8 +142,9 @@ export default {
 		...utility,
 		...mapActions([
 			'syncNotif',
-			'typingClr',
-			'seenConvoClr'
+			'messageClr',
+			'seenConvoClr',
+			'typingSecClr'
 		]),
 		checkLimit (res) {
 			if (res.length < 50) {
@@ -230,44 +234,6 @@ export default {
 </script>
 
 <style>
-@keyframes point {
-	0% {
-		opacity: .3;
-	}
-	100% {
-		opacity: 1;
-	}
-}
-
-.typing {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.typing_point {
-	margin: 7.5px 2px;
-	width: 5px;
-	height: 5px;
-	background: #555;
-	border-radius: 50%;
-	animation-name: point;
-	animation-duration: .9s;
-	animation-iteration-count:infinite;
-}
-
-.typing_point:nth-child(1) {
-	animation-delay: 0s;
-}
-
-.typing_point:nth-child(2) {
-	animation-delay: .3s;
-}
-
-.typing_point:nth-child(3) {
-	animation-delay: .6s;
-}
-
 .layout.from {
 	flex-direction: row-reverse;
 }

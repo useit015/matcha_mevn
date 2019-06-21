@@ -1,7 +1,7 @@
 <template>
 <v-container class="pt-5 px-0 discover" v-if="loaded">
 	<v-layout wrap justify-center>
-		<v-flex xl2 md3 sm10>
+		<v-flex :xl2="search" :xl4="!search" :md3="search" :md8="!search" sm10>
 			<v-container px-md-5>
 				<v-layout column>
 					<h4 class="title font-weight-thin mb-4">Show me</h4>
@@ -26,27 +26,42 @@
 					<h4 class="title font-weight-thin mb-4">Near</h4>
 					<v-text-field class="loaction_input mb-4" color="primary" outline solo flat append-icon="place" v-model="location"></v-text-field>
 					<h4 class="title font-weight-thin mb-4">Interests</h4>
-					<v-combobox :items="tags" v-model="interests" multiple chips deletable-chips outline solo flat color="primary" class="tags_menu mb-5"></v-combobox>
-					<v-btn outline block large color="primary" class="clear_btn" @click="reset"><v-icon>refresh</v-icon></v-btn>
-					<v-btn outline block large color="primary" class="clear_btn" @click="search = true"><v-icon>search</v-icon></v-btn>
-					<v-layout>
-						<v-combobox v-model="sort" :items="sortTypes" label="Sort By"></v-combobox>
-						<v-btn icon @click="changeSort">
+					<v-autocomplete
+						v-model="interests"
+						:items="allTags"
+						solo
+						flat
+						outline
+						multiple
+						deletable-chips
+						hide-details
+						class="tags_menu mb-5"
+						chips
+					></v-autocomplete>
+					<v-layout align-center justify-between class="mb-4">
+						<h4 class="title font-weight-thin">Sort by</h4>
+						<v-btn flat icon class="sort_btn" color="primary" @click="changeSort">
 							<v-icon :class="`sort_icon ${sortDir < 0 ? 'flip' : ''}`">sort</v-icon>
+						</v-btn>
+					</v-layout>
+					<v-select outline solo v-model="sort" :items="sortTypes" class="sort_select mb-5"></v-select>
+					<v-layout :column="search" align-center justify-center>
+						<v-btn outline block large color="primary" :class="`${search ? '' : 'mr-3'} clear_btn`" @click="reset">
+							<v-icon>refresh</v-icon>
+						</v-btn>
+						<v-btn outline block large color="primary" :class="`${search ? '' : 'm-3'} clear_btn`" @click="search = true">
+							<v-icon>search</v-icon>
 						</v-btn>
 					</v-layout>
 				</v-layout>
 			</v-container>
 		</v-flex>
-		<v-flex xl10 md9 sm12>
-			<v-layout row wrap justify-center v-if="search">
+		<v-flex xl10 md9 sm12 v-if="search">
+			<v-layout row wrap justify-center>
 				<v-flex class="user" v-for="user in sorted" :key="user.user_id" xl2 lg3 sm3 ma-3 grow>
 					<user-card :user="user"/>
 				</v-flex>
 			</v-layout>
-			<div v-else>
-				Search to seee
-			</div>
 		</v-flex>
 	</v-layout>
 </v-container>
@@ -86,7 +101,7 @@ export default {
 				blockedBy: val => !this.blockedBy.includes(val.user_id),
 				rating: val => val.rating >= this.rating[0] && val.rating <= this.rating[1],
 				gender: val => !this.gender || val.gender === this.gender,
-				location: val => !this.location || [val.country, val.address, val.city].some(cur => cur.has(this.location)),
+				location: val => !this.location || [val.country, val.address, val.city].some(cur => cur && cur.has(this.location)),
 				age: val => {
 					const year = new Date(val.birthdate).getFullYear()
 					const now = new Date().getFullYear()
@@ -104,12 +119,13 @@ export default {
 		}
 	},
 	computed: {
-		...mapGetters([
-			'user',
-			'status',
-			'blocked',
-			'blockedBy'
-		]),
+		...mapGetters({
+			user: 'user',
+			allTags: 'tags',
+			status: 'status',
+			blocked: 'blocked',
+			blockedBy: 'blockedBy'
+		}),
 		filtered () {
 			if (!this.search) return []
 			return this.users
@@ -163,16 +179,6 @@ export default {
 		} else {
 			this.logout(this.user.id)
 			this.$router.push('/login')
-		}
-	},
-	watch: {
-		user: {
-			immediate: true,
-			handler () {
-				if (this.user.looking && this.user.looking != 'both') {
-					this.gender = this.user.looking
-				}
-			}
 		}
 	},
 	methods: {
@@ -257,5 +263,22 @@ export default {
 
 .sort_icon.flip {
 	transform: rotate(180deg);
+}
+
+.sort_btn {
+	margin: 0 0 0 auto !important;
+	padding: 0 !important;
+}
+
+.sort_select
+> .v-input__control> .v-input__slot {
+	box-shadow: none !important;
+	border: 2px solid var(--color-primary) !important;
+	opacity: .5;
+}
+
+.sort_select.v-select--is-menu-active
+> .v-input__control > .v-input__slot {
+	opacity: 1;
 }
 </style>

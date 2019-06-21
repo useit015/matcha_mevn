@@ -7,6 +7,7 @@ export const getters = {
 	status: state => state.status,
 	blocked: state => state.blocked,
 	location: state => state.location,
+	typingSec: state => state.typingSec,
 	seenConvo: state => state.seenConvo,
 	blockedBy: state => state.blockedBy,
 	followers: state => state.followers,

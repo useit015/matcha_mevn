@@ -45,7 +45,7 @@
 		</v-layout>
 	</v-container>
 	<alert :data="alert"></alert>
-	<profile-editor @update-image="updateImage" ref="profile_editor"></profile-editor>
+	<profile-editor @file_error="error = true" @file_succes="error = false" @update-image="updateImage" ref="profile_editor"></profile-editor>
 </v-layout>
 <loader v-else/>
 </template>
@@ -78,6 +78,7 @@ export default {
 		ProfileSettings
 	},
 	data: () => ({
+		error: null,
 		loaded: false,
 		activeTab: 'tab-profile',
 		alert: {
@@ -158,23 +159,25 @@ export default {
 			}
 		},
 		async updateImage (data) {
-			try {
-				let msg
-				const fd = new FormData()
-				fd.append('image', data)
-				const url = `http://134.209.195.36/api/users/image`
-				const headers = { 'x-auth-token': this.user.token }
-				const res = await this.$http.post(url, fd, { headers })
-				if (res && res.body && !res.body.msg) {
-					msg = 'You profile image has been updated successfuly'
-					this.showAlert('success', msg)
-					this.$store.commit('updateProfileImage', res.body)
-				} else {
-					msg = 'Ouups something went wrong!'
-					this.showAlert('red', msg)
+			if (!this.error) {
+				try {
+					let msg
+					const fd = new FormData()
+					fd.append('image', data)
+					const url = `http://134.209.195.36/api/users/image`
+					const headers = { 'x-auth-token': this.user.token }
+					const res = await this.$http.post(url, fd, { headers })
+					if (res && res.body && !res.body.msg) {
+						msg = 'You profile image has been updated successfuly'
+						this.showAlert('success', msg)
+						this.$store.commit('updateProfileImage', res.body)
+					} else {
+						msg = 'Ouups something went wrong!'
+						this.showAlert('red', msg)
+					}
+				} catch (err) {
+					console.log('got error here --> ', err)
 				}
-			} catch (err) {
-				console.log('got error here --> ', err)
 			}
 		},
 		showAlert (color, text) {

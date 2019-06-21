@@ -331,16 +331,20 @@ export default {
 				height: frameRect.height / imageRect.height
 			}
 		},
-		clicked: function(e){
+		clicked (e){
 			if (this.dragged == true) {
 				this.dragged = false
 			} else {
 				document.getElementById('profileInput').click()
 			}
 		},
-		fileSelected: function(e) {
+		fileSelected (e) {
 			var files = e.target.files || e.dataTransfer.files;
-			if (!files.length) return;
+			if (!files.length || files[0].type.split('/')[0] != 'image') {
+				this.$emit('file_error')
+				return
+			}
+			this.$emit('file_success')
 			var image = new Image();
 			var reader = new FileReader();
 			this.changed = true

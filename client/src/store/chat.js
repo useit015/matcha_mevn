@@ -5,8 +5,9 @@ export const chat = {
 		seenConvoClr: state => {
 			state.seenConvo = false
 		},
-		typingClr: state => {
-			state.typing = false
+		typingSecClr: (state, convId) => {
+			state.typingSec.convos = state.typingSec.convos.filter(cur => cur.id_conversation != convId)
+			state.typingSec.status = !!state.typingSec.convos.length
 		},
 		messageClr: state => {
 			state.newMessage = null
@@ -45,9 +46,9 @@ export const chat = {
 		},
 	},
 	actions: {
-		typingClr: ({ commit }) => commit('typingClr'),
 		syncNotif: ({ commit }) => commit('syncNotif'),
 		messageClr: ({ commit }) => commit('messageClr'),
+		typingSecClr: ({ commit }, convId) => commit('typingSecClr', convId),
 		seenConvoClr: ({ commit }) => commit('seenConvoClr'),
 		syncConvo: ({ commit }, convo) => commit('syncConvo', convo),
 		updateConvos: ({ commit }, msg) => commit('updateConvos', msg),

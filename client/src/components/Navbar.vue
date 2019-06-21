@@ -140,6 +140,7 @@ import moment from 'moment'
 export default {
 	name: 'Navbar',
 	data: () => ({
+		timer: {},
 		notifMenu: 0,
 		msgMenu: 0,
 		notifNum: 0,
@@ -205,8 +206,12 @@ export default {
 			'notif',
 			'status',
 			'convos',
+			'typingSec',
 			'profileImage'
 		]),
+		typingConvos () {
+			return this.typingSec.convos ? this.typingSec.convos.length : false
+		},
 		image () {
 			return this.getFullPath(this.profileImage)
 		},
@@ -234,6 +239,14 @@ export default {
 				const res = await this.$http.get(url, { headers })
 				this.seenNotif()
 			}
+		},
+		typingConvos () {
+			if (this.typingSec.status) {
+				const len = this.typingSec.convos.length
+				const convId = this.typingSec.convos[len - 1].id_conversation
+				if (this.timer[convId]) clearTimeout(this.timer[convId])
+				this.timer[convId] = setTimeout(() => this.typingSecClr(convId), 1200)
+			}
 		}
 	},
 	methods: {
@@ -242,7 +255,8 @@ export default {
 			in: 'login',
 			out: 'logout',
 			syncConvo: 'syncConvo',
-			seenNotif: 'seenNotif'
+			seenNotif: 'seenNotif',
+			typingSecClr: 'typingSecClr'
 		}),
 		toUserProfile (id) {
 			this.$router.push(`/user/${id}`)
