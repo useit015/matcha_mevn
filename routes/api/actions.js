@@ -6,8 +6,9 @@ router.post('/position', auth, async (req, res) => {
 	if (!req.user.id) res.json({ msg: 'not logged in' })
 	try {
 		const sql = `UPDATE users SET lat = ?, lng = ? WHERE id = ?`
-		await pool.query(sql, [req.body.lat, req.body.lng, req.user.id])
-		res.json('synced position')
+		const result = await pool.query(sql, [req.body.lat, req.body.lng, req.user.id])
+		if (!result.affectedRows) return res.json({ msg: 'Oups something went wrong'})
+		res.json({ ok: true })
 	} catch (err) {
 		throw new Error(err)
 	}

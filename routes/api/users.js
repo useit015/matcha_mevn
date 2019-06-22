@@ -184,7 +184,7 @@ router.post('/install', async (req, res) => {
 			last_name: req.body.last_name,
 			username: req.body.username,
 			email: req.body.email,
-			password: bcrypt.hashSync(req.body.password, 10),
+			password: await bcrypt.hash(req.body.password, 10),
 			vkey: randomHex(),
 			gender: req.body.gender,
 			looking: req.body.looking,
@@ -281,6 +281,52 @@ router.post('/update', auth, async (req, res) => {
 		} else {
 			res.json({ ok: false, status: 'User not found' })
 		}
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
+router.post('/email', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.email || !(/.+@.+/.test(req.body.email)))
+		return res.json({ msg:'Email is invalid' })
+	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
+		return res.json({ msg:'Password is invalid' })
+	if (req.user.email == req.body.email)
+		return res.json({ msg:'The provided email matches your current email' })
+	try {
+		let result = await bcrypt.compare(req.body.password, req.user.password)
+		if (!result) return res.json({ msg: 'Wrong password' })
+		let sql = `SELECT * FROM users WHERE email = ?`
+		result = await pool.query(sql, [req.body.email])
+		if (result.length) return res.json({ msg: 'Email already exists' })
+		sql = `UPDATE users SET email = ? WHERE id = ?`
+		result = await pool.query(sql, [req.body.email, req.user.id])
+		if (!result.affectedRows) return res.json({ msg: 'Oups something went wrong' })
+		res.json({ ok: true })
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
+router.post('/password', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
+		return res.json({ msg:'Password is invalid' })
+	if (!req.body.newPassword || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.newPassword)))
+		return res.json({ msg:'New password is invalid' })
+	if (!req.body.confNewPassword || req.body.newPassword != req.body.confNewPassword )
+		return res.json({ msg:'Confirmation password is invalid' })
+	if (req.body.password == req.body.newPassword )
+		return res.json({ msg:'The provided password matches your current password' })
+	try {
+		let result = await bcrypt.compare(req.body.password, req.user.password)
+		if (!result) return res.json({ msg: 'Wrong password' })
+		const hash = await bcrypt.hash(req.body.newPassword, 10)
+		let sql = `UPDATE users SET password = ? WHERE id = ?`
+		result = await pool.query(sql, [hash, req.user.id])
+		if (!result.affectedRows) return res.json({ msg: 'Oups something went wrong' })
+		res.json({ ok: true })
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -385,8 +431,15 @@ router.post('/show', auth, async (req, res) => {
 router.get('/show/:id', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'not logged in' })
 	try {
-		let sql = `SELECT *, GET_RATING(users.id) AS rating FROM users WHERE id = ?`
-		const result = await pool.query(sql, [req.params.id])
+		let sql = `SELECT *, GET_RATING(users.id) AS rating FROM users 
+					WHERE id = ? 
+					AND id NOT IN (
+						SELECT blocked FROM blocked WHERE blocker = ?
+					)
+					AND ? NOT IN (
+						SELECT blocked FROM blocked WHERE blocker = ?
+					)`
+		const result = await pool.query(sql, [req.params.id, req.user.id, req.user.id, req.params.id])
 		if (result.length) {
 			const user = result[0]
 			sql = `SELECT * FROM images WHERE user_id = ?`
@@ -399,6 +452,24 @@ router.get('/show/:id', auth, async (req, res) => {
 		} else {
 			res.json({msg:'User doesnt exist'})
 		}
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
+router.post('/blacklisted', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'not logged in' })
+	const blacklist = JSON.parse(req.body.ids)
+	console.log(Array.isArray(blacklist))
+	if (!Array.isArray(blacklist) || !blacklist.length) return res.json({ msg: 'bad query' })
+	const placehoder = `(${blacklist.map(cur => '?').join(', ')})`
+	try {
+		let sql = `SELECT username, first_name, last_name FROM users WHERE id IN ${placehoder}`
+		const result = await pool.query(sql, blacklist)
+		res.json({
+			ok: true,
+			list: result
+		})
 	} catch (err) {
 		throw new Error(err)
 	}
