@@ -1,8 +1,10 @@
 import utility from '../utility'
 import { isArray } from 'util'
+import Vue from 'vue'
 
 export const user = {
 	mutations: {
+		updateUserEmail: (state, email) => state.user.email = email,
 		updateTags: (state, tags) => state.user.tags = tags.map(cur => cur.text.toLowerCase()).join(','),
 		updateUser: (state, user) => state.user = user,
 		updateProfileImage: (state, data) => {
@@ -43,9 +45,15 @@ export const user = {
 			if (state.user.images.length && !state.user.images.find(cur => cur.profile)) {
 				state.user.images[state.user.images.length - 1].profile = true
 			}
+		},
+		syncBlacklist: (state, list) => {
+			state.blacklist = list
 		}
 	},
 	actions: {
+		updateUserEmail: ({ commit }, email) => {
+			commit('updateUserEmail', email)
+		},
 		updateUser: ({ commit }, user) => {
 			const { lat, lng } = user
 			commit('locate', { lat, lng })
@@ -96,7 +104,7 @@ export const user = {
 			try {
 				let blocked = []
 				let blockedBy = []
-				const res = await utility.sync('blocked')
+				let res = await utility.sync('blocked')
 				if (isArray(res.body)) {
 					blocked = res.body
 						.filter(cur => cur.blocker == id)
@@ -106,6 +114,14 @@ export const user = {
 						.map(cur => cur.blocker)
 				}
 				commit('syncBlocked', { blocked, blockedBy })
+				if (blocked.length) {
+					const token = localStorage.getItem('token')
+					const url = `http://134.209.195.36/api/users/blacklisted`
+					const headers = { 'x-auth-token': token }
+					const data = { ids: JSON.stringify(blocked) }
+					res = await Vue.http.post(url, data, { headers })
+					if (res.body.ok) commit('syncBlacklist', res.body.list)
+				}
 			} catch (err) {
 				console.log('Got error here --> ', err)
 			}

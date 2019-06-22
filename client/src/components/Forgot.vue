@@ -34,19 +34,12 @@ export default {
 				const res = await this.$http.post(url, { email })
 				this.email = ''
 				if (res.body.ok) {
-					this.showAlert('green', 'Please check your email ..')
+					this.showAlert('green', 'Please check your email ..', this)
 				} else {
-					this.showAlert('red', 'Ouups something went wrong!')
+					this.showAlert('red', 'Ouups something went wrong!', this)
 				}
 			} else {
-				this.showAlert('red', 'Please provide a valid email')
-			}
-		},
-		showAlert (color, text) {
-			this.alert = {
-				state: true,
-				color,
-				text
+				this.showAlert('red', 'Please provide a valid email', this)
 			}
 		}
 	}

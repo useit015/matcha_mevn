@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import vueRouter from 'vue-router'
 import Users from '@/components/Users'
-import About from '@/components/About'
 import Login from '@/components/Login'
 import Search from '@/components/Search'
 import Forgot from '@/components/Forgot'
@@ -28,10 +27,6 @@ export const router = new vueRouter({
 		{
 			path: '/install',
 			component: install
-		},
-		{
-			path: '/about',
-			component: About
 		},
 		{
 			path: '/register',

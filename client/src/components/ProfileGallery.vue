@@ -43,13 +43,6 @@ export default {
 		profileImage (image) {
 			return this.getFullPath(image)
 		},
-		showAlert (color, text) {
-			this.alert = {
-				state: true,
-				color,
-				text
-			}
-		},
 		async deleteImg (image) {
 			try {
 				const url = `http://134.209.195.36/api/users/image/del`
@@ -61,9 +54,9 @@ export default {
 				const res = await this.$http.post(url, data, { headers})
 				if (res.body.ok) {
 					this.delImg(image.id)
-					this.showAlert('green', 'Photo has been removed')
+					this.showAlert('green', 'Photo has been removed', this)
 				} else {
-					this.showAlert('red', 'Oups.. something went wrong')
+					this.showAlert('red', 'Oups.. something went wrong', this)
 				}
 			} catch (err) {
 				console.log('Got error with --> ', err)

@@ -10,6 +10,7 @@ export const getters = {
 	typingSec: state => state.typingSec,
 	seenConvo: state => state.seenConvo,
 	blockedBy: state => state.blockedBy,
+	blacklist: state => state.blacklist,
 	followers: state => state.followers,
 	newMessage: state => state.newMessage,
 	selectedConvo: state => state.selectedConvo,

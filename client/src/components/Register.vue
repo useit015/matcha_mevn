@@ -27,6 +27,8 @@
 </template>
 
 <script>
+import utility from '../utility.js'
+
 export default {
 	name: 'Register',
 	data: () => ({
@@ -61,6 +63,7 @@ export default {
 		}
 	}),
 	methods: {
+		...utility,
 		async registerUser (e) {
 			e.preventDefault()
 			try {
@@ -85,8 +88,8 @@ export default {
 				console.error(err)
 			}
 		},
-		passwordMatch () { 
-			return !this.passwordConfirm.length || this.password === this.passwordConfirm ? '' : 'Passwords must match';
+		passwordMatch () {
+			return this.passMatch(this.passwordConfirm, this.password)
 		}
 	}
 }

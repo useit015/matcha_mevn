@@ -148,11 +148,11 @@ export default {
 				const res = await this.$http.post(url, this.user, { headers })
 				if (res && res.body && !res.body.msg) {
 					msg = 'Your account has been updated successfuly'
-					this.showAlert('success', msg)
+					this.showAlert('success', msg, this)
 					this.update(this.user)
 				} else {
 					msg = 'Ouups something went wrong!'
-					this.showAlert('red', msg)
+					this.showAlert('red', msg, this)
 				}
 			} catch (err) {
 				console.log('got error here --> ', err)
@@ -169,22 +169,15 @@ export default {
 					const res = await this.$http.post(url, fd, { headers })
 					if (res && res.body && !res.body.msg) {
 						msg = 'You profile image has been updated successfuly'
-						this.showAlert('success', msg)
+						this.showAlert('success', msg, this)
 						this.$store.commit('updateProfileImage', res.body)
 					} else {
 						msg = 'Ouups something went wrong!'
-						this.showAlert('red', msg)
+						this.showAlert('red', msg, this)
 					}
 				} catch (err) {
 					console.log('got error here --> ', err)
 				}
-			}
-		},
-		showAlert (color, text) {
-			this.alert = {
-				state: true,
-				color,
-				text
 			}
 		},
 		syncUser (user) {

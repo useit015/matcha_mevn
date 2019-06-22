@@ -62,7 +62,7 @@ export default {
 				this.$refs.vueavatar.clicked()
 				this.dialog = true
 			} else {
-				this.showAlert('red', 'Max photos if five, you must delete one in order to add')
+				this.showAlert('red', 'Max photos if five, you must delete one in order to add', this)
 			}
 		},
 		onChangeScale (scale) {
@@ -75,13 +75,6 @@ export default {
 		},
 		onImageReady (scale) {
 			this.$refs.vueavatarscale.setScale(scale)
-		},
-		showAlert (color, text) {
-			this.alert = {
-				state: true,
-				color,
-				text
-			}
 		}
 	}
 }

@@ -48,9 +48,10 @@
 </template>
 
 <script>
-import loader from './loader'
 import Alert from './Alert'
+import loader from './loader'
 import { mapGetters } from 'vuex'
+import utility from '../utility.js'
 
 export default {
 	name: 'Recover',
@@ -99,6 +100,7 @@ export default {
 		}
 	},
 	methods: {
+		...utility,
 		passwordMatch () { 
 			return !this.passwordConfirm.length || this.password === this.passwordConfirm ? '' : 'Passwords must match';
 		},
@@ -114,19 +116,12 @@ export default {
 				this.loading = false
 				if (res.body.ok) {
 					this.notSub = false
-					this.showAlert('green', 'Your password has been reseted!')
+					this.showAlert('green', 'Your password has been reseted!', this)
 				} else {
-					this.showAlert('red', 'Oups, something went wrong, please try later')
+					this.showAlert('red', 'Oups, something went wrong, please try later', this)
 				}
 			} catch (err) {
 				console.log('Got error with --> ', err)
-			}
-		},
-		showAlert (color, text) {
-			this.alert = {
-				state: true,
-				color,
-				text
 			}
 		}
 	},

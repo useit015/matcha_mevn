@@ -21,6 +21,7 @@ export const store = new Vuex.Store({
 		following: [],
 		followers: [],
 		blockedBy: [],
+		blacklist: [],
 		status: false,
 		typingSec: {
 			status: false,

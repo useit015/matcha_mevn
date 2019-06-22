@@ -60,10 +60,10 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import { VueTagsInput, createTags } from '@johmun/vue-tags-input'
-import utility from '../utility.js'
 import moment from 'moment'
+import { mapGetters } from 'vuex'
+import utility from '../utility.js'
+import { VueTagsInput, createTags } from '@johmun/vue-tags-input'
 
 export default {
 	name: 'ProfileForm',
@@ -106,12 +106,12 @@ export default {
 	},
 	methods: {
 		...utility,
-		syncUser() {
+		syncUser () {
 			const list = this.user.tags ? this.user.tags.split(',') : []
 			this.tags = list ? createTags(list) : []
 			this.$emit('sync-user', this.user)
 		},
-		updateUser() {
+		updateUser () {
 			this.$emit('update-user', this.user)
 		}
 	}
