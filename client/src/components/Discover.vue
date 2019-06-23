@@ -65,7 +65,7 @@
 <v-container class="my-3" v-else>
 	<v-layout wrap justify-center>
 		<h2 class="display-2 text-xs-center font-weight-thin pt-4 pb-3 mb-4 grey--text mx-auto">
-			Complete your profile to discover users that matchs you !
+			Complete your profile to the opportunity to discover users that matchs you !
 		</h2>
 		<v-flex xs6 md4>
 			<v-btn block outline large router to="/settings" color="primary">
