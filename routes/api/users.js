@@ -10,6 +10,7 @@ const router = require('express').Router()
 const pool = require('../../utility/database')
 const distance = require('../../utility/distance')
 const sendMail = require('../../utility/mail')
+const validateInput = require('../../utility/validate')
 const writeFileAsync = promisify(writeFile)
 const unlinkAsync = promisify(unlink)
 const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
@@ -140,15 +141,15 @@ router.get('/gettags', auth, async (req, res) => {
 })
 
 router.post('/add', async (req, res) => {
-	if (!req.body.first_name || req.body.first_name.length < 3)
+	if (!validateInput(req.body.first_name, 'fname'))
 		return res.json({msg:'First name is invalid'})
-	if (!req.body.last_name || req.body.last_name.length < 3)
+	if (!validateInput(req.body.last_name, 'lname'))
 		return res.json({msg:'Last name is invalid'})
-	if (!req.body.email || !(/.+@.+/.test(req.body.email)))
+	if (!validateInput(req.body.email, 'email'))
 		return res.json({msg:'Email is invalid'})
-	if (!req.body.username || req.body.username.length < 8)
-		return res.json({msg:'Username is invalid'})
-	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
+	if (!validateInput(req.body.username, 'username'))
+		return res.json({ msg:'Username is invalid' })
+	if (!validateInput(req.body.password, 'password'))
 		return res.json({msg:'Password is invalid'})
 	try {
 		const user = {
@@ -162,16 +163,15 @@ router.post('/add', async (req, res) => {
 		let sql = `SELECT email, username FROM users WHERE username = ? OR email = ?`
 		let result = await pool.query(sql, [user.username, user.email])
 		if (!result.length) {
-			sql = `INSERT INTO users (first_name, last_name,
-							username, email, password, vkey)
-							VALUES (?, ?, ?, ?, ?, ?)`
+			sql = `INSERT INTO users (first_name, last_name, username, email, password, vkey)
+					VALUES (?, ?, ?, ?, ?, ?)`
 			result = await pool.query(sql, Object.values(user))
 			sendMail(user.email, user.vkey)
 			if (result.affectedRows) {
 				return res.json({ ok: true, status: 'User Added' })
 			}
 		}
-		res.json({ msg: 'Something went wrong'})
+		res.json({ msg: 'Oups something went wrong'})
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -218,19 +218,18 @@ router.post('/install', async (req, res) => {
 })
 
 router.post('/update', auth, async (req, res) => {
-	if (!req.user.id)
-		return res.json({ msg: 'Not logged in' })
-	if (!req.body.first_name || req.body.first_name.length < 3)
-		return res.json({ msg:'First name is invalid' })
-	if (!req.body.last_name || req.body.last_name.length < 3)
-		return res.json({ msg:'Last name is invalid' })
-	if (!req.body.email || !(/.+@.+/.test(req.body.email)))
-		return res.json({ msg:'Email is invalid' })
-	if (!req.body.username || req.body.username.length < 8)
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!validateInput(req.body.first_name, 'fname'))
+		return res.json({msg:'First name is invalid'})
+	if (!validateInput(req.body.last_name, 'lname'))
+		return res.json({msg:'Last name is invalid'})
+	if (!validateInput(req.body.email, 'email'))
+		return res.json({msg:'Email is invalid'})
+	if (!validateInput(req.body.username, 'username'))
 		return res.json({ msg:'Username is invalid' })
-	if (!req.body.gender && req.body.gender != 'male' && req.body.gender != 'female')
+	if (!validateInput(req.body.gender, 'gender'))
 		return res.json({ msg:'Gender is invalid' })
-	if (!req.body.looking && req.body.looking != 'male' && req.body.looking != 'female' && req.body.looking != 'both')
+	if (!validateInput(req.body.looking, 'looking'))
 		return res.json({ msg:'Looking is invalid' })
 	try {
 		let sql, result
@@ -286,10 +285,10 @@ router.post('/update', auth, async (req, res) => {
 
 router.post('/email', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
-	if (!req.body.email || !(/.+@.+/.test(req.body.email)))
-		return res.json({ msg:'Email is invalid' })
-	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
-		return res.json({ msg:'Password is invalid' })
+	if (!validateInput(req.body.email, 'email'))
+		return res.json({msg:'Email is invalid'})
+	if (!validateInput(req.body.password, 'password'))
+		return res.json({msg:'Password is invalid'})
 	if (req.user.email == req.body.email)
 		return res.json({ msg:'The provided email matches your current email' })
 	try {
@@ -309,9 +308,9 @@ router.post('/email', auth, async (req, res) => {
 
 router.post('/password', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
-	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
+	if (!validateInput(req.body.password, 'password'))
 		return res.json({ msg:'Password is invalid' })
-	if (!req.body.newPassword || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.newPassword)))
+	if (!validateInput(req.body.newPassword, 'password'))
 		return res.json({ msg:'New password is invalid' })
 	if (!req.body.confNewPassword || req.body.newPassword != req.body.confNewPassword )
 		return res.json({ msg:'Confirmation password is invalid' })
@@ -346,7 +345,7 @@ router.post('/image', [auth, upload.single('image')], async (req, res) => {
 			result = await pool.query(sql, [req.user.id, imgName])
 			res.json({ ok: true, status: 'Image Updated', name: imgName, id:result.insertId })
 		} else {
-			res.json({ msg: 'user has 5 photos' })
+			res.json({ msg: 'User already has 5 photos' })
 		}
 	} catch (err) {
 		throw new Error(err)
@@ -355,6 +354,7 @@ router.post('/image', [auth, upload.single('image')], async (req, res) => {
 
 router.post('/image/del', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.id || isNaN(req.body.id)) return res.json({ msg: 'Invalid request' })
 	const isExternal = url => url && (url.indexOf(':') > -1 || url.indexOf('//') > -1 || url.indexOf('www.') > -1)
 	try {
 		let sql = `SELECT * FROM images WHERE id = ? AND user_id = ?`
@@ -375,7 +375,7 @@ router.post('/image/del', auth, async (req, res) => {
 			}
 			if (result.affectedRows) return res.json({ ok: true})
 		}
-		res.json({ msg: 'Something went wrong'})
+		res.json({ msg: 'Oups something went wrong'})
 	} catch (err) {
 		throw new Error(err)
 	}
@@ -383,7 +383,7 @@ router.post('/image/del', auth, async (req, res) => {
 
 router.post('/show', auth, async (req, res) => {
 	const user = req.user
-	if (!user.id) return res.json({ msg: 'not logged in' })
+	if (!user.id) return res.json({ msg: 'Not logged in' })
 	try {
 		const sql = `SELECT *, GET_RATING(users.id) AS rating FROM users, images
 						WHERE users.id = images.user_id
@@ -427,7 +427,8 @@ router.post('/show', auth, async (req, res) => {
 })
 
 router.get('/show/:id', auth, async (req, res) => {
-	if (!req.user.id) return res.json({ msg: 'not logged in' })
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.params.id || isNaN(req.params.id)) return res.json({ msg: 'Invalid request' })
 	try {
 		let sql = `SELECT *, GET_RATING(users.id) AS rating FROM users 
 					WHERE id = ? 

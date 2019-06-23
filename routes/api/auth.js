@@ -6,6 +6,7 @@ const router = require('express').Router()
 const pool = require('../../utility/database')
 const auth = require('../../middleware/auth')
 const sendMail = require('../../utility/mail')
+const validateInput = require('../../utility/validate')
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 
@@ -86,11 +87,11 @@ router.get('/google/redirect', passport.authenticate('google'), (req, res) => {
 
 router.get('/isloggedin', auth, async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
-	if (!req.user.id) res.json({ msg: 'not logged in' })
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {
 		let sql = `SELECT * FROM users WHERE id = ?`
 		const result = await pool.query(sql, [req.user.id])
-		if (!result.length) return res.json({ msg: 'Not logged in' })
+		if (!result.length) return res.json({ msg: 'User not found' })
 		const user = result[0]
 		delete user.password
 		delete user.verified
@@ -107,14 +108,19 @@ router.get('/isloggedin', auth, async (req, res) => {
 
 router.post('/login', async (req, res) => {
 	// ! MUST VALIDATE INPUT !!!!
+	if (!validateInput(req.body.username, 'username'))
+		return res.json({ msg:'Username is invalid' })
+	if (!validateInput(req.body.password, 'password'))
+		return res.json({ msg:'Password is invalid' })
 	try {
 		let sql = `SELECT * FROM users WHERE username = ?`
 		let result = await pool.query(sql, [req.body.username])
-		if (!result.length || !result[0].verified) return res.json({ msg: 'wrong username' })
+		if (!result.length) return res.json({ msg: 'Wrong username' })
+		if (!result[0].verified) return res.json({ msg: 'Unverified user. Please verify your account' })
 		const user = result[0]
 		try {
 			result = await bcrypt.compare(req.body.password, user.password)
-			if (!result) return res.json({ msg: 'wrong pass' })
+			if (!result) return res.json({ msg: 'Wrong password' })
 			delete user.password
 			delete user.verified
 			delete user.tokenExpiration
@@ -141,7 +147,7 @@ router.get('/verify/:key', async (req, res) => {
 	try {
 		let sql = `SELECT verified, id FROM users WHERE vkey = ?`
 		const result = await pool.query(sql, [req.params.key])
-		if (!result.length) return res.json({ msg: 'invalid key' })
+		if (!result.length) return res.json({ msg: 'Invalid key' })
 		const user = result[0]
 		if (user.verified) return res.json({ msg: 'User already verified' })
 		sql = `UPDATE users SET verified = 1 WHERE vkey = ? AND verified = 0`
@@ -156,11 +162,14 @@ router.get('/verify/:key', async (req, res) => {
 
 router.post('/rcheck', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.key) return res.json({ msg: 'Invalid key' })
+	if (!validateInput(req.body.password, 'password'))
+		return res.json({ msg:'Password is invalid' })
 	try {
 		const hash = await bcrypt.hash(req.body.password, 10)
 		const sql = `UPDATE users set password = ?, rkey = '' WHERE id = ? AND rkey = ?`
 		const result = await pool.query(sql, [hash, req.user.id, req.body.key])
-		if (!result.affectedRows) return res.json({ msg: 'something went wrong' })
+		if (!result.affectedRows) return res.json({ msg: 'Oups something went wrong' })
 		res.json({ ok: true })
 	} catch (err) {
 		throw new Error(err)
@@ -168,11 +177,13 @@ router.post('/rcheck', auth, async (req, res) => {
 })
 
 router.post('/forgot', async (req, res) => {
+	if (!validateInput(req.body.email, 'email'))
+		return res.json({ msg:'Email is invalid' })
 	try {
 		const key = randomHex()
 		const sql = `UPDATE users SET rkey = ? WHERE email = ?`
 		const result = await pool.query(sql, [key, req.body.email])
-		if (!result.affectedRows) return res.json({ msg: 'email not found' })
+		if (!result.affectedRows) return res.json({ msg: 'Email not found' })
 		sendMail(req.body.email, key)
 		res.json({ ok: true })
 	} catch (err) {
@@ -181,6 +192,7 @@ router.post('/forgot', async (req, res) => {
 })
 
 router.get('/recover/:key', async (req, res) => {
+	if (!req.params.key) return res.json({ msg: 'Invalid request' })
 	try {
 		const key = req.params.key
 		const sql = `SELECT id FROM users WHERE rkey = ?`
@@ -196,6 +208,7 @@ router.get('/recover/:key', async (req, res) => {
 
 router.post('/kcheck', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.key) return res.json({ msg: 'Invalid request' })
 	try {
 		const key = req.body.key
 		const sql = `SELECT id FROM users WHERE rkey = ?`

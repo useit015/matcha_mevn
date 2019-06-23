@@ -1,9 +1,14 @@
 const router = require('express').Router()
 const pool = require('../../utility/database')
+const validateInput = require('../../utility/validate')
 const auth = require('../../middleware/auth')
 
 router.post('/add', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.id_from || isNaN(req.body.id_from)) return res.json({ msg: 'Invalid request' })
+	if (!req.body.id_to || isNaN(req.body.id_to)) return res.json({ msg: 'Invalid request' })
+	if (!req.body.id_conversation || isNaN(req.body.id_conversation)) return res.json({ msg: 'Invalid request' })
+	if (!req.body.type) return res.json({ msg: 'Invalid request' })
 	try {
 		const sql = `INSERT INTO notifications (type, id_from, id_to, id_conversation) VALUES (?, ?, ?, ?)`
 		const data = [req.body.type, req.body.id_from, req.body.id_to, req.body.id_conversation]
