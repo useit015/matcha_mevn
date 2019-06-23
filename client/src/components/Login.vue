@@ -1,13 +1,5 @@
 <template>
 <v-container class="mt-4">
-	<transition name="alert">
-		<v-alert v-if="userFailed" :value="true" dismissible type="error" color="error" icon="warning" transition="scale-transition" class="alert">
-			Oups .. something went wrong !
-		</v-alert>
-		<v-alert v-if="userAdded" :value="true" dismissible type="success" color="success" icon="check_circle" transition="scale-transition" class="alert">
-			You have been successfully registered, please verify your email
-		</v-alert>
-	</transition>
 	<div class="login mt-5">
 		<h1 class="page-header display-3 font-weight-light grey--text">Login</h1>
 		<v-form v-model="valid" class="my-4">
@@ -45,22 +37,30 @@
 			</a>
 		</v-layout>
 	</div>
+	<alert :data="alert"></alert>
 </v-container>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
+import Alert from './Alert'
 import utility from '../utility.js'
 
 export default {
 	name: 'Login',
+	components: {
+		Alert
+	},
 	data: () => ({
 		username: '',
 		password: '',
 		valid: false,
 		showPass: false,
-		userAdded: false,
-		userFailed: false,
+		alert: {
+			state: false,
+			color: '',
+			text: ''
+		},
 		nameRules: [
 			v => !!v || 'This field is required'
 		],
@@ -97,12 +97,18 @@ export default {
 					password: this.password
 				}
 				const res = await this.$http.post(url, auth)
-				const user = res.body
-				if (user.id) {
-					user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
-					this.login(user)
-					this.updateLocation()
-					this.$router.push('/')
+				if (res.body.msg) {
+					this.showAlert('red', res.body.msg, this)
+				}
+				else 
+				{
+					const user = res.body
+					if (user.id) {
+						user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+						this.login(user)
+						this.updateLocation()
+						this.$router.push('/')
+					}
 				}
 			} catch (err) {
 				console.error(err)

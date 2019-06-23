@@ -1,13 +1,5 @@
 <template>
 <v-container class="mt-4">
-	<transition name="alert">
-		<v-alert v-if="userFailed" :value="true" dismissible type="error" color="error" icon="warning" transition="scale-transition" class="alert">
-			Oups .. something went wrong !
-		</v-alert>
-		<v-alert v-if="userAdded" :value="true" dismissible type="success" color="success" icon="check_circle" transition="scale-transition" class="alert">
-			You have been successfully registered, please verify your email
-		</v-alert>
-	</transition>
 	<div class="register mt-5">
 		<h1 class="page-header display-3 mb-4 font-weight-light grey--text">Register</h1>
 		<v-form v-model="valid" class="my-4">
@@ -23,14 +15,19 @@
 			</v-layout>
 		</v-form>
 	</div>
+	<alert :data="alert"></alert>
 </v-container>
 </template>
 
 <script>
+import Alert from './Alert'
 import utility from '../utility.js'
 
 export default {
 	name: 'Register',
+	components: {
+		Alert
+	},
 	data: () => ({
 		firstname: '',
 		lastname: '',
@@ -41,8 +38,11 @@ export default {
 		valid: false,
 		showPass: false,
 		showConfPass: false,
-		userAdded: false,
-		userFailed: false,
+		alert: {
+			state: false,
+			color: '',
+			text: ''
+		},
 		rules: {
 			name: [
 				v => !!v || 'This field is required'
@@ -76,13 +76,10 @@ export default {
 					password: this.password
 				}
 				const res = await this.$http.post(url, data)
-				if (res.body) {
-					this.userAdded = true
-					setTimeout(() => this.userAdded = false, 5000)
+				if (res.body.ok) {
+					this.showAlert('green', res.body.status, this)
 				} else {
-					this.userAdded = false
-					this.userFailed = true
-					setTimeout(() => this.userFailed = false, 5000)
+					this.showAlert('red', res.body.msg, this)
 				}
 			} catch (err) {
 				console.error(err)
