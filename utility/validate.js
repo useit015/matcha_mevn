@@ -15,7 +15,7 @@ const validateInput = (input, type) => {
         case 'gender':
             return !(input != 'male' && input != 'female')
         case 'msg':
-            return (input.length > 0 && input.length < 2048)
+            return (input.length == 0 || input.length > 2048)
         default:
             return false
     }
