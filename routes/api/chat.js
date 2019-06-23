@@ -62,6 +62,7 @@ router.post('/single', auth, async (req, res) => {
 	try {
 		let sql = `SELECT * FROM chat WHERE id_conversation = ? ORDER BY created_at DESC LIMIT ?, 50`
 		const result = await pool.query(sql, [req.body.id, page * 50])
+		console.log(result)
 		res.json(result.reverse())
 		sql = `UPDATE chat SET is_read = 1 WHERE id_conversation = ? AND id_from != ?`
 		await pool.query(sql, [req.body.id, req.user.id])
@@ -88,6 +89,10 @@ router.post('/update', auth, async (req, res) => {
 
 router.post('/send', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.id_conversation || isNaN(req.body.id_conversation)) return res.json({ msg: 'Invalid request' })
+	if (!req.body.id_from || isNaN(req.body.id_from)) return res.json({ msg: 'Invalid request' })
+	if (!validateInput(req.body.message, 'msg'))
+		return res.json({ msg:'Invalid message' })
 	// ! MUST VALIDATE USER INPUT
 	try {
 		const msg = {
@@ -96,7 +101,7 @@ router.post('/send', auth, async (req, res) => {
 			message: req.body.message.trim(),
 			date: new Date().toISOString().substr(0, 19)
 		}
-		if (msg.length > 2048)
+		if (msg.message.length > 2048)
 			return res.json({msg:'Message too long'})
 		let sql = `SELECT * FROM conversations WHERE id_conversation = ? AND (id_user1 = ? OR id_user2 = ?)`
 		let result = await pool.query(sql, [msg.id_conversation, msg.id_from, msg.id_from])
@@ -106,7 +111,7 @@ router.post('/send', auth, async (req, res) => {
 		result = await pool.query(sql, Object.values(msg))
 		sql = `UPDATE conversations SET last_update = ?, last_msg = ? WHERE id_conversation = ?`
 		await pool.query(sql, [msg.date, result.insertId, msg.id_conversation])
-		res.json('Message added')
+		res.json({ ok:true })
 	} catch (err) {
 		throw new Error(err)
 	}
