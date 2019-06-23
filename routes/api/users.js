@@ -343,7 +343,7 @@ router.post('/image', [auth, upload.single('image')], async (req, res) => {
 			await pool.query(sql, [req.user.id])
 			sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, 1)`
 			result = await pool.query(sql, [req.user.id, imgName])
-			res.json({ ok: true, status: 'Image Updated', name: imgName, id:result.insertId })
+			res.json({ ok: true, status: 'Image Updated', name: imgName, id:req.user.id })
 		} else {
 			res.json({ msg: 'User already has 5 photos' })
 		}
