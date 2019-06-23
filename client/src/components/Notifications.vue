@@ -1,6 +1,6 @@
 <template>
-<v-container>
-	<h1 class="heading display-2 text-xs-center text-md-left font-weight-thin pt-4 pb-3 mb-4 hidden-sm-and-down grey--text">Notifications</h1>
+<v-container class="timeline_container">
+	<h1 class="heading display-2 font-weight-thin pt-4 pb-3 mb-4 grey--text">Notifications</h1>
 	<v-timeline align-top dense>
 		<v-timeline-item color="primary" small v-for="(entry, i) in notifs" :key="i">
 			<v-layout wrap justify-center py-3 class="history_item">

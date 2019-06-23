@@ -1,9 +1,9 @@
 <template>
 <div>
-	<v-dialog v-model="dialog" max-width="500" persistent>
-		<v-card class="grey lighten-3">
-			<v-layout column align-center justify-center pt-4>
-				<vue-avatar :width=400 :height=400 :border=0 ref="vueavatar" @vue-avatar-editor:image-ready="onImageReady" @file_error="error = true" @file_success="error = false" class="mb-3"></vue-avatar>
+	<v-dialog v-model="dialog" max-width="450" persistent>
+		<v-card class="grey lighten-3 editor_dialog">
+			<v-layout column align-center justify-center class="pt-5">
+				<vue-avatar :width=280 :height=280 :border=0 ref="vueavatar" @vue-avatar-editor:image-ready="onImageReady" @file_error="error = true" @file_success="error = false" class="mb-3"></vue-avatar>
 				<vue-avatar-scale ref="vueavatarscale" @vue-avatar-editor-scale:change-scale="onChangeScale" :width=250 :min=1 :max=3 :step=0.02></vue-avatar-scale>
 			</v-layout>
 			<v-card-actions>
@@ -45,8 +45,7 @@ export default {
 		error() {
 			if (this.error == true) {
 				this.$emit('file_error')
-			}
-			else {
+			} else {
 				this.$emit('file_succes')
 			}
 		}

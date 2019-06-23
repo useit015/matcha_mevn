@@ -1,5 +1,5 @@
 <template>
-<v-layout v-if="selectedConvo" column class="pa-3">
+<v-layout v-if="selectedConvo" column>
 	<v-img v-if="!limit && selectedConvo" class="chat_load" :src="loadGif"></v-img>
 	<v-flex v-for="(msg, i) in messages" :key="i + key">
 		<h3 class="date_spacer subheading mb-2 mt-4" v-if="newConvo(msg, i)">{{ formatTime(msg.created_at) }}</h3>

@@ -62,11 +62,19 @@
 	</v-container>
 	<loader v-else/>
 </div>
-<div v-else>
-	<v-layout row wrap justify-center>
-		<h2 class="display-2 text-xs-center text-md-left font-weight-thin pt-4 pb-3 mb-4 hidden-sm-and-down grey--text">Complet your profile to discover users that matchs you !</h2>
+<v-container class="my-3" v-else>
+	<v-layout wrap justify-center>
+		<h2 class="display-2 text-xs-center font-weight-thin pt-4 pb-3 mb-4 grey--text mx-auto">
+			Complete your profile to discover users that matchs you !
+		</h2>
+		<v-flex xs6 md4>
+			<v-btn block outline large router to="/settings" color="primary">
+				<v-icon left>chevron_left</v-icon>
+				<span>Go to setting</span>
+			</v-btn>
+		</v-flex>
 	</v-layout>
-</div>
+</v-container>
 </template>
 
 <script>

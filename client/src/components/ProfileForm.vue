@@ -4,7 +4,7 @@
 		<v-icon v-if="isEditing">close</v-icon>
 		<v-icon v-else>edit</v-icon>
 	</v-btn>
-	<h1 class="heading display-2 font-weight-thin pt-4 pb-3 mb-4 hidden-sm-and-down">Informations</h1>
+	<h1 class="heading display-2 font-weight-thin pt-4 pb-3 mb-4">Informations</h1>
 	<v-form class="mt-4">
 		<v-layout wrap>
 			<v-flex xs12>
@@ -98,7 +98,7 @@ export default {
 			handler: 'syncUser',
 			immediate: true
 		},
-		tags: function() {
+		tags () {
 			this.user.tags = this.tags
 				.map(cur => cur.text.toLowerCase())
 				.join(',')

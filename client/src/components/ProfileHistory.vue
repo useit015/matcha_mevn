@@ -1,7 +1,7 @@
 <template>
 <v-container>
-	<h1 class="heading display-2 text-xs-center text-md-left font-weight-thin pt-4 pb-3 mb-4 hidden-sm-and-down">History</h1>
-	<v-timeline align-top dense>
+	<h1 class="heading display-2 font-weight-thin py-3 mb-4">History</h1>
+	<v-timeline align-top dense class="timeline_container">
 		<v-timeline-item color="primary" small v-for="(entry, i) in history" :key="i">
 			<v-layout py-3 class="history_item">
 				<v-flex xs3 class="hidden-xs-only">

@@ -1,9 +1,9 @@
 <template>
 <v-container>
-	<h1 class="heading display-2 text-xs-center text-md-left font-weight-thin pt-4 pb-3 mb-4 hidden-sm-and-down">Settings</h1>
-	<v-layout wrap justify-center align-start class="mt-4">
-		<v-flex xs12 sm6>
-			<v-layout justify-center align-center>
+	<h1 class="heading display-2 font-weight-thin py-3 mb-4">Parameters</h1>
+	<v-layout wrap justify-center align-start class="my-4">
+		<v-flex xs12 sm6 class="px-3 my-3">
+			<v-layout align-center class="px-3">
 				<v-text-field
 					disabled
 					label="Email"
@@ -13,12 +13,11 @@
 				<v-icon color="primary" class="ml-3" @click="emailDialog = true">edit</v-icon>
 			</v-layout>
 		</v-flex>
-		<v-flex xs12 sm6 class="px-3">
+		<v-flex xs12 sm6 class="px-3 my-3">
 			<v-layout align-center class="px-3">
 				<v-text-field 
 					disabled
 					color="primary"
-					class="ml-3"
 					value="**********"
 					label="Password"
 					type="password"
@@ -26,34 +25,34 @@
 				<v-icon color="primary" class="ml-3" @click="passDialog = true">edit</v-icon>
 			</v-layout>
 		</v-flex>
-		<v-flex xs12 class="px-0">
-			<v-btn depressed block large color="primary" @click="locDialog = true">
+		<v-flex xs12>
+			<v-btn outline block large color="primary" @click="locDialog = true">
 				<span>Change location</span>
 				<v-icon right>location_on</v-icon>
 			</v-btn>
 		</v-flex>
 	</v-layout>
-	<v-expansion-panel class="blacklist">
-		<v-expansion-panel-content expand-icon="keyboard_arrow_down">
+	<v-expansion-panel v-model="blacklistPanel" :disabled="closePanel" class="blacklist">
+		<v-expansion-panel-content  :ripple="{ class: 'primary--text' }" expand-icon="keyboard_arrow_down">
 			<template v-slot:header>
-				<div>Blacklist</div>
+				<div class="subheading expansion_list">Blacklist</div>
 			</template>
 			<v-list class="blacklist_list">
 				<v-list-tile
 					v-for="banned in blacklist"
-					:key="banned"
+					:key="banned.id"
 					class="blacklist_item mx-2">
 					<v-list-tile-content>
 						<v-list-tile-title>{{ banned.username }}</v-list-tile-title>
 					</v-list-tile-content>
 					<v-list-tile-action>
-						<v-icon @click="log">close</v-icon>
+						<v-icon @click="unBlock(banned)">close</v-icon>
 					</v-list-tile-action>
 				</v-list-tile>
 			</v-list>
 		</v-expansion-panel-content>
 	</v-expansion-panel>
-	<v-dialog v-model="	emailDialog" max-width="500" persistent v-if="reRender">
+	<v-dialog v-model="emailDialog" max-width="500" persistent v-if="reRender">
 		<v-card class="grey lighten-3">
 			<v-container>
 				<h5 class="display-1 display-2 text-xs-center text-md-left font-weight-thin pt-3 pb-3 mb-4 hidden-sm-and-down">Change email</h5>
@@ -178,6 +177,7 @@ export default {
 		showNewPass: false,
 		blacklistOn: false,
 		emailDialog: false,
+		blacklistPanel: null,
 		showConfNewPass: false,
 		password: '',
 		newPassword: '',
@@ -205,7 +205,9 @@ export default {
 	computed: {
 		...mapGetters([
 			'user',
+			'blocked',
 			'location',
+			'blockedBy',
 			'blacklist'
 		]),
 		latitude () {
@@ -213,11 +215,21 @@ export default {
 		},
 		longitude () {
 			return Number(this.location.lng)
+		},
+		closePanel () {
+			if (!this.blacklist.length) {
+				this.blacklistPanel = null
+				return true
+			}
+			return false
 		}
 	},
 	methods: {
 		...utility,
-		...mapActions(['updateUserEmail']),
+		...mapActions([
+			'syncBlacklist',
+			'updateUserEmail'
+		]),
 		async saveEmail () {
 			try {
 				const url = `http://134.209.195.36/api/users/email`
@@ -300,11 +312,26 @@ export default {
 				this.$store.commit('locate', this.loc)
 				this.showAlert('green', 'Your location has been updated', this)
 			} else {
-				this.showAlert('green', result.body.msg, this)
+				this.showAlert('red', result.body.msg, this)
 			}
 		},
-		unBlock (id) {
-			console.log('log')
+		async unBlock (banned) {
+			const { id, username } = banned
+			const url = `http://134.209.195.36/api/action/unblock`
+			const headers = { 'x-auth-token': this.user.token }
+			const result =  await this.$http.post(url, { id }, { headers })
+			console.log('id is -->> ', this.blocked.filter(cur => cur != id))
+			if (result.body.ok) {
+				const blacklist = {
+					blocked: this.blocked.filter(cur => cur != id) || [],
+					blockedBy: this.blockedBy
+				}
+				this.$store.commit('syncBlocked', blacklist)
+				this.syncBlacklist(blacklist.blocked)
+				this.showAlert('green', `${username} has been ublocked`, this)
+			} else {
+				this.showAlert('red', result.body.msg, this)
+			}
 		}
 	}
 }
@@ -321,7 +348,7 @@ export default {
 
 .blacklist {
 	box-shadow: none;
-	border: 2px solid var(--color-primary);
+	border: 1px solid var(--color-primary);
 	border-radius: 3px;
 }
 
@@ -329,5 +356,13 @@ export default {
 .blacklist_list,
 .blacklist_item {
 	background-color: #fafafa !important;
+}
+
+.expansion_list {
+	color: #666;
+}
+
+.v-expansion-panel__header {
+	padding: 8px 24px;
 }
 </style>

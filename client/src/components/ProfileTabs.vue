@@ -15,12 +15,12 @@ export default {
 	data() {
 		this.links = [
 			{ icon: 'person', text: 'Info', route: 'profile' },
-			{ icon: 'photo_camera', text: 'Pictures', route: 'photo' }
+			{ icon: 'photo_camera', text: 'Gallery', route: 'photo' }
 		]
 		if (this.settings) {
 			this.links[0].text = 'Profile'
 			this.links.push({ icon: 'history', text: 'History', route: 'history' })
-			this.links.push({ icon: 'settings', text: 'Preferences', route: 'setting' })
+			this.links.push({ icon: 'settings', text: 'Parameters', route: 'setting' })
 		}
 		return {
 			activeTab: null,

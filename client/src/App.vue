@@ -14,6 +14,7 @@
 
 <script>
 import Navbar from '@/components/Navbar'
+
 export default {
 	name: 'App',
 	components: { Navbar },
@@ -88,6 +89,13 @@ html {
 	flex-shrink: 0;
 }
 
+.cover__btn {
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: translate(-25%, 25%);
+}
+
 .avatar__btn {
 	position: absolute;
 	top: 85%;
@@ -149,5 +157,28 @@ html {
 
 .typing_point:nth-child(3) {
 	animation-delay: .6s;
+}
+
+.editor_dialog {
+	overflow: hidden
+}
+
+@media only screen and (max-width: 400px) {
+	.timeline_container {
+		transform: scale(.8) translate(-5%, -10%);
+	}
+}
+
+@media only screen and (max-width: 350px) {
+	.timeline_container {
+		transform: scale(.7) translate(-10%, -20%);
+	}
+}
+
+@media only screen and (max-width: 600px) {
+	.heading {
+		font-size: 2.5em !important;
+		padding-bottom: .5rem !important;
+	}
 }
 </style>

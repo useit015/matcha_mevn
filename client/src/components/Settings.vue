@@ -1,6 +1,18 @@
 <template>
 <v-layout column class="settings" v-if="loaded">
 	<div class="parallax"></div>
+	<v-tooltip left>
+		<template v-slot:activator="{ on }">
+			<div class="cover__btn">
+				<v-fab-transition>
+					<v-btn fab small outline color="grey" v-on="on" @click.stop="">
+						<v-icon>add_a_photo</v-icon>
+					</v-btn>
+				</v-fab-transition>
+			</div>
+		</template>
+		<span>Change cover photo</span>
+	</v-tooltip>
 	<v-layout class="py-0 strap grey lighten-3">
 		<v-container py-0>
 			<v-layout>
@@ -146,6 +158,7 @@ export default {
 				const url = `http://134.209.195.36/api/users/update`
 				const headers = { 'x-auth-token': this.user.token }
 				const res = await this.$http.post(url, this.user, { headers })
+				console.log('i am res >>->', res)
 				if (res && res.body && !res.body.msg) {
 					msg = 'Your account has been updated successfuly'
 					this.showAlert('success', msg, this)

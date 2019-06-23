@@ -1,10 +1,10 @@
 <template>
 <v-container fluid grid-list-md class="messenger pa-3" v-if="loaded">
 	<v-layout row wrap class="parent">
-		<v-flex xs3 class="left">
-			<MessengerList :convos="convos"/>
+		<v-flex md3 sm1 class="left hidden-xs-only">
+			<MessengerList/>
 		</v-flex>
-		<v-flex xs9 class="right">
+		<v-flex md9 sm11 xs12 class="right">
 			<v-layout column class="chat_layout">
 				<v-flex xs9 class="top_chat">
 					<MessengerChat ref="chat"/>
@@ -119,6 +119,19 @@ export default {
 .top_chat {
 	flex: 1 0 90% !important;
 	overflow-y: auto;
+}
+
+.top_chat::-webkit-scrollbar {
+	width: .45em;
+}
+ 
+.top_chat::-webkit-scrollbar-track {
+	-webkit-box-shadow: none;
+}
+ 
+.top_chat::-webkit-scrollbar-thumb {
+	background-color: darkgrey;
+	border-radius: 4px;
 }
 
 .bottom {

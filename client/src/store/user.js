@@ -8,8 +8,8 @@ export const user = {
 		updateTags: (state, tags) => state.user.tags = tags.map(cur => cur.text.toLowerCase()).join(','),
 		updateUser: (state, user) => state.user = user,
 		updateProfileImage: (state, data) => {
-			state.user.images.filter(cur => cur.profile).forEach(cur => cur.profile = 0)
-			state.user.images.push({ name: data.name, profile: 1, id:data.id })
+			state.user.images.forEach(cur => cur.profile = 0)
+			state.user.images.push({ name: data.name, profile: 1, user_id: state.user.id})
 		},
 		locate: (state, location) => {
 			state.location = location
@@ -100,7 +100,7 @@ export const user = {
 				console.log('Got error here --> ', err)
 			}
 		},
-		syncBlocked: async ({ commit }, id) => {
+		syncBlocked: async ({ commit, dispatch }, id) => {
 			try {
 				let blocked = []
 				let blockedBy = []
@@ -114,14 +114,7 @@ export const user = {
 						.map(cur => cur.blocker)
 				}
 				commit('syncBlocked', { blocked, blockedBy })
-				if (blocked.length) {
-					const token = localStorage.getItem('token')
-					const url = `http://134.209.195.36/api/users/blacklisted`
-					const headers = { 'x-auth-token': token }
-					const data = { ids: JSON.stringify(blocked) }
-					res = await Vue.http.post(url, data, { headers })
-					if (res.body.ok) commit('syncBlacklist', res.body.list)
-				}
+				if (blocked.length) dispatch('syncBlacklist', blocked)
 			} catch (err) {
 				console.log('Got error here --> ', err)
 			}
@@ -167,6 +160,15 @@ export const user = {
 		},
 		delImg: ({ commit }, id) => {
 			commit('delImg', id)
+		},
+		syncBlacklist: async ({ commit }, blocked) => {
+			if (!blocked.length) return commit('syncBlacklist', [])
+			const token = localStorage.getItem('token')
+			const url = `http://134.209.195.36/api/users/blacklisted`
+			const headers = { 'x-auth-token': token }
+			const data = { ids: JSON.stringify(blocked) }
+			const res = await Vue.http.post(url, data, { headers })
+			if (res.body.ok) commit('syncBlacklist', res.body.list)
 		}
 	}
 }
