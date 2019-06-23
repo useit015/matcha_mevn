@@ -264,7 +264,6 @@ export default {
 					confNewPassword: this.confNewPassword
 				}
 				const res = await this.$http.post(url, data, { headers })
-				console.log('i am res --> ', res)
 				this.password = ''
 				this.newPassword = ''
 				this.confNewPassword = ''
@@ -320,7 +319,6 @@ export default {
 			const url = `http://134.209.195.36/api/action/unblock`
 			const headers = { 'x-auth-token': this.user.token }
 			const result =  await this.$http.post(url, { id }, { headers })
-			console.log('id is -->> ', this.blocked.filter(cur => cur != id))
 			if (result.body.ok) {
 				const blacklist = {
 					blocked: this.blocked.filter(cur => cur != id) || [],

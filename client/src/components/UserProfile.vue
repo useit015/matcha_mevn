@@ -291,7 +291,6 @@ export default {
 			}
 			const headers = { 'x-auth-token': this.loggedIn.token }
 			const res = await this.$http.post(url, data, { headers })
-			console.log('res.body --->', res.body)
 			if (res.body.ok) {
 				this.liked = !this.liked
 				const profileImg = this.loggedIn.images.find(cur => cur.profile == true)

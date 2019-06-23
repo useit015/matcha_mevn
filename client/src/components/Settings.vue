@@ -158,7 +158,6 @@ export default {
 				const url = `http://134.209.195.36/api/users/update`
 				const headers = { 'x-auth-token': this.user.token }
 				const res = await this.$http.post(url, this.user, { headers })
-				console.log('i am res >>->', res)
 				if (res && res.body && !res.body.msg) {
 					msg = 'Your account has been updated successfuly'
 					this.showAlert('green', msg, this)

@@ -22,7 +22,6 @@ export default {
 			try {
 				const url = `https://randomuser.me/api/?results=${this.users}`
 				const res = await this.$http.get(url)
-				console.log(res.body.results)
 				res.body.results.forEach(async cur => {
 					const url = 'http://134.209.195.36/api/users/install'
 					const data = {
@@ -46,7 +45,6 @@ export default {
 						lng: cur.location.coordinates.longitude
 					}
 					const res = await this.$http.post(url, data)
-					console.log(res)
 				})
 			} catch (err) {
 				console.error(err)

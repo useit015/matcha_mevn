@@ -11,7 +11,6 @@ export const socket = {
 		},
 		SOCKET_disconnect: state => {
 			state.isConnected = false
-			console.log('disconnected -->')
 		},
 		SOCKET_chat: async (state, data) => {
 			try {
@@ -60,7 +59,6 @@ export const socket = {
 		SOCKET_typing: (state, data) => {
 			if (!state.typingSec.convos.some(cur => cur.id_conversation == data.id_conversation)) {
 				state.typingSec.convos.push(data)
-				console.log('>>>>>', state.typingSec.convos,'<<<<<<<<')
 				state.typingSec.status = !!state.typingSec.convos.length
 			}
 		},

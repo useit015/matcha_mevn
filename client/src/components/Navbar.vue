@@ -181,7 +181,6 @@ export default {
 		]
 	}),
 	async created () {
-		console.log('history:', window.history)
 		try {
 			const token = localStorage.getItem('token')
 			const url = 'http://134.209.195.36/auth/isloggedin'
