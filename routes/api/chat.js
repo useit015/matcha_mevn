@@ -62,7 +62,6 @@ router.post('/single', auth, async (req, res) => {
 	try {
 		let sql = `SELECT * FROM chat WHERE id_conversation = ? ORDER BY created_at DESC LIMIT ?, 50`
 		const result = await pool.query(sql, [req.body.id, page * 50])
-		console.log(result)
 		res.json(result.reverse())
 		sql = `UPDATE chat SET is_read = 1 WHERE id_conversation = ? AND id_from != ?`
 		await pool.query(sql, [req.body.id, req.user.id])
