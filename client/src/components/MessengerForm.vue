@@ -61,15 +61,20 @@ export default {
 								.escapeHtml()
 								.slice(0, 2048)
 						}
-						this.msg = ''
-						this.updateConvos(data)
-						this.$emit('msgSent', data)
-						this.$socket.emit('chat', data)
 						const result = await this.$http.post(url, data, { headers })
+						if (result.body.ok){
+							this.msg = ''
+							this.updateConvos(data)
+							this.$emit('msgSent', data)
+							this.$socket.emit('chat', data)
+						}
 					} catch (err) {
 						console.error(err)
 					}
 				}
+			}
+			else {
+				this.msg = ''
 			}
 		}
 	}
