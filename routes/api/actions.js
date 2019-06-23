@@ -3,7 +3,9 @@ const pool = require('../../utility/database')
 const auth = require('../../middleware/auth')
 
 router.post('/position', auth, async (req, res) => {
-	if (!req.user.id) res.json({ msg: 'not logged in' })
+	if (!req.user.id) return res.json({ msg: 'not logged in' })
+	if (!req.body.lat || !req.body.lng || isNaN(req.body.lat) || isNaN(req.body.lng))
+		return res.json({ msg: 'Invalid request' })
 	try {
 		const sql = `UPDATE users SET lat = ?, lng = ? WHERE id = ?`
 		const result = await pool.query(sql, [req.body.lat, req.body.lng, req.user.id])
@@ -16,6 +18,7 @@ router.post('/position', auth, async (req, res) => {
 
 router.post('/block', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.id || isNaN(req.body.id)) return res.json({ msg: 'Invalid request' })
 	try {
 		let sql = `SELECT * FROM blocked where blocker = ? AND blocked = ?`
 		const data = [req.user.id, req.body.id]
@@ -49,7 +52,7 @@ router.post('/block', auth, async (req, res) => {
 
 router.post('/unblock', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
-	if (!req.body.id) return res.json({ msg: 'Invalid request' })
+	if (!req.body.id || isNaN(req.body.id)) return res.json({ msg: 'Invalid request' })
 	try {
 		let sql = `DELETE FROM blocked WHERE blocker = ? AND blocked = ?`
 		const result = await pool.query(sql, [req.user.id, req.body.id])
@@ -62,6 +65,7 @@ router.post('/unblock', auth, async (req, res) => {
 
 router.post('/report', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.id || isNaN(req.body.id)) return res.json({ msg: 'Invalid request' })
 	try {
 		let sql = `UPDATE users SET reports = reports + 1 WHERE id = ?`
 		const result = await pool.query(sql, [req.body.id, req.body.id])
@@ -77,6 +81,7 @@ router.post('/report', auth, async (req, res) => {
 
 router.post('/match', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.id || isNaN(req.body.id)) return res.json({ msg: 'Invalid request' })
 	try {
 		let sql, result
 		const data = [req.user.id, req.body.id]
