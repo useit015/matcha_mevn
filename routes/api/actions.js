@@ -81,7 +81,8 @@ router.post('/report', auth, async (req, res) => {
 
 router.post('/match', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
-	if (!req.body.id || isNaN(req.body.id)) return res.json({ msg: 'Invalid request' })
+	if (typeof req.body.liked !== 'boolean' || !req.body.id || isNaN(req.body.id))
+		return res.json({ msg: 'Invalid request' })
 	try {
 		let sql, result
 		const data = [req.user.id, req.body.id]
