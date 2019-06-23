@@ -161,7 +161,7 @@ export default {
 				console.log('i am res >>->', res)
 				if (res && res.body && !res.body.msg) {
 					msg = 'Your account has been updated successfuly'
-					this.showAlert('success', msg, this)
+					this.showAlert('green', msg, this)
 					this.update(this.user)
 				} else {
 					msg = 'Ouups something went wrong!'

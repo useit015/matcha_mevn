@@ -123,10 +123,12 @@
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
+	<alert :data="alert"></alert>
 </div>
 </template>
 
 <script>
+import Alert from './Alert'
 import moment from 'moment'
 import loader from './loader'
 import { mapGetters, mapActions } from 'vuex'
@@ -140,6 +142,7 @@ import ProfileSettings from './ProfileSettings'
 export default {
 	name: 'UserProfile',
 	components: {
+		Alert,
 		loader,
 		ProfileTabs,
 		ProfileForm,
@@ -158,7 +161,12 @@ export default {
 			items: [
 				{ title: 'Block', handler: e => console.log('nigga1 -->', e) },
 				{ title: 'Report', handler: e => console.log('nigga2 -->', e) }
-			]
+			],
+			alert: {
+				state: false,
+				color: '',
+				text: ''
+			}
 		}
 	},
 	computed: {
@@ -375,10 +383,10 @@ export default {
 				headers })
 			if (!res.body.msg) {
 				this.reportDialog = false
-				console.log('user reported ->', this.user.id)
+				this.showAlert('green', 'User reported successfuly', this)
 			}
 			else {
-				console.log(res.body.msg)
+				this.showAlert('red', res.body.msg, this)
 			}
 		}
 	},
