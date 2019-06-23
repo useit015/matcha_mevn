@@ -9,7 +9,7 @@ export const user = {
 		updateUser: (state, user) => state.user = user,
 		updateProfileImage: (state, data) => {
 			state.user.images.forEach(cur => cur.profile = 0)
-			state.user.images.push({ name: data.name, profile: 1, user_id: state.user.id})
+			state.user.images.push({ name: data.name, profile: 1, user_id: data.user_id, id:data.id })
 		},
 		locate: (state, location) => {
 			state.location = location
