@@ -51,6 +51,7 @@ export default {
 				if (!e.shiftKey) {
 					try {
 						const url = `http://134.209.195.36/api/chat/send`
+						const headers = { 'x-auth-token': this.user.token }
 						const data = {
 							id_conversation: this.selectedConvo,
 							id_from: this.user.id,
@@ -64,7 +65,7 @@ export default {
 						this.updateConvos(data)
 						this.$emit('msgSent', data)
 						this.$socket.emit('chat', data)
-						await this.$http.post(url, data)
+						const result = await this.$http.post(url, data, { headers })
 					} catch (err) {
 						console.error(err)
 					}
