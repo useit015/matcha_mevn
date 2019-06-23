@@ -168,10 +168,10 @@ router.post('/add', async (req, res) => {
 			result = await pool.query(sql, Object.values(user))
 			sendMail(user.email, user.vkey)
 			if (result.affectedRows) {
-				return res.json({ ok: true, status: 'User Added' })
+				return res.json({ ok: true, status: 'You have been successfully registered, please verify your email' })
 			}
 		}
-		res.json({ msg: 'Oups something went wrong'})
+		res.json({ msg: 'Username or Email already in use'})
 	} catch (err) {
 		throw new Error(err)
 	}
