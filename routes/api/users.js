@@ -228,8 +228,6 @@ router.post('/update', auth, async (req, res) => {
 		return res.json({ msg:'Email is invalid' })
 	if (!req.body.username || req.body.username.length < 8)
 		return res.json({ msg:'Username is invalid' })
-	if (!req.body.password || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(req.body.password)))
-		return res.json({ msg:'Password is invalid' })
 	if (!req.body.gender && req.body.gender != 'male' && req.body.gender != 'female')
 		return res.json({ msg:'Gender is invalid' })
 	if (!req.body.looking && req.body.looking != 'male' && req.body.looking != 'female' && req.body.looking != 'both')
@@ -464,7 +462,7 @@ router.post('/blacklisted', auth, async (req, res) => {
 	if (!Array.isArray(blacklist) || !blacklist.length) return res.json({ msg: 'bad query' })
 	const placehoder = `(${blacklist.map(cur => '?').join(', ')})`
 	try {
-		let sql = `SELECT username, first_name, last_name FROM users WHERE id IN ${placehoder}`
+		let sql = `SELECT id, username, first_name, last_name FROM users WHERE id IN ${placehoder}`
 		const result = await pool.query(sql, blacklist)
 		res.json({
 			ok: true,

@@ -47,6 +47,19 @@ router.post('/block', auth, async (req, res) => {
 	}
 })
 
+router.post('/unblock', auth, async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (!req.body.id) return res.json({ msg: 'Invalid request' })
+	try {
+		let sql = `DELETE FROM blocked WHERE blocker = ? AND blocked = ?`
+		const result = await pool.query(sql, [req.user.id, req.body.id])
+		if (!result.affectedRows) return res.json({ msg: 'Cannot unblock user' })
+		res.json({ ok: true })
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
 router.post('/report', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {

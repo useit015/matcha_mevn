@@ -131,7 +131,6 @@ router.post('/login', async (req, res) => {
 	}
 })
 
-
 router.get('/logout', auth, (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	res.json({ ok: true })
