@@ -4,7 +4,7 @@ const validateInput = (input, type) => {
         case 'username':
             return !(input.length < 8 || input.length > 25)
         case 'password':
-            return !(input.length < 12 || input.length > 255 || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(input)))
+            return !(input.length < 6 || input.length > 255 || !(/^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(input)))
         case 'email':
             return (/.+@.+/.test(input))
         case 'fname':
