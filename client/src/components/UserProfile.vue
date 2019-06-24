@@ -2,7 +2,7 @@
 <div>
 	<loader v-if="f"/>
 	<v-layout column class="user_profile" v-else>
-		<div class="parallax"></div>
+		<div class="parallax" :style="`background-image: url(${coverPhoto});`"></div>
 		<v-layout class="py-0 strap grey lighten-3">
 			<v-container py-0>
 				<v-layout>
@@ -78,7 +78,7 @@
 							</v-container>
 						</v-tab-item>
 						<v-tab-item value="tab-photo">
-							<profile-gallery :images="user.images"></profile-gallery>
+							<profile-gallery :images="filteredImages"></profile-gallery>
 						</v-tab-item>
 					</v-tabs-items>
 				</v-flex>
@@ -241,6 +241,15 @@ export default {
 		},
 		isOnline () {
 			return  this.online.includes(this.user.id)
+		},
+		coverPhoto () {
+			const cover = 'https://images.pexels.com/photos/96422/pexels-photo-96422.jpeg'
+			if (!this.user || !this.user.images) return this.getFullPath(cover)
+			const image = this.user.images.find(cur => cur.cover)
+			return this.getFullPath(image ? image.name : cover)
+		},
+		filteredImages () {
+			return this.user.images.filter(cur => !cur.cover)
 		}
 	},
 	watch: {

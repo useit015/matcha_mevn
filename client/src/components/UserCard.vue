@@ -19,10 +19,11 @@
 			<v-rating readonly dense small :value="user.rating" half-increments class="rating"></v-rating>
 		</v-layout>
 		<v-layout justify-center align-center class="body-1 text-capitalize bottom mb-0 mt-auto py-2 px-4 grey lighten-5">
-			<v-icon color="primary" class="cake_icon px-1" small>cake</v-icon>
-			<span class="pr-1">{{ age }}</span>
+			<v-icon v-if="user.birthdate" color="primary" class="cake_icon px-1" small>cake</v-icon>
+			<span v-if="user.birthdate" class="pr-1">{{ age }}</span>
 			<v-icon color="primary lighten-1" class="location_icon px-1" small>place</v-icon>
-			<span class="text-truncate">{{ `${user.city}, ${user.country}` }}</span>
+			<span  v-if="user.city && user.country" class="text-truncate">{{ `${user.city}, ${user.country}` }}</span>
+			<span  v-else class="text-truncate">Earth</span>
 		</v-layout>
 	</v-layout>
 </v-card>

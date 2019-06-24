@@ -1,11 +1,11 @@
 <template>
 <v-layout column class="settings" v-if="loaded">
-	<div class="parallax"></div>
+	<div class="parallax" :style="`background-image: url(${coverPhoto});`"></div>
 	<v-tooltip left>
 		<template v-slot:activator="{ on }">
 			<div class="cover__btn">
 				<v-fab-transition>
-					<v-btn fab small outline color="grey" v-on="on" @click.stop="">
+					<v-btn fab small outline color="grey" v-on="on" @click.stop="pickFile">
 						<v-icon>add_a_photo</v-icon>
 					</v-btn>
 				</v-fab-transition>
@@ -13,6 +13,12 @@
 		</template>
 		<span>Change cover photo</span>
 	</v-tooltip>
+	<input
+		type="file"
+		style="display: none"
+		ref="image"
+		accept="image/*"
+		@change="onFilePicked">
 	<v-layout class="py-0 strap grey lighten-3">
 		<v-container py-0>
 			<v-layout>
@@ -44,7 +50,7 @@
 						<profile-form :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
 					</v-tab-item>
 					<v-tab-item value="tab-photo">
-						<profile-gallery :images="user.images"></profile-gallery>
+						<profile-gallery :images="filteredImages"></profile-gallery>
 					</v-tab-item>
 					<v-tab-item value="tab-history">
 						<profile-history></profile-history>
@@ -108,8 +114,9 @@ export default {
 	computed: {
 		...mapGetters({
 			loggedIn: 'user',
-			avatar: 'profileImage',
-			status: 'status'
+			status: 'status',
+			coverPhoto: 'coverPhoto',
+			profileImage: 'profileImage'
 		}),
 		user: {
 			get () {
@@ -117,8 +124,8 @@ export default {
 			},
 			set (user) {}
 		},
-		profileImage () {
-			return this.getFullPath(this.avatar)
+		filteredImages () {
+			return this.user.images.filter(cur => !cur.cover)
 		}
 	},
 	watch: {
@@ -200,6 +207,40 @@ export default {
 		},
 		openEditor () {
 			this.$refs.profile_editor.pickFile()
+		},
+		pickFile () {
+			this.$refs.image.click()
+		},
+		async onFilePicked (e) {
+			const files = e.target.files
+			if (files[0]) {
+				const imageFile = files[0]
+				const imageName = imageFile.name
+				if (imageName.lastIndexOf('.') <= 0) return
+				if (imageFile.size > 4 * 1024 * 1024) {
+					this.showAlert('red', 'Image is too large..', this)
+				} else {
+					try {
+						let msg
+						const fd = new FormData()
+						fd.append('image', imageFile)
+						const url = `http://134.209.195.36/api/users/image/cover`
+						const headers = { 'x-auth-token': this.user.token }
+						const res = await this.$http.post(url, fd, { headers })
+						if (res && res.body && !res.body.msg) {
+							msg = 'You cover image has been updated successfuly'
+							this.showAlert('success', msg, this)
+							this.$store.commit('updateCoverImage', res.body)
+						} else {
+							msg = 'Ouups something went wrong!'
+							this.showAlert('red', msg, this)
+							console.log('res here --> ', res)
+						}
+					} catch (err) {
+						console.log('got error here --> ', err)
+					}
+				}
+			}
 		}
 	}
 }

@@ -69,7 +69,6 @@ html {
 }
 
 .parallax {
-	background-image: url(https://images.pexels.com/photos/96422/pexels-photo-96422.jpeg);
 	background-position: center;
 	background-size: cover;
 	height: 25rem;
@@ -93,7 +92,7 @@ html {
 	position: absolute;
 	top: 0;
 	right: 0;
-	transform: translate(-25%, 25%);
+	transform: translate(-50%, 50%);
 }
 
 .avatar__btn {

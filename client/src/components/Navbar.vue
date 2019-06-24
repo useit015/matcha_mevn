@@ -188,9 +188,10 @@ export default {
 			const res = await this.$http.get(url, { headers })
 			if (!res.body.msg) {
 				const user = res.body
-				user.birthdate = new Date(user.birthdate)
-					.toISOString()
-					.substr(0, 10)
+				if (user.birthdate)
+					user.birthdate = new Date(user.birthdate)
+						.toISOString()
+						.substr(0, 10)
 				this.in(user)
 			} else {
 				console.log(res.body.msg)

@@ -9,7 +9,11 @@ export const user = {
 		updateUser: (state, user) => state.user = user,
 		updateProfileImage: (state, data) => {
 			state.user.images.forEach(cur => cur.profile = 0)
-			state.user.images.push({ name: data.name, profile: 1, user_id: data.user_id, id:data.id })
+			state.user.images.push({ name: data.name, cover: 0, profile: 1, user_id: data.user_id, id:data.id })
+		},
+		updateCoverImage: (state, data) => {
+			state.user.images = state.user.images.filter(cur => !cur.cover)
+			state.user.images.push({ name: data.name, cover: 1, profile: 0, user_id: data.user_id, id: data.id })
 		},
 		locate: (state, location) => {
 			state.location = location
@@ -43,7 +47,13 @@ export const user = {
 		delImg: (state, id) => {
 			state.user.images = state.user.images.filter(cur => cur.id != id)
 			if (state.user.images.length && !state.user.images.find(cur => cur.profile)) {
-				state.user.images[state.user.images.length - 1].profile = true
+				let len = state.user.images.length
+				while (--len >= 0) {
+					if (!state.user.images[len].cover) {
+						state.user.images[len].profile = true
+						break
+					}
+				}
 			}
 		},
 		syncBlacklist: (state, list) => {

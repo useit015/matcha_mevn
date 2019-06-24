@@ -1,3 +1,5 @@
+import utility from '../utility'
+
 export const getters = {
 	user: state => state.user,
 	tags: state => state.tags,
@@ -56,7 +58,13 @@ export const getters = {
 	}),
 	profileImage: state => {
 		if (!state.user.images) return 'default.jpg'
-		const image = state.user.images.filter(cur => cur.profile == true)[0]
-		return image ? image.name : 'default.jpg'
+		const image = state.user.images.find(cur => cur.profile)
+		return utility.getFullPath(image ? image.name : 'default.jpg')
+	},
+	coverPhoto: state => {
+		const cover = 'https://images.pexels.com/photos/96422/pexels-photo-96422.jpeg'
+		if (!state.user.images) return cover
+		const image = state.user.images.find(cur => cur.cover)
+		return utility.getFullPath(image ? image.name : cover)
 	}
 }

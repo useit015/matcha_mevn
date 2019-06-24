@@ -125,7 +125,27 @@ export const socket = {
 			if (convo && state.selectedConvo == convo.id_conversation) state.selectedConvo = null
 		},
 		SOCKET_online: (state, online) => {
-			state.online = online.filter(cur => cur != state.user.id).map(cur => Number(cur))
+			if (!online.find(cur => cur == state.user.id)) {
+				state.status = false
+				state.user = {}
+				state.isConnected = false
+				state.typing = false
+				state.blocked = []
+				state.location = {}
+				state.seenConvo = false
+				state.convos = []
+				state.notif = []
+				state.blockedBy = []
+				state.followers = []
+				state.following = []
+				state.newMessage = null
+				state.selectedConvo = null
+				state.visited = []
+				state.visitor = []
+				state.imageConvo = null
+			} else {
+				state.online = online.filter(cur => cur != state.user.id).map(cur => Number(cur))
+			}
 		}
 	}
 }

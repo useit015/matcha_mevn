@@ -1,6 +1,9 @@
 <template>
 <v-container>
 	<h1 class="heading display-2 font-weight-thin py-3 mb-4">Parameters</h1>
+	<v-layout justify-center>
+		<div v-for="(color, i) in colors" :key="i" :style="`background:${color};`" class="color_picker" @click="changeTheme(color)"></div>
+	</v-layout>
 	<v-layout wrap justify-center align-start class="my-4">
 		<v-flex xs12 sm6 class="px-3 my-3">
 			<v-layout align-center class="px-3">
@@ -200,6 +203,12 @@ export default {
 		emailRules: [
 			v => !!v || 'This field is required',
 			v => /.+@.+/.test(v) || 'E-mail must be valid'
+		],
+		colors: [
+			'#311B92',
+			'#263238',
+			'#43A047',
+			'#6A1B9A'
 		]
 	}),
 	computed: {
@@ -330,6 +339,11 @@ export default {
 			} else {
 				this.showAlert('red', result.body.msg, this)
 			}
+		},
+		changeTheme (color) {
+			let root = document.documentElement
+			this.$vuetify.theme.primary = color
+			root.style.setProperty('--color-primary', color)
 		}
 	}
 }
@@ -362,5 +376,12 @@ export default {
 
 .v-expansion-panel__header {
 	padding: 8px 24px;
+}
+
+.color_picker {
+	width: 3.5rem;
+	height: 3.5rem;
+	margin: 1vw 2vw;
+	border-radius: 5px;
 }
 </style>
