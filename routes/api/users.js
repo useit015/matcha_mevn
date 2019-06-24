@@ -2,7 +2,7 @@ const moment = require('moment')
 const multer = require('multer')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { writeFile, unlink } = require('fs')
+const { readFile, writeFile, unlink } = require('fs')
 const { dirname, resolve } = require('path')
 const { promisify } = require('util')
 const { randomBytes } = require('crypto')
@@ -11,12 +11,15 @@ const pool = require('../../utility/database')
 const distance = require('../../utility/distance')
 const sendMail = require('../../utility/mail')
 const validateInput = require('../../utility/validate')
+const readFileAsync = promisify(readFile)
 const writeFileAsync = promisify(writeFile)
 const unlinkAsync = promisify(unlink)
 const upload = multer({ limits: { fileSize: 4 * 1024 * 1024 } })
 const auth = require('../../middleware/auth')
 
 const randomHex = () => randomBytes(10).toString('hex')
+const isExternal = url => url && (url.indexOf(':') > -1 || url.indexOf('//') > -1 || url.indexOf('www.') > -1)
+
 
 router.get('/getmatches', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'not logged in' })
@@ -335,7 +338,7 @@ router.post('/image', [auth, upload.single('image')], async (req, res) => {
 		const base64Data = req.body.image.replace(/^data:image\/png;base64,/, '')
 		const uploadDir = `${dirname(dirname(__dirname))}/public/uploads/`
 		const imgName = `${req.user.id}-${randomHex()}.png`
-		let sql = `SELECT * FROM images WHERE user_id = ?`
+		let sql = `SELECT * FROM images WHERE user_id = ? AND cover = 0`
 		let result = await pool.query(sql, [req.user.id])
 		if (result.length < 5) {
 			await writeFileAsync(uploadDir + imgName, base64Data, 'base64')
@@ -343,7 +346,7 @@ router.post('/image', [auth, upload.single('image')], async (req, res) => {
 			await pool.query(sql, [req.user.id])
 			sql = `INSERT INTO images (user_id, name, profile) VALUES (?, ?, 1)`
 			result = await pool.query(sql, [req.user.id, imgName])
-			res.json({ ok: true, status: 'Image Updated', name: imgName, id:result.insertId, user_id:req.user.id })
+			res.json({ ok: true, status: 'Image Updated', name: imgName, id: result.insertId, user_id: req.user.id })
 		} else {
 			res.json({ msg: 'User already has 5 photos' })
 		}
@@ -352,10 +355,37 @@ router.post('/image', [auth, upload.single('image')], async (req, res) => {
 	}
 })
 
+router.post('/image/cover', [auth, upload.single('image')], async (req, res) => {
+	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	try {
+		let sql = `SELECT * FROM images WHERE cover = 1 AND user_id = ?`
+		let result = await pool.query(sql, [req.user.id])
+		if (result.length) {
+			if (!isExternal(result[0].name)) {
+				try {
+					unlinkAsync(resolve(dirname(dirname(__dirname)), 'public/uploads', result[0].name))
+				} catch (err) {
+					throw new Error(err)
+				}
+			}
+			sql = `DELETE FROM images WHERE id = ? AND user_id = ?`
+			await pool.query(sql, [result[0].id, req.user.id])
+		}
+		const uploadDir = `${dirname(dirname(__dirname))}/public/uploads/`
+		const imgName = `${req.user.id}-${randomHex()}.png`
+		await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
+		sql = `INSERT INTO images (user_id, name, cover) VALUES (?, ?, 1)`
+		result = await pool.query(sql, [req.user.id, imgName])
+		if (!result.affectedRows) return res.json({ msg: 'Oups.. Something went wrong!'})
+		res.json({ ok: true, status: 'Image Updated', name: imgName, id: result.insertId, user_id: req.user.id })
+	} catch (err) {
+		throw new Error(err)
+	}
+})
+
 router.post('/image/del', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	if (!req.body.id || isNaN(req.body.id)) return res.json({ msg: 'Invalid request' })
-	const isExternal = url => url && (url.indexOf(':') > -1 || url.indexOf('//') > -1 || url.indexOf('www.') > -1)
 	try {
 		let sql = `SELECT * FROM images WHERE id = ? AND user_id = ?`
 		let result = await pool.query(sql, [req.body.id, req.user.id])
@@ -370,7 +400,8 @@ router.post('/image/del', auth, async (req, res) => {
 			sql = `DELETE FROM images WHERE id = ? AND user_id = ?`
 			result = await pool.query(sql, [req.body.id, req.user.id])
 			if (req.body.profile) {
-				sql = `UPDATE images SET profile = 1 WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`
+				sql = `UPDATE images SET profile = 1 WHERE user_id = ? AND cover = 0
+						ORDER BY created_at DESC LIMIT 1`
 				const result = await pool.query(sql, [req.user.id])
 			}
 			if (result.affectedRows) return res.json({ ok: true})
@@ -430,14 +461,9 @@ router.get('/show/:id', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	if (!req.params.id || isNaN(req.params.id)) return res.json({ msg: 'Invalid request' })
 	try {
-		let sql = `SELECT *, GET_RATING(users.id) AS rating FROM users 
-					WHERE id = ? 
-					AND id NOT IN (
-						SELECT blocked FROM blocked WHERE blocker = ?
-					)
-					AND ? NOT IN (
-						SELECT blocked FROM blocked WHERE blocker = ?
-					)`
+		let sql = `SELECT *, GET_RATING(users.id) AS rating FROM users WHERE id = ?
+					AND id NOT IN (SELECT blocked FROM blocked WHERE blocker = ?)
+					AND ? NOT IN (SELECT blocked FROM blocked WHERE blocker = ?)`
 		const result = await pool.query(sql, [req.params.id, req.user.id, req.user.id, req.params.id])
 		if (result.length) {
 			const user = result[0]

@@ -86,7 +86,6 @@ router.get('/google/redirect', passport.authenticate('google'), (req, res) => {
 })
 
 router.get('/isloggedin', auth, async (req, res) => {
-	// ! MUST VALIDATE INPUT !!!!
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {
 		let sql = `SELECT * FROM users WHERE id = ?`
@@ -107,11 +106,8 @@ router.get('/isloggedin', auth, async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
-	// ! MUST VALIDATE INPUT !!!!
-	if (!validateInput(req.body.username, 'username'))
-		return res.json({ msg:'Username is invalid' })
-	if (!validateInput(req.body.password, 'password'))
-		return res.json({ msg:'Password is invalid' })
+	if (!validateInput(req.body.username, 'username')) return res.json({ msg:'Username is invalid' })
+	if (!validateInput(req.body.password, 'password')) return res.json({ msg:'Password is invalid' })
 	try {
 		let sql = `SELECT * FROM users WHERE username = ?`
 		let result = await pool.query(sql, [req.body.username])
