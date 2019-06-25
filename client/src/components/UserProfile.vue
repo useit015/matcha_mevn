@@ -54,25 +54,29 @@
 		<v-container fill-height grid-list-xl class="profile">
 			<v-layout justify-center wrap>
 				<v-flex xs12 sm8 md4>
-					<profile-badge :user="user"></profile-badge>
+					<profile-badge :user="user" :match="userCanChat"></profile-badge>
 				</v-flex>
 				<v-flex xs12 sm10 md8 class="pa-0 grey--text main">
 					<v-tabs-items v-model="activeTab">
 						<v-tab-item value="tab-profile">
 							<v-container>
 								<div v-if="user.biography">
-									<h1 class="heading display-2 font-weight-thin py-3 mb-4 hidden-sm-and-down">About</h1>
+									<h1 class="heading display-2 font-weight-thin py-3 mb-4">About</h1>
 									<v-container class="infos subheading py-2">
 										{{ user.biography }}
 									</v-container>
 								</div>
-								<h1 class="heading display-2 font-weight-thin py-3 mb-4 hidden-sm-and-down">Informations</h1>
-								<v-layout column class="title text-capitalize">
+								<h1 class="heading display-2 font-weight-thin py-3 mb-4">Informations</h1>
+								<v-layout column class="title text-capitalize infos">
 									<v-container py-3 v-for="item in informations" :key="item.label">
 										<v-layout>
 											<v-flex xs6>{{ `${item.label}:` }}</v-flex>
 											<v-flex xs6 class="infos">{{ item.content }}</v-flex>
 										</v-layout>
+									</v-container>
+									<v-container py-3 px-2 v-if="!!userTags.length">
+										<h1 class="heading display-2 font-weight-thin py-3 mb-4">Interests</h1>
+										<v-chip color="primary" class="user_tags" dark label v-for="(tag, i) in userTags" :key="i">{{ tag }}</v-chip>
 									</v-container>
 								</v-layout>
 							</v-container>
@@ -223,11 +227,11 @@ export default {
 				{ label: 'Age', content: this.age },
 				{ label: 'Gender', content: this.user.gender },
 				{ label: 'Looking For', content: this.user.looking },
-				{ label: 'Address', content: this.user.address },
+				{ label: 'Phone Number', content: this.user.phone },
 				{ label: 'City', content: this.user.city },
 				{ label: 'Country', content: this.user.country },
 				{ label: 'Postal Code', content: this.user.postal_code },
-				{ label: 'Phone Number', content: this.user.phone }
+				{ label: 'Address', content: this.user.address }
 			]
 		},
 		distance () {
@@ -250,6 +254,11 @@ export default {
 		},
 		filteredImages () {
 			return this.user.images.filter(cur => !cur.cover)
+		},
+		userTags () {
+			const tags = this.user.tags
+			if (!tags) return []
+			return tags.split(',')
 		}
 	},
 	watch: {
@@ -436,5 +445,9 @@ export default {
 .user_link {
 	text-decoration: none;
 	font-size: 1.1em;
+}
+
+.user_tags {
+	border-radius: 5px;
 }
 </style>

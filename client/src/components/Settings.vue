@@ -217,7 +217,7 @@ export default {
 				const imageFile = files[0]
 				const imageName = imageFile.name
 				if (imageName.lastIndexOf('.') <= 0) return
-				if (imageFile.size > 4 * 1024 * 1024) {
+				if (imageFile.size > 1024 * 1024) {
 					this.showAlert('red', 'Image is too large..', this)
 				} else {
 					try {

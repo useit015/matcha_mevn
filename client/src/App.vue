@@ -95,11 +95,17 @@ html {
 	transform: translate(-50%, 50%);
 }
 
-.avatar__btn {
+.avatar__btn,
+.avatar__like {
 	position: absolute;
 	top: 85%;
 	left: 85%;
 	transform: translate(-50%, -50%) scale(.95);
+}
+
+.avatar__like {
+	top: 15%;
+	left: 85%;
 }
 
 .v-btn--floating:not(.v-btn--depressed):not(.v-btn--flat),
@@ -162,9 +168,47 @@ html {
 	overflow: hidden
 }
 
+@media only screen and (max-width: 600px) {
+	.heading {
+		font-size: 2.5em !important;
+		padding-bottom: .5rem !important;
+	}
+	.title {
+		font-size: 16px !important;
+	}
+	.v-chip__content {
+		transform: scale(.9);
+	}
+	.chat_container {
+		font-size: 85% !important;
+	}
+	.badge {
+		text-align: center !important;
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+	}
+	.parallax {
+		height: 20rem;
+	}
+	.color_picker {
+		height: 3.5rem !important;
+		width: 3.5rem !important;
+	}
+}
+
 @media only screen and (max-width: 400px) {
 	.timeline_container {
 		transform: scale(.8) translate(-5%, -10%);
+	}
+	.title {
+		font-size: 14px !important;
+	}
+	.chat_container {
+		font-size: 80% !important;
+	}
+	.color_picker {
+		height: 3rem !important;
+		width: 3rem !important;
 	}
 }
 
@@ -172,12 +216,21 @@ html {
 	.timeline_container {
 		transform: scale(.7) translate(-10%, -20%);
 	}
-}
-
-@media only screen and (max-width: 600px) {
-	.heading {
-		font-size: 2.5em !important;
-		padding-bottom: .5rem !important;
+	.title {
+		font-size: 12px !important;
+	}
+	.v-chip__content {
+		transform: scale(.8);
+	}
+	.chat_container {
+		font-size: 70% !important;
+	}
+	.parallax {
+		height: 15rem;
+	}
+	.color_picker {
+		height: 2.5rem !important;
+		width: 2.5rem !important;
 	}
 }
 </style>

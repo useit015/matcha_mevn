@@ -1,5 +1,5 @@
 <template>
-<v-layout v-if="selectedConvo" column>
+<v-layout v-if="selectedConvo" column class="chat_container">
 	<v-img v-if="!limit && selectedConvo" class="chat_load" :src="loadGif"></v-img>
 	<v-flex v-for="(msg, i) in messages" :key="i + key">
 		<h3 class="date_spacer subheading mb-2 mt-4" v-if="newConvo(msg, i)">{{ formatTime(msg.created_at) }}</h3>
@@ -189,7 +189,7 @@ export default {
 			return [
 				'mx-2',
 				'chat_bubble',
-				msg.id_from != this.user.id ? 'grey lighten-3' : 'blue lighten-1 white--text'
+				msg.id_from != this.user.id ? 'grey lighten-3' : 'primary white--text'
 			].join(' ')
 		},
 		pushClass (msg, i) {

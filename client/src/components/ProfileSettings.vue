@@ -2,7 +2,19 @@
 <v-container>
 	<h1 class="heading display-2 font-weight-thin py-3 mb-4">Parameters</h1>
 	<v-layout justify-center>
-		<div v-for="(color, i) in colors" :key="i" :style="`background:${color};`" class="color_picker" @click="changeTheme(color)"></div>
+		<v-tooltip bottom>
+			<template v-slot:activator="{ on }">
+				<div
+					v-for="(color, i) in colors"
+					:key="i"
+					:style="`background:${color};`"
+					class="color_picker"
+					@click="changeTheme(color)"
+					v-on="on"
+				></div>
+			</template>
+			<span>Use theme</span>
+		</v-tooltip>
 	</v-layout>
 	<v-layout wrap justify-center align-start class="my-4">
 		<v-flex xs12 sm6 class="px-3 my-3">
@@ -205,10 +217,11 @@ export default {
 			v => /.+@.+/.test(v) || 'E-mail must be valid'
 		],
 		colors: [
-			'#311B92',
-			'#263238',
+			'#03A9F4',
 			'#43A047',
-			'#6A1B9A'
+			'#E64A19',
+			'#D81B60',
+			'#263238'
 		]
 	}),
 	computed: {
@@ -379,9 +392,10 @@ export default {
 }
 
 .color_picker {
-	width: 3.5rem;
-	height: 3.5rem;
+	width: 4rem;
+	height: 4rem;
 	margin: 1vw 2vw;
 	border-radius: 5px;
+	cursor: pointer;
 }
 </style>

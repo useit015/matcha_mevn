@@ -2,7 +2,7 @@ import utility from '../utility'
 
 export const getters = {
 	user: state => state.user,
-	tags: state => state.tags,
+	tags: state => state.tags.filter(cur => cur.length),
 	notif: state => state.notif,
 	typing: state => state.typing,
 	online: state => state.online,

@@ -219,7 +219,7 @@ export default {
 			return this.notif
 				.filter(cur => cur.type != 'chat')
 				.sort((a, b) => new Date(b.date) - new Date(a.date))
-				.slice(0, 10)
+				.slice(0, 7)
 		}
 	},
 	watch: {
