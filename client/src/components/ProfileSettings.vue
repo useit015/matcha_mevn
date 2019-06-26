@@ -248,9 +248,6 @@ export default {
 		},
 		isGoogleUser () {
 			return this.user.google_id != null
-		},
-		googleLoaded () {
-			return (typeof google === 'object' && typeof google.maps === 'object')
 		}
 	},
 	created () {
@@ -262,9 +259,12 @@ export default {
 			'syncBlacklist',
 			'updateUserEmail'
 		]),
+		googleLoaded () {
+			return (typeof google === 'object' && typeof google.maps === 'object')
+		},
 		openLoc () {
 			this.locDialog = true
-			this.flag = this.googleLoaded
+			this.flag = this.googleLoaded()
 		},
 		async saveEmail () {
 			try {
