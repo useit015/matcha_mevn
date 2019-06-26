@@ -62,6 +62,17 @@ export default {
 			]
 		}
 	}),
+	async created () {
+		try {
+			const token = localStorage.getItem('token')
+			const url = 'http://134.209.195.36/auth/isloggedin'
+			const headers = { 'x-auth-token': token }
+			const res = await this.$http.get(url, { headers })
+			if (!res.body.msg) this.$router.push('/')
+		} catch (err) {
+			console.log('problem with -->', err)
+		}
+	},
 	methods: {
 		...utility,
 		async registerUser (e) {

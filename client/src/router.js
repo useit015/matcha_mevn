@@ -46,7 +46,15 @@ export const router = new vueRouter({
 		},
 		{
 			path: '/search',
-			component: Search
+			component: Search,
+			props: route => ({
+				data: {
+					gender: route.query.gender,
+					location: route.query.location,
+					min: route.query.min,
+					max: route.query.max
+				}
+			})
 		},
 		{
 			path: '/notifications',

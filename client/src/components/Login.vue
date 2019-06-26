@@ -78,12 +78,15 @@ export default {
 			v => v.length >= 8 || 'Password must be at least 8 characters long'
 		]
 	}),
-	//computed: mapGetters(['user']),
-	watch: {
-		user: {
-			handler () {
-				if (this.user.id) this.$router.push('/')
-			}
+	async created () {
+		try {
+			const token = localStorage.getItem('token')
+			const url = 'http://134.209.195.36/auth/isloggedin'
+			const headers = { 'x-auth-token': token }
+			const res = await this.$http.get(url, { headers })
+			if (!res.body.msg) this.$router.push('/')
+		} catch (err) {
+			console.log('problem with -->', err)
 		}
 	},
 	methods: {

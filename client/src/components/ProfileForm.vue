@@ -197,6 +197,9 @@ export default {
 		},
 		updateUser () {
 			this.$emit('update-user', this.user)
+		},
+		toggleEdit () {
+			this.isEditing = !this.isEditing
 		}
 	}
 }

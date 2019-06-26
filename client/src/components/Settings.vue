@@ -47,7 +47,7 @@
 				<profile-tabs settings :active="activeTab" @change-tab="changeTab" mobile></profile-tabs>
 				<v-tabs-items v-model="activeTab">
 					<v-tab-item value="tab-profile">
-						<profile-form :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
+						<profile-form ref="form" :user="user" @sync-user="syncUser" @update-user="updateUser"></profile-form>
 					</v-tab-item>
 					<v-tab-item value="tab-photo">
 						<profile-gallery :images="filteredImages"></profile-gallery>
@@ -169,6 +169,7 @@ export default {
 					msg = 'Your account has been updated successfuly'
 					this.showAlert('green', msg, this)
 					this.update(this.user)
+					this.$refs.form.toggleEdit()
 				} else {
 					msg = 'Ouups something went wrong!'
 					this.showAlert('red', msg, this)

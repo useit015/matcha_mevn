@@ -5,7 +5,7 @@
 			<MessengerList/>
 		</v-flex>
 		<v-flex md9 sm11 xs12 class="right">
-			<v-layout column class="chat_layout">
+			<v-layout column justify-start class="chat_layout">
 				<v-flex xs9 class="top_chat">
 					<MessengerChat ref="chat"/>
 				</v-flex>
@@ -112,7 +112,7 @@ export default {
 	height: calc(100vh - 4.75rem);
 }
 
-.parent, .chat_layout {
+.right, .chat_layout, .parent {
 	height: 100%;
 }
 

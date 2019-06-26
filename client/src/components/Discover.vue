@@ -271,18 +271,6 @@ export default {
 	color: var(--color-primary);
 }
 
-/* .v-menu__content.theme--light.menuable__content__active {
-	border: 2px solid var(--color-primary);
-	box-shadow: none;
-} */
-
-/* .v-menu__content.menuable__content__active.v-autocomplete__content {
-	border: 2px solid var(--color-primary);
-	box-shadow: none;
-	border-top: none;
-	transform: translateY(-3px);
-} */
-
 .v-select-list.v-card.theme--light > .v-list,
 .theme--light.v-btn-toggle,
 .v-menu__content.menuable__content__active.v-autocomplete__content

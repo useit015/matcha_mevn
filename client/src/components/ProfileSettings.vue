@@ -17,7 +17,7 @@
 		</v-tooltip>
 	</v-layout>
 	<v-layout wrap justify-center align-start class="my-4">
-		<v-flex xs12 sm6 class="px-3 my-3">
+		<v-flex v-if="!isGoogleUser" xs12 sm6 class="px-3 my-3">
 			<v-layout align-center class="px-3">
 				<v-text-field
 					disabled
@@ -28,7 +28,7 @@
 				<v-icon color="primary" class="ml-3" @click="emailDialog = true">edit</v-icon>
 			</v-layout>
 		</v-flex>
-		<v-flex xs12 sm6 class="px-3 my-3">
+		<v-flex v-if="!isGoogleUser" xs12 sm6 class="px-3 my-3">
 			<v-layout align-center class="px-3">
 				<v-text-field 
 					disabled
@@ -67,7 +67,7 @@
 			</v-list>
 		</v-expansion-panel-content>
 	</v-expansion-panel>
-	<v-dialog v-model="emailDialog" max-width="500" persistent v-if="reRender">
+	<v-dialog v-model="emailDialog" max-width="500" persistent v-if="!isGoogleUser && reRender">
 		<v-card class="grey lighten-3">
 			<v-container>
 				<h5 class="display-1 display-2 text-xs-center text-md-left font-weight-thin pt-3 pb-3 mb-4 hidden-sm-and-down">Change email</h5>
@@ -101,7 +101,7 @@
 			</v-container>
 		</v-card>
 	</v-dialog>
-	<v-dialog v-model="passDialog" max-width="500" persistent v-if="reRender">
+	<v-dialog v-model="passDialog" max-width="500" persistent v-if="!isGoogleUser && reRender">
 		<v-card class="grey lighten-3">
 			<v-container>
 				<h5 class="display-1 display-2 text-xs-center text-md-left font-weight-thin pt-3 pb-3 mb-4 hidden-sm-and-down">Change password</h5>
@@ -244,7 +244,13 @@ export default {
 				return true
 			}
 			return false
+		},
+		isGoogleUser () {
+			return this.user.google_id != null
 		}
+	},
+	created () {
+		console.log('>>>-->', this.user)
 	},
 	methods: {
 		...utility,

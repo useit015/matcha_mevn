@@ -80,6 +80,12 @@ export default {
 		UserCard,
 		loader
 	},
+	props: {
+		data: {
+			type: Object,
+			default: () => ({ })
+		}
+	},
 	data () {
 		return {
 			search: false,
@@ -175,6 +181,15 @@ export default {
 				rating: Number(cur.rating),
 				status: Math.round(Math.random() * 100) % 2
 			}))
+			if (this.data.gender || this.data.location) {
+				if (this.data.gender != 'null') this.gender = this.data.gender
+				if (this.data.location != 'null') this.location = this.data.location
+				if (this.data.min && this.data.max
+					&& !isNaN(this.data.max) && !isNaN(this.data.min)
+					&& Number(this.data.max) >= Number(this.data.min))
+						this.age = [Number(this.data.min), Number(this.data.max)]
+				this.search = true
+			}
 			this.loaded = true
 		} else {
 			this.logout(this.user.id)

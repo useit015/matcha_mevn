@@ -126,6 +126,17 @@ export const socket = {
 		},
 		SOCKET_online: (state, online) => {
 			if (!online.find(cur => cur == state.user.id)) {
+				setTimeout(() => {
+					if (state.user.id) {
+						(new Vue()).$socket.emit('logoutCheck', state.user.id)
+					}
+				}, 2000)
+			} else {
+				state.online = online.filter(cur => cur != state.user.id).map(cur => Number(cur))
+			}
+		},
+		SOCKET_out: (state, id) => {
+			if (id == state.user.id) {
 				state.status = false
 				state.user = {}
 				state.isConnected = false
@@ -143,8 +154,6 @@ export const socket = {
 				state.visited = []
 				state.visitor = []
 				state.imageConvo = null
-			} else {
-				state.online = online.filter(cur => cur != state.user.id).map(cur => Number(cur))
 			}
 		}
 	}
