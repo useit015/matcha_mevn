@@ -125,6 +125,7 @@ export default {
 			set (user) {}
 		},
 		filteredImages () {
+			if (!this.user.images) return []
 			return this.user.images.filter(cur => !cur.cover)
 		}
 	},

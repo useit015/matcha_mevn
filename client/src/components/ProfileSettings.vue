@@ -250,9 +250,16 @@ export default {
 			return this.user.google_id != null
 		}
 	},
-	created () {
-		console.log('>>>-->', this.user)
-	},
+	watch: {
+		location: {
+			immediate: true,
+			handler () {
+				this.loc.lat = Number(this.location.lat)
+				this.loc.lng = Number(this.location.lng)
+			}
+		}
+	}
+	,
 	methods: {
 		...utility,
 		...mapActions([
