@@ -21,8 +21,8 @@ export default {
 	created () {
 		let script = document.createElement('script')
 		script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBZwoZjtlArLEEYsZFhS3f_YxJEDrX6km4'
-		script.async = true
-		script.defer = true
+		// script.async = true
+		// script.defer = true
 		document.body.prepend(script)
 	}
 }

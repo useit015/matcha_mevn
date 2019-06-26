@@ -264,7 +264,7 @@ export default {
 }
 
 .vue-tags-input .ti-input {
-	border: none;
+	border: none !important;
 	border-bottom: 1px solid grey;
 }
 </style>
