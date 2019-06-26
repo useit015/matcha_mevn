@@ -163,7 +163,7 @@
 					<v-btn dark flat @click="changeLoc">Save</v-btn>
 				</v-toolbar-items>
 			</v-toolbar>
-			<map-location-selector :latitude="latitude" :longitude="longitude" @locationUpdated="locationUpdated"></map-location-selector>
+			<map-location-selector v-if="ok" :latitude="latitude" :longitude="longitude" @locationUpdated="locationUpdated"></map-location-selector>
 		</v-card>
 	</v-dialog>
 	<alert :data="alert"></alert>
@@ -247,6 +247,9 @@ export default {
 		},
 		isGoogleUser () {
 			return this.user.google_id != null
+		},
+		ok () {
+			return google
 		}
 	},
 	created () {
