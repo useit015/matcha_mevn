@@ -40,7 +40,7 @@
 				<v-icon color="primary" class="ml-3" @click="passDialog = true">edit</v-icon>
 			</v-layout>
 		</v-flex>
-		<v-flex xs12>
+		<v-flex v-if="googleLoaded" xs12>
 			<v-btn outline block large color="primary" @click="locDialog = true">
 				<span>Change location</span>
 				<v-icon right>location_on</v-icon>
@@ -151,7 +151,7 @@
 			</v-container>
 		</v-card>
 	</v-dialog>
-	<v-dialog v-model="locDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+	<v-dialog v-if="googleLoaded" v-model="locDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
 		<v-card>
 			<v-toolbar dark color="primary" class="map_toolbar">
 				<v-btn icon dark @click="locDialog = false">
@@ -247,6 +247,9 @@ export default {
 		},
 		isGoogleUser () {
 			return this.user.google_id != null
+		},
+		googleLoaded () {
+			return typeof google === 'object' && typeof google.maps === 'object'
 		}
 	},
 	created () {
