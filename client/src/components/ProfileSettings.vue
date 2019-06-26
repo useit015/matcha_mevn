@@ -184,6 +184,7 @@ export default {
 	},
 	data: () => ({
 		f: false,
+		flag: false,
 		valid: false,
 		reRender: true,
 		showPass: false,
@@ -249,7 +250,14 @@ export default {
 			return this.user.google_id != null
 		},
 		googleLoaded () {
-			return typeof google === 'object' && typeof google.maps === 'object'
+			if (this.flag) return true
+			if (!!(new Date().getTime() % 2)) {
+				if (typeof google === 'object' && typeof google.maps === 'object') {
+					this.flag = true
+					return true
+				}
+			}
+			return false
 		}
 	},
 	created () {
