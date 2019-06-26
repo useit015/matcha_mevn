@@ -40,8 +40,8 @@
 				<v-icon color="primary" class="ml-3" @click="passDialog = true">edit</v-icon>
 			</v-layout>
 		</v-flex>
-		<v-flex v-if="googleLoaded" xs12>
-			<v-btn outline block large color="primary" @click="locDialog = true">
+		<v-flex xs12>
+			<v-btn outline block large color="primary" @click="openLoc">
 				<span>Change location</span>
 				<v-icon right>location_on</v-icon>
 			</v-btn>
@@ -151,7 +151,7 @@
 			</v-container>
 		</v-card>
 	</v-dialog>
-	<v-dialog v-if="googleLoaded" v-model="locDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+	<v-dialog v-if="flag" v-model="locDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
 		<v-card>
 			<v-toolbar dark color="primary" class="map_toolbar">
 				<v-btn icon dark @click="locDialog = false">
@@ -250,14 +250,7 @@ export default {
 			return this.user.google_id != null
 		},
 		googleLoaded () {
-			if (this.flag) return true
-			if (!!(new Date().getTime() % 2)) {
-				if (typeof google === 'object' && typeof google.maps === 'object') {
-					this.flag = true
-					return true
-				}
-			}
-			return false
+			return (typeof google === 'object' && typeof google.maps === 'object')
 		}
 	},
 	created () {
@@ -269,6 +262,10 @@ export default {
 			'syncBlacklist',
 			'updateUserEmail'
 		]),
+		openLoc () {
+			this.locDialog = true
+			this.flag = this.googleLoaded
+		},
 		async saveEmail () {
 			try {
 				const url = `http://134.209.195.36/api/users/email`
