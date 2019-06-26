@@ -10,6 +10,7 @@ const app = express()
 const passport = require('passport')
 const pool = require('./utility/database')
 const ejs = require('ejs')
+const mkdirp = require('mkdirp')
 
 app.use(passport.initialize())
 
@@ -26,6 +27,8 @@ app.use('/api/chat', require('./routes/api/chat'))
 app.use('/api/notif', require('./routes/api/notif'))
 app.use('/api/users', require('./routes/api/users'))
 app.use(express.static(`${__dirname}/public`))
+
+mkdirp('./public/uploads/', function(err) {  })
 
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')))
 
