@@ -67,6 +67,9 @@ io.on('connection', socket => {
 		io.emit('online', Object.keys(users))
 		console.log('users are', users)
 	})
+	socket.on('logoutCheck', id => {
+		if (!Object.keys(users).includes(id.toString())) io.emit('out', id)
+	})
 	socket.on('logout', id => {
 		try {
 			const sql = `UPDATE users SET status = NOW() WHERE id = ?`
@@ -89,7 +92,7 @@ io.on('connection', socket => {
 				delete users[key]
 				io.emit('online', Object.keys(users))
 				console.log('Client disconnected --> ', socket.id)
-				socket.disconnect( )
+				socket.disconnect()
 			}
 		}
 	})

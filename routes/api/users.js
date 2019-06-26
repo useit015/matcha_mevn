@@ -169,7 +169,7 @@ router.post('/add', async (req, res) => {
 			sql = `INSERT INTO users (first_name, last_name, username, email, password, vkey)
 					VALUES (?, ?, ?, ?, ?, ?)`
 			result = await pool.query(sql, Object.values(user))
-			sendMail(user.email, user.vkey)
+			sendMail(user.email, user.vkey, 'verify')
 			if (result.affectedRows) {
 				return res.json({ ok: true, status: 'You have been successfully registered, please verify your email' })
 			}
@@ -288,6 +288,7 @@ router.post('/update', auth, async (req, res) => {
 
 router.post('/email', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (req.user.google_id) return res.json({ msg: 'Not allowed !' })
 	if (!validateInput(req.body.email, 'email'))
 		return res.json({msg:'Email is invalid'})
 	if (!validateInput(req.body.password, 'password'))
@@ -311,6 +312,7 @@ router.post('/email', auth, async (req, res) => {
 
 router.post('/password', auth, async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
+	if (req.user.google_id) return res.json({ msg: 'Not allowed !' })
 	if (!validateInput(req.body.password, 'password'))
 		return res.json({ msg:'Password is invalid' })
 	if (!validateInput(req.body.newPassword, 'password'))

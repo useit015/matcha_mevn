@@ -37,8 +37,8 @@ passport.use(
 	}, async (accessToken, refreshToken, profile, done) => {
 		try {
 			let user, sql, result
-			sql = `SELECT * FROM users WHERE google_id = ?`
-			result = await pool.query(sql, [profile.id])
+			sql = `SELECT * FROM users WHERE google_id = ? OR email = ?`
+			result = await pool.query(sql, [profile.id, profile.emails[0].value])
 			if (!result.length) {
 				user = {
 					google_id: profile.id,
@@ -180,7 +180,7 @@ router.post('/forgot', async (req, res) => {
 		const sql = `UPDATE users SET rkey = ? WHERE email = ?`
 		const result = await pool.query(sql, [key, req.body.email])
 		if (!result.affectedRows) return res.json({ msg: 'Email not found' })
-		sendMail(req.body.email, key)
+		sendMail(req.body.email, key, 'recover')
 		res.json({ ok: true })
 	} catch (err) {
 		throw new Error(err)
