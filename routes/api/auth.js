@@ -42,7 +42,7 @@ passport.use(
 			if (!result.length) {
 				user = {
 					google_id: profile.id,
-					username: profile.displayName,
+					username: profile.displayName.replace(/ /g, ''),
 					first_name: profile.name.givenName,
 					last_name: profile.name.familyName,
 					email: profile.emails[0].value
