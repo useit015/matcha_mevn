@@ -14,7 +14,7 @@ const sendMail = async (to, key, type) => {
 			title: type == 'verify' ? 'Verify email' : 'Recover password',
 			body: `Please click the button to ${type == 'verify' ? 'verify your email' : 'recover your password'}`,
 			action: type == 'verify' ? 'Verify' : 'Recover',
-			url: `http://134.209.195.36/auth/${type}/${key}`
+			url: `${process.env.API_URL}/auth/${type}/${key}`
 		}
 		const html = ejs.render(raw, data)
 		let transporter = nodemailer.createTransport(conf)
