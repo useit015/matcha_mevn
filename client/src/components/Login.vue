@@ -32,7 +32,7 @@
 			</v-layout>
 		</v-form>
 		<v-layout justify-center align-center>
-			<a href="http://134.209.195.36/auth/google" class="google">
+			<a :href="`${url}/auth/google`" class="google">
 				<v-btn large depressed color="red" dark class="mt-3">Login with google</v-btn>
 			</a>
 		</v-layout>
@@ -54,6 +54,7 @@ export default {
 	data: () => ({
 		username: '',
 		password: '',
+		url: process.env.URL,
 		valid: false,
 		showPass: false,
 		alert: {
@@ -74,19 +75,19 @@ export default {
 		],
 		passRules: [
 			v => !!v || 'This field is required',
-			v => /^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(v) || 'Password must contain at least one letter, one number and one special char',
+			v => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v) || 'Password must contain at least one uppercase, one lowercase, one number and one special char',
 			v => v.length >= 8 || 'Password must be at least 8 characters long'
 		]
 	}),
 	async created () {
 		try {
 			const token = localStorage.getItem('token')
-			const url = 'http://134.209.195.36/auth/isloggedin'
+			const url = `${process.env.URL}/auth/isloggedin`
 			const headers = { 'x-auth-token': token }
 			const res = await this.$http.get(url, { headers })
 			if (!res.body.msg) this.$router.push('/')
 		} catch (err) {
-			console.log('problem with -->', err)
+			console.log('Got error here -->', err)
 		}
 	},
 	methods: {
@@ -94,7 +95,7 @@ export default {
 		...mapActions(['login']),
 		async log () {
 			try {
-				const url = 'http://134.209.195.36/auth/login'
+				const url = `${process.env.URL}/auth/login`
 				const auth = {
 					username: this.username,
 					password: this.password
@@ -107,7 +108,10 @@ export default {
 				{
 					const user = res.body
 					if (user.id) {
-						user.birthdate = new Date(user.birthdate).toISOString().substr(0, 10)
+						if (user.birthdate)
+							user.birthdate = new Date(user.birthdate)
+								.toISOString()
+								.substr(0, 10)
 						this.login(user)
 						this.updateLocation()
 						this.$router.push('/')

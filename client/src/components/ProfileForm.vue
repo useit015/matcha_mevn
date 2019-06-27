@@ -109,8 +109,8 @@
 			</v-flex>
 			<v-flex xs12>
 				<vue-tags-input
-					:max-tags="50"
-					:maxlength="100"
+					:max-tags="20"
+					:maxlength="25"
 					:autocomplete-items="formatedTags"
 					:add-on-key="tagEsc"
 					:disabled="!isEditing"
@@ -256,7 +256,7 @@ export default {
 }
 
 .vue-tags-input.ti-disabled > .ti-input {
-	border-bottom: 1px dashed #c8c8c8;
+	border-bottom: 1px dashed #c8c8c8 !important;
 }
 
 .vue-tags-input.ti-focus .ti-input::after {
@@ -265,6 +265,6 @@ export default {
 
 .vue-tags-input .ti-input {
 	border: none !important;
-	border-bottom: 1px solid grey;
+	border-bottom: 1px solid grey !important;
 }
 </style>

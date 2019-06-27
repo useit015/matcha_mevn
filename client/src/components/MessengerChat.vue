@@ -94,7 +94,7 @@ export default {
 							convo: this.selectedConvo,
 						})
 					} catch (err) {
-						console.log('got error here --> ', err)
+						console.log('Got error here --> ', err)
 					}
 				}
 			}
@@ -217,7 +217,7 @@ export default {
 		},
 		async getChat () {
 			try {
-				const url = `http://134.209.195.36/api/chat/single`
+				const url = `${process.env.URL}/api/chat/single`
 				const headers = { 'x-auth-token': this.user.token }
 				const data = {
 					id: this.selectedConvo,
@@ -226,7 +226,7 @@ export default {
 				const result = await this.$http.post(url, data, { headers })
 				return result
 			} catch (err) {
-				console.log('got error here --> ', err)
+				console.log('Got error here --> ', err)
 			}
 		}
 	}
@@ -234,6 +234,10 @@ export default {
 </script>
 
 <style>
+.chat_container {
+	overflow-x: hidden;
+}
+
 .layout.from {
 	flex-direction: row-reverse;
 }

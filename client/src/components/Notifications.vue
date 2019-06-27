@@ -66,7 +66,7 @@ export default {
 				const token = this.user.token || localStorage.getItem('token')
 				if (token) {
 					try {
-						const url = 'http://134.209.195.36/auth/isloggedin'
+						const url = `${process.env.URL}/auth/isloggedin`
 						const headers = { 'x-auth-token': token }
 						const res = await this.$http.get(url, { headers })
 						if (!res.body.msg) return

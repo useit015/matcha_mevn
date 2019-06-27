@@ -35,7 +35,7 @@ const getLocationFromIp = async f => {
 const syncLocation = async location => {
 	try {
 		const token = localStorage.getItem('token')
-		const url = `http://134.209.195.36/api/action/position`
+		const url = `${process.env.URL}/api/action/position`
 		const headers = { 'x-auth-token': token }
 		await Vue.http.post(url, location, { headers })
 	} catch (err) {
@@ -61,7 +61,7 @@ export default {
 	isBlocked,
 	syncLocation,
 	getLocationFromIp,
-	getFullPath: file => isExternal(file) ? file : `http://134.209.195.36/uploads/${file ? file : 'default.jpg'}`,
+	getFullPath: file => isExternal(file) ? file : `${process.env.URL}/uploads/${file ? file : 'default.jpg'}`,
 	formatTime (date) {
 		const when = moment(getDate(date))
 		const now = moment()
@@ -76,7 +76,7 @@ export default {
 	sync: async type => {
 		try {
 			const token = localStorage.getItem('token')
-			const url = `http://134.209.195.36/api/users/get${type}`
+			const url = `${process.env.URL}/api/users/get${type}`
 			const headers = { 'x-auth-token': token }
 			return await Vue.http.get(url, { headers })
 		} catch (err) {
@@ -86,7 +86,7 @@ export default {
 	syncNotif: async () => {
 		try {
 			const token = localStorage.getItem('token')
-			const url = `http://134.209.195.36/api/notif/all`
+			const url = `${process.env.URL}/api/notif/all`
 			const headers = { 'x-auth-token': token }
 			const result =  await Vue.http.get(url, { headers })
 			return result.body.msg ? [] : result.body

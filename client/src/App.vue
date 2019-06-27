@@ -4,11 +4,6 @@
 	<v-content>
 		<router-view/>
 	</v-content>
-	<!-- <v-fab-transition>
-		<v-btn color="primary" dark fab fixed bottom right>
-			<v-icon>keyboard_arrow_up</v-icon>
-		</v-btn>
-	</v-fab-transition> -->
 </v-app>
 </template>
 
@@ -20,7 +15,7 @@ export default {
 	components: { Navbar },
 	created () {
 		let script = document.createElement('script')
-		script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBZwoZjtlArLEEYsZFhS3f_YxJEDrX6km4'
+		script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_KEY}`
 		script.async = true
 		script.defer = true
 		document.body.prepend(script)
@@ -194,6 +189,12 @@ html {
 		height: 3.5rem !important;
 		width: 3.5rem !important;
 	}
+	.header_content > * {
+		transform: scale(.9) !important;
+	}
+	.header_content > .header_center > h1 {
+		font-size: 1rem;
+	}
 }
 
 @media only screen and (max-width: 400px) {
@@ -209,6 +210,12 @@ html {
 	.color_picker {
 		height: 3rem !important;
 		width: 3rem !important;
+	}
+	.header_content > * {
+		transform: scale(.8) !important;
+	}
+	.header_content > .header_center > h1 {
+		font-size: .7rem;
 	}
 }
 
@@ -231,6 +238,12 @@ html {
 	.color_picker {
 		height: 2.5rem !important;
 		width: 2.5rem !important;
+	}
+	.header_content > * {
+		transform: scale(.7) !important;
+	}
+	.header_content > .header_center > h1 {
+		font-size: .6rem;
 	}
 }
 </style>

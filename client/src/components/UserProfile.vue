@@ -54,7 +54,7 @@
 		<v-container fill-height grid-list-xl class="profile">
 			<v-layout justify-center wrap>
 				<v-flex xs12 sm8 md4>
-					<profile-badge :user="user" :match="userCanChat"></profile-badge>
+					<profile-badge :user="user" :like="likedBy" :match="userCanChat"></profile-badge>
 				</v-flex>
 				<v-flex xs12 sm10 md8 class="pa-0 grey--text main">
 					<v-tabs-items v-model="activeTab">
@@ -68,12 +68,14 @@
 								</div>
 								<h1 class="heading display-2 font-weight-thin py-3 mb-4">Informations</h1>
 								<v-layout column class="title text-capitalize infos">
-									<v-container py-3 v-for="item in informations" :key="item.label">
-										<v-layout>
-											<v-flex xs6>{{ `${item.label}:` }}</v-flex>
-											<v-flex xs6 class="infos">{{ item.content }}</v-flex>
-										</v-layout>
-									</v-container>
+									<div v-for="item in informations" :key="item.label">
+										<v-container py-3 v-if="item.content">
+											<v-layout>
+												<v-flex xs6>{{ `${item.label}:` }}</v-flex>
+												<v-flex xs6 class="infos">{{ item.content }}</v-flex>
+											</v-layout>
+										</v-container>
+									</div>
 									<v-container py-3 px-2 v-if="!!userTags.length">
 										<h1 class="heading display-2 font-weight-thin py-3 mb-4">Interests</h1>
 										<v-chip color="primary" class="user_tags" dark label v-for="(tag, i) in userTags" :key="i">{{ tag }}</v-chip>
@@ -162,10 +164,6 @@ export default {
 			blockDialog: false,
 			reportDialog: false,
 			activeTab: 'tab-profile',
-			items: [
-				{ title: 'Block', handler: e => console.log('nigga1 -->', e) },
-				{ title: 'Report', handler: e => console.log('nigga2 -->', e) }
-			],
 			alert: {
 				state: false,
 				color: '',
@@ -196,6 +194,12 @@ export default {
 			set () {
 				this.syncMatches(this.loggedIn.id)
 			}
+		},
+		likedBy () {
+				for (let match of this.followers)
+					if (match.id == this.user.id)
+						return true 
+				return false
 		},
 		profileImage () {
 			return this.getFullPath(this.getProfileImage())
@@ -302,7 +306,7 @@ export default {
 			return image ? image.name : 'default.jpg'
 		},
 		async match () {
-			const url = `http://134.209.195.36/api/action/match`
+			const url = `${process.env.URL}/api/action/match`
 			const data = {
 				id: this.$route.params.id,
 				liked: this.liked
@@ -333,7 +337,7 @@ export default {
 			}
 		},
 		async block () {
-			const url = `http://134.209.195.36/api/action/block`
+			const url = `${process.env.URL}/api/action/block`
 			let data = { id: this.$route.params.id }
 			const headers =  { 'x-auth-token': this.loggedIn.token }
 			const res = await this.$http.post(url, data, { headers })
@@ -366,7 +370,7 @@ export default {
 				} else {
 					try {
 						const headers = { 'x-auth-token': this.loggedIn.token }
-						const url = `http://134.209.195.36/api/users/show/${id}`
+						const url = `${process.env.URL}/api/users/show/${id}`
 						const res = await this.$http.get(url, { headers })
 						if (res.body.msg) {
 							this.$router.push('/404')
@@ -393,7 +397,7 @@ export default {
 			}
 		},
 		async reportUser() {
-			const url = `http://134.209.195.36/api/action/report`
+			const url = `${process.env.URL}/api/action/report`
 			let data = { id: this.$route.params.id }
 			const headers =  { 'x-auth-token': this.loggedIn.token }
 			const res = await this.$http.post(url, data, {

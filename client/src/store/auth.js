@@ -36,6 +36,7 @@ export const auth = {
 				localStorage.setItem('token', user.token)
 				const { lat, lng } = user
 				commit('locate', { lat, lng })
+				dispatch('locate')
 				dispatch('getTags')
 				dispatch('getNotif')
 				dispatch('syncHistory')

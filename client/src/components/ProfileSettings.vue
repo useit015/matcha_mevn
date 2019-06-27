@@ -275,7 +275,7 @@ export default {
 		},
 		async saveEmail () {
 			try {
-				const url = `http://134.209.195.36/api/users/email`
+				const url = `${process.env.URL}/api/users/email`
 				const headers = { 'x-auth-token': this.user.token }
 				const data = {
 					email: this.email,
@@ -299,7 +299,7 @@ export default {
 		},
 		async savePass () {
 			try {
-				const url = `http://134.209.195.36/api/users/password`
+				const url = `${process.env.URL}/api/users/password`
 				const headers = { 'x-auth-token': this.user.token }
 				const data = {
 					password: this.password,
@@ -347,7 +347,7 @@ export default {
 		},
 		async changeLoc () {
 			this.locDialog = false
-			const url = `http://134.209.195.36/api/action/position`
+			const url = `${process.env.URL}/api/action/position`
 			const headers = { 'x-auth-token': this.user.token }
 			const result =  await this.$http.post(url, this.loc, { headers })
 			if (result.body.ok) {
@@ -359,7 +359,7 @@ export default {
 		},
 		async unBlock (banned) {
 			const { id, username } = banned
-			const url = `http://134.209.195.36/api/action/unblock`
+			const url = `${process.env.URL}/api/action/unblock`
 			const headers = { 'x-auth-token': this.user.token }
 			const result =  await this.$http.post(url, { id }, { headers })
 			if (result.body.ok) {

@@ -136,7 +136,7 @@ export default {
 				const token = this.user.token || localStorage.getItem('token')
 				if (token) {
 					try {
-						const url = 'http://134.209.195.36/auth/isloggedin'
+						const url = `${process.env.URL}/auth/isloggedin`
 						const headers = { 'x-auth-token': token }
 						const res = await this.$http.get(url, { headers })
 						if (!res.body.msg) {
@@ -163,7 +163,7 @@ export default {
 		async updateUser () {
 			try {
 				let msg
-				const url = `http://134.209.195.36/api/users/update`
+				const url = `${process.env.URL}/api/users/update`
 				const headers = { 'x-auth-token': this.user.token }
 				const res = await this.$http.post(url, this.user, { headers })
 				if (res && res.body && !res.body.msg) {
@@ -172,7 +172,7 @@ export default {
 					this.update(this.user)
 					this.$refs.form.toggleEdit()
 				} else {
-					msg = 'Ouups something went wrong!'
+					msg = res.body.msg ? res.body.msg : 'Ouups something went wrong!'
 					this.showAlert('red', msg, this)
 				}
 			} catch (err) {
@@ -185,7 +185,7 @@ export default {
 					let msg
 					const fd = new FormData()
 					fd.append('image', data)
-					const url = `http://134.209.195.36/api/users/image`
+					const url = `${process.env.URL}/api/users/image`
 					const headers = { 'x-auth-token': this.user.token }
 					const res = await this.$http.post(url, fd, { headers })
 					if (res && res.body && !res.body.msg) {
@@ -226,7 +226,7 @@ export default {
 						let msg
 						const fd = new FormData()
 						fd.append('image', imageFile)
-						const url = `http://134.209.195.36/api/users/image/cover`
+						const url = `${process.env.URL}/api/users/image/cover`
 						const headers = { 'x-auth-token': this.user.token }
 						const res = await this.$http.post(url, fd, { headers })
 						if (res && res.body && !res.body.msg) {
@@ -234,12 +234,11 @@ export default {
 							this.showAlert('success', msg, this)
 							this.$store.commit('updateCoverImage', res.body)
 						} else {
-							msg = 'Ouups something went wrong!'
+							msg = res.body.msg ? res.body.msg : 'Ouups something went wrong!'
 							this.showAlert('red', msg, this)
-							console.log('res here --> ', res)
 						}
 					} catch (err) {
-						console.log('got error here --> ', err)
+						console.log('Got error here --> ', err)
 					}
 				}
 			}

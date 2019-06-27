@@ -55,7 +55,7 @@ export const chat = {
 		updateConvosOrder: ({ commit }, id) => commit('updateConvosOrder', id),
 		syncConvoAll: async ({ commit }) => {
 			const token = localStorage.getItem('token')
-			const url = 'http://134.209.195.36/api/chat/all'
+			const url = `${process.env.URL}/api/chat/all`
 			const headers = { 'x-auth-token': token }
 			const result = await Vue.http.get(url, { headers })
 			if (!result.body.msg) commit('syncConvoAll', result.body)

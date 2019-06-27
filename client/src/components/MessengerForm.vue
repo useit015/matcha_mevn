@@ -50,7 +50,7 @@ export default {
 			if (this.msg && this.msg.trim()) {
 				if (!e.shiftKey) {
 					try {
-						const url = `http://134.209.195.36/api/chat/send`
+						const url = `${process.env.URL}/api/chat/send`
 						const headers = { 'x-auth-token': this.user.token }
 						const data = {
 							id_conversation: this.selectedConvo,

@@ -174,7 +174,7 @@ export const user = {
 		syncBlacklist: async ({ commit }, blocked) => {
 			if (!blocked.length) return commit('syncBlacklist', [])
 			const token = localStorage.getItem('token')
-			const url = `http://134.209.195.36/api/users/blacklisted`
+			const url = `${process.env.URL}/api/users/blacklisted`
 			const headers = { 'x-auth-token': token }
 			const data = { ids: JSON.stringify(blocked) }
 			const res = await Vue.http.post(url, data, { headers })

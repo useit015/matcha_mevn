@@ -183,7 +183,7 @@ export default {
 	async created () {
 		try {
 			const token = localStorage.getItem('token')
-			const url = 'http://134.209.195.36/auth/isloggedin'
+			const url = `${process.env.URL}/auth/isloggedin`
 			const headers = { 'x-auth-token': token }
 			const res = await this.$http.get(url, { headers })
 			if (!res.body.msg) {
@@ -193,11 +193,9 @@ export default {
 						.toISOString()
 						.substr(0, 10)
 				this.in(user)
-			} else {
-				console.log(res.body.msg)
 			}
 		} catch (err) {
-			console.log('problem with -->', err)
+			console.log('Got error here -->', err)
 		}
 	},
 	computed: {
@@ -234,7 +232,7 @@ export default {
 		},
 		async notifMenu () {
 			if (this.notifMenu) {
-				const url = 'http://134.209.195.36/api/notif/update'
+				const url = `${process.env.URL}/api/notif/update`
 				const headers = { 'x-auth-token': this.user.token }
 				const res = await this.$http.get(url, { headers })
 				this.seenNotif()
@@ -267,7 +265,7 @@ export default {
 		},
 		async logout () {
 			try {
-				const url = 'http://134.209.195.36/auth/logout'
+				const url = `${process.env.URL}/auth/logout`
 				const headers = { 'x-auth-token': this.user.token }
 				const res = await this.$http.get(url, { headers })
 				if (res.body.ok) this.out(this.user.id)

@@ -4,9 +4,9 @@
 			<div class="header_layout"></div>
 			<v-layout justify-center align-center class="header_content">
 				<div class="header_center">
-					<h1 class="display-3 white--text font-weight-thin mb-5">Meet Someone worth meeting today</h1>
-					<v-layout justify-center>
-						<v-flex xs12 md7>
+					<h1 class="display-3 white--text hidden-xs-only text-xs-center font-weight-thin mb-5">Meet Someone worth meeting today</h1>
+					<v-layout justify-center wrap>
+						<v-flex xs10 sm8 md7>
 							<v-layout column>
 								<h4 class="title font-weight-thin white--text mb-4">Show me</h4>
 								<v-btn-toggle class="mb-5 home_toggle" v-model="gender">

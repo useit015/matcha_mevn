@@ -174,7 +174,7 @@ export default {
 	},
 	async created () {
 		const token = localStorage.getItem('token')
-		const url = 'http://134.209.195.36/api/users/show'
+		const url = `${process.env.URL}/api/users/show`
 		const headers = { 'x-auth-token': token }
 		const res = await this.$http.post(url, {filter:true}, { headers })
 		if (!res.body.msg) {

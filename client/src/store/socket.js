@@ -29,7 +29,7 @@ export const socket = {
 								state.convos[i].message_from = data.id_from
 							}
 						})
-						const url = 'http://134.209.195.36/api/chat/update'
+						const url = `${process.env.URL}/api/chat/update`
 						const body = { id: state.selectedConvo }
 						await Vue.http.post(url, body, { headers })
 					}
@@ -49,7 +49,7 @@ export const socket = {
 						type: 'chat',
 						id_conversation
 					}
-					const url = 'http://134.209.195.36/api/notif/add'
+					const url = `${process.env.URL}/api/notif/add`
 					await Vue.http.post(url, body, { headers })
 				}
 			} catch (err) {
@@ -84,7 +84,7 @@ export const socket = {
 					match_date: data.date
 				})
 				if (data.type == 'like_back') {
-					const url = 'http://134.209.195.36/api/chat/all'
+					const url = `${process.env.URL}/api/chat/all`
 					const headers = { 'x-auth-token': state.user.token }
 					const result = await Vue.http.get(url, { headers })
 					state.convos = result.body

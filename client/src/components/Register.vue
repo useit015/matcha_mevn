@@ -57,7 +57,7 @@ export default {
 			],
 			password: [
 				v => !!v || 'This field is required',
-				v => /^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]+$/.test(v) || 'Password must contain at least one letter, one number and one special char',
+				v => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v) || 'Password must contain at least one uppercase, one lowercase, one number and one special char',
 				v => v.length >= 8 || 'Password must be at least 8 characters long'
 			]
 		}
@@ -65,12 +65,12 @@ export default {
 	async created () {
 		try {
 			const token = localStorage.getItem('token')
-			const url = 'http://134.209.195.36/auth/isloggedin'
+			const url = `${process.env.URL}/auth/isloggedin`
 			const headers = { 'x-auth-token': token }
 			const res = await this.$http.get(url, { headers })
 			if (!res.body.msg) this.$router.push('/')
 		} catch (err) {
-			console.log('problem with -->', err)
+			console.log('Got error here -->', err)
 		}
 	},
 	methods: {
@@ -78,7 +78,7 @@ export default {
 		async registerUser (e) {
 			e.preventDefault()
 			try {
-				const url = 'http://134.209.195.36/api/users/add'
+				const url = `${process.env.URL}/api/users/add`
 				const data = {
 					first_name: this.firstname,
 					last_name: this.lastname,

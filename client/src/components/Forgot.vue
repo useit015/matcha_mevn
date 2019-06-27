@@ -30,7 +30,7 @@ export default {
 			e.preventDefault()
 			const email = this.email
 			if (email && email.length && /.+@.+/.test(email)) {
-				const url = `http://134.209.195.36/auth/forgot`
+				const url = `${process.env.URL}/auth/forgot`
 				const res = await this.$http.post(url, { email })
 				this.email = ''
 				if (res.body.ok) {

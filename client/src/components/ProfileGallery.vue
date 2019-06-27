@@ -45,7 +45,7 @@ export default {
 		},
 		async deleteImg (image) {
 			try {
-				const url = `http://134.209.195.36/api/users/image/del`
+				const url = `${process.env.URL}/api/users/image/del`
 				const headers = { 'x-auth-token': this.user.token }
 				const data = {
 					id: image.id,
