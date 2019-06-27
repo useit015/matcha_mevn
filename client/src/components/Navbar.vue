@@ -1,7 +1,8 @@
 <template>
 <nav>
 	<v-toolbar flat app>
-		<v-toolbar-side-icon class="grey--text" @click="drawer = !drawer"></v-toolbar-side-icon>
+		<v-toolbar-side-icon v-if="status" class="grey--text" @click="drawer = !drawer"></v-toolbar-side-icon>
+		<div v-else style="width:2.5rem;"></div>
 		<v-toolbar-title class="text-uppercase grey--text">
 			<span>M</span><span class="font-weight-light">atcha</span>
 		</v-toolbar-title>
@@ -83,7 +84,7 @@
 			<v-btn flat color="grey" router to="/register">Sign Up</v-btn>
 		</div>
 	</v-toolbar>
-	<v-navigation-drawer v-model="drawer" app fixed class="primary">
+	<v-navigation-drawer v-if="status" v-model="drawer" app fixed class="primary">
 		<v-list>
 			<v-list-tile avatar>
 				<v-layout align-center justify-center v-if="status">

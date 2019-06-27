@@ -1,12 +1,17 @@
 <template>
-<v-container>
-	<v-layout row>
-		<h1>(404) Page NotFound</h1>
+	<v-layout class="wrap" align-center justify-center row>
+		<h1 class="display-4 font-weight-thin text-xs-center">(404) Page NotFound</h1>
 	</v-layout>
-</v-container>
 </template>
 
-<script>
-export default {
+<style scoped>
+.wrap {
+	height: 80vh;
+	width: 80vw;
+	margin: 0 auto;
 }
-</script>
+
+.wrap > .display-4 {
+	line-height: 1.5 !important;
+}
+</style>
