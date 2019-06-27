@@ -301,9 +301,9 @@ export default {
 			this.activeTab = tab
 		},
 		getProfileImage () {
-			if (!this.user || !this.user.images) return 'default.jpg'
+			if (!this.user || !this.user.images) return 'default.png'
 			const image = this.user.images.find(cur => cur.profile == true)
-			return image ? image.name : 'default.jpg'
+			return image ? image.name : 'default.png'
 		},
 		async match () {
 			const url = `${process.env.URL}/api/action/match`
@@ -320,7 +320,7 @@ export default {
 					date: new Date(),
 					id_from: this.loggedIn.id,
 					username: this.loggedIn.username,
-					profile_image: profileImg ? profileImg.name : 'default.jpg',
+					profile_image: profileImg ? profileImg.name : 'default.png',
 					id_to: this.$route.params.id
 				}
 				if (!this.liked) {
@@ -384,7 +384,7 @@ export default {
 							date: new Date(),
 							id_from: this.loggedIn.id,
 							username: this.loggedIn.username,
-							profile_image: profileImg ? profileImg.name : 'default.jpg',
+							profile_image: profileImg ? profileImg.name : 'default.png',
 							id_to: id,
 							type: 'visit'
 						}

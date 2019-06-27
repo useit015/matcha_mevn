@@ -54,7 +54,7 @@
 					</v-btn>
 				</template>
 				<v-list class="grey lighten-5 pa-0 message_list">
-					<template v-for="(item, i) in convos">
+					<template v-for="(item, i) in menuConvos">
 						<v-list-tile :key="i" avatar @click="toUserChat(item)">
 							<v-list-tile-avatar>
 								<img :src="getFullPath(item.profile_image)">
@@ -219,6 +219,9 @@ export default {
 				.filter(cur => cur.type != 'chat')
 				.sort((a, b) => new Date(b.date) - new Date(a.date))
 				.slice(0, 7)
+		},
+		menuConvos () {
+			return this.convos.slice(0, 7)
 		}
 	},
 	watch: {

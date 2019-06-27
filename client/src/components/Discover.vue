@@ -20,6 +20,8 @@
 								<span class="px-1">Women</span>
 							</v-btn>
 						</v-btn-toggle>
+						<h4 class="title font-weight-thin mb-3">Distance</h4>
+						<v-range-slider class="mx-3 mb-5 pt-3" v-model="distance" hide-details :max="max" min="0" :step="step" thumb-label="always" thumb-size="30"></v-range-slider>
 						<h4 class="title font-weight-thin mb-3">Age</h4>
 						<v-range-slider class="mx-3 mb-5 pt-3" v-model="age" hide-details max="85" min="18" step="1" thumb-label="always" thumb-size="25"></v-range-slider>
 						<h4 class="title font-weight-thin mb-3">Fame</h4>
@@ -82,6 +84,7 @@ import loader from './loader'
 import { mapGetters, mapActions } from 'vuex'
 import UserCard from './UserCard'
 import countries from '../nats.json'
+import utility from '../utility'
 
 export default {
 	name: 'Discover',
@@ -91,6 +94,8 @@ export default {
 	},
 	data () {
 		return {
+			max: 0,
+			step: 0,
 			sortDir: 1,
 			sort: null,
 			users: [],
@@ -101,6 +106,7 @@ export default {
 			loaded: false,
 			age: [18, 85],
 			rating: [0, 5],
+			distance: [0, 0],
 			tags: ['sports', 'cinema', 'music'],
 			sortTypes: ['age', 'distance', 'rating', 'interests'],
 			nats: countries,
@@ -111,14 +117,21 @@ export default {
 				rating: val => val.rating >= this.rating[0] && val.rating <= this.rating[1],
 				gender: val => !this.gender || val.gender === this.gender,
 				location: val => !this.location || [val.country, val.address, val.city].some(cur => cur.has(this.location)),
+				distance: val => {
+					if (this.distance[0] == this.distance[1]) return true
+					if (val.lat && val.lng) {
+						const { lat, lng } = val
+						const distance = this.calculateDistance(this.userLocation, { lat, lng })
+						return distance >= this.distance[0] && distance <= this.distance[1]
+					}
+				},
 				age: val => {
 					const year = new Date(val.birthdate).getFullYear()
 					const now = new Date().getFullYear()
 					return year >= now - this.age[1] && year <=  now - this.age[0]
 				},
 				interest: val => {
-					if (!this.interests.length)
-						return true
+					if (!this.interests.length) return true
 					for (const interest of this.interests)
 						if (val.tags.split(',').includes(interest))
 							return true
@@ -134,6 +147,7 @@ export default {
 			status: 'status',
 			online: 'online',
 			blocked: 'blocked',
+			userLocation: 'location',
 			blockedBy: 'blockedBy'
 		}),
 		filtered () {
@@ -145,6 +159,7 @@ export default {
 				.filter(this.filters.gender)
 				.filter(this.filters.location)
 				.filter(this.filters.age)
+				.filter(this.filters.distance)
 				.filter(this.filters.interest)
 		},
 		sorted () {
@@ -170,6 +185,16 @@ export default {
 					break
 			}
 			return [...this.filtered].sort(sortFunc)
+		},
+		maxDis () {
+			if (this.sort === null && this.sortDir === 1 && this.users.length) {
+				const { lat, lng } = this.users[this.users.length - 1]
+				const to = {
+					lat: Number(lat),
+					lng: Number(lng)
+				}
+				return Math.ceil(this.calculateDistance(this.userLocation, to))
+			}
 		}
 	},
 	async created () {
@@ -203,9 +228,42 @@ export default {
 			handler () {
 				this.whoIsUp()
 			}
+		},
+		age () {
+			if (this.age[0] > this.age[1]) {
+				const temp = this.age[0]
+				this.age[0] = this.age[1]
+				this.age[1] = temp
+			}
+		},
+		rating () {
+			if (this.rating[0] > this.rating[1]) {
+				const temp = this.rating[0]
+				this.rating[0] = this.rating[1]
+				this.rating[1] = temp
+			}
+		},
+		distance () {
+			if (this.distance[0] > this.distance[1]) {
+				const temp = this.distance[0]
+				this.distance[0] = this.distance[1]
+				this.distance[1] = temp
+			}
+		},
+		maxDis: {
+			immediate: true,
+			handler () {
+				const distance = this.maxDis
+				if (distance) {
+					this.distance[1] = distance
+					this.max = distance
+					this.step = Math.ceil(distance / 30)
+				}
+			}
 		}
 	},
 	methods: {
+		...utility,
 		...mapActions(['logout']),
 		reset () {
 			this.sortDir = 1
@@ -213,6 +271,7 @@ export default {
 			this.gender = null
 			this.age = [18, 85]
 			this.rating = [0, 5]
+			this.distance = [0, this.maxDis]
 			this.location = null
 		},
 		changeSort () {
@@ -306,5 +365,9 @@ export default {
 .sort_btn {
 	margin: 0 0 0 auto !important;
 	padding: 0 !important;
+}
+
+.v-slider__thumb-label > span {
+	font-size: .8em;
 }
 </style>

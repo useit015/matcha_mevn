@@ -19,6 +19,8 @@
 							<span class="px-1">Women</span>
 						</v-btn>
 					</v-btn-toggle>
+					<h4 class="title font-weight-thin mb-3">Distance</h4>
+					<v-range-slider class="mx-3 mb-5 pt-3" v-model="distance" hide-details :max="max" min="0" :step="step" thumb-label="always" thumb-size="30"></v-range-slider>
 					<h4 class="title font-weight-thin mb-3">Age</h4>
 					<v-range-slider class="mx-3 mb-4 pt-3" v-model="age" max="85" min="18" step="1" thumb-label="always" thumb-size="25"></v-range-slider>
 					<h4 class="title font-weight-thin mb-3">Fame</h4>
@@ -73,6 +75,7 @@ import loader from './loader'
 import { mapGetters, mapActions } from 'vuex'
 import UserCard from './UserCard'
 import countries from '../nats.json'
+import utility from '../utility'
 
 export default {
 	name: 'Discover',
@@ -88,6 +91,8 @@ export default {
 	},
 	data () {
 		return {
+			max: 0,
+			step: 0,
 			search: false,
 			sortDir: 1,
 			sort: null,
@@ -98,6 +103,7 @@ export default {
 			loaded: false,
 			age: [18, 85],
 			rating: [0, 5],
+			distance: [0, 0],
 			tags: ['sports', 'cinema', 'music'],
 			sortTypes: ['age', 'distance', 'rating', 'interests'],
 			nats: countries,
@@ -108,6 +114,14 @@ export default {
 				rating: val => val.rating >= this.rating[0] && val.rating <= this.rating[1],
 				gender: val => !this.gender || val.gender === this.gender,
 				location: val => !this.location || [val.country, val.address, val.city].some(cur => cur && cur.has(this.location)),
+				distance: val => {
+					if (this.distance[0] == this.distance[1]) return true
+					if (val.lat && val.lng) {
+						const { lat, lng } = val
+						const distance = this.calculateDistance(this.userLocation, { lat, lng })
+						return distance >= this.distance[0] && distance <= this.distance[1]
+					}
+				},
 				age: val => {
 					const year = new Date(val.birthdate).getFullYear()
 					const now = new Date().getFullYear()
@@ -128,9 +142,11 @@ export default {
 		...mapGetters({
 			user: 'user',
 			allTags: 'tags',
+			online: 'online',
 			status: 'status',
 			blocked: 'blocked',
-			blockedBy: 'blockedBy'
+			blockedBy: 'blockedBy',
+			userLocation: 'location'
 		}),
 		filtered () {
 			if (!this.search) return []
@@ -142,6 +158,7 @@ export default {
 				.filter(this.filters.gender)
 				.filter(this.filters.location)
 				.filter(this.filters.age)
+				.filter(this.filters.distance)
 				.filter(this.filters.interest)
 		},
 		sorted () {
@@ -168,6 +185,15 @@ export default {
 					break
 			}
 			return [...this.filtered].sort(sortFunc)
+		},
+		maxDis () {
+			if (this.sort === null && this.sortDir === 1 && this.users.length) {
+				const { lat, lng } = this.users[this.users.length - 1]
+				const to = { lat: Number(lat), lng: Number(lng) }
+				const raw = (this.calculateDistance(this.userLocation, to) / 4).toFixed(0)
+				const r = Math.ceil(Number(raw)/Math.pow(10, raw.length - 1))
+				return Number(r + raw.split('').splice(1).map(cur => '0').join(''))
+			}
 		}
 	},
 	async created () {
@@ -178,8 +204,7 @@ export default {
 		if (!res.body.msg) {
 			this.users = res.body.map(cur => ({
 				...cur,
-				rating: Number(cur.rating),
-				status: Math.round(Math.random() * 100) % 2
+				rating: Number(cur.rating)
 			}))
 			if (this.data.gender || this.data.location) {
 				if (this.data.gender != 'null') this.gender = this.data.gender
@@ -190,6 +215,7 @@ export default {
 						this.age = [Number(this.data.min), Number(this.data.max)]
 				this.search = true
 			}
+			this.whoIsUp()
 			this.loaded = true
 		} else {
 			this.logout(this.user.id)
@@ -197,16 +223,64 @@ export default {
 		}
 	},
 	methods: {
+		...utility,
 		...mapActions(['logout']),
 		reset () {
 			this.search = false
 			this.rating = [0, 5]
 			this.age = [18, 85]
 			this.gender = null
+			this.distance = [0, this.maxDis]
 			this.location = null
 		},
 		changeSort () {
 			this.sortDir = -this.sortDir
+		},
+		whoIsUp () {
+			this.users.forEach((user, i) => {
+				this.users[i].lastSeen = this.users[i].status
+				this.users[i].status = this.online.includes(user.user_id)
+			})
+		}
+	},
+	watch: {
+		online: {
+			immediate: true,
+			handler () {
+				this.whoIsUp()
+			}
+		},
+		age () {
+			if (this.age[0] > this.age[1]) {
+				const temp = this.age[0]
+				this.age[0] = this.age[1]
+				this.age[1] = temp
+			}
+		},
+		rating () {
+			if (this.rating[0] > this.rating[1]) {
+				const temp = this.rating[0]
+				this.rating[0] = this.rating[1]
+				this.rating[1] = temp
+			}
+		},
+		distance () {
+			if (this.distance[0] > this.distance[1]) {
+				const temp = this.distance[0]
+				this.distance[0] = this.distance[1]
+				this.distance[1] = temp
+			}
+		},
+		maxDis: {
+			immediate: true,
+			handler () {
+				const distance = this.maxDis
+				if (distance) {
+					this.distance[1] = distance
+					this.max = distance
+					this.step = Math.ceil(distance / 30)
+				}
+			}
 		}
 	}
 }

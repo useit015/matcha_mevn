@@ -57,9 +57,9 @@ export const getters = {
 		return false
 	}),
 	profileImage: state => {
-		if (!state.user.images) return 'default.jpg'
+		if (!state.user.images) return 'default.png'
 		const image = state.user.images.find(cur => cur.profile)
-		return utility.getFullPath(image ? image.name : 'default.jpg')
+		return utility.getFullPath(image ? image.name : 'default.png')
 	},
 	coverPhoto: state => {
 		const cover = 'https://images.pexels.com/photos/96422/pexels-photo-96422.jpeg'

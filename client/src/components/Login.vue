@@ -63,11 +63,14 @@ export default {
 			text: ''
 		},
 		nameRules: [
-			v => !!v || 'This field is required'
+			v => !!v || 'This field is required',
+			v => !(/[^a-zA-Z \-]+/.test(v)) || 'Name can contain only letters',
+			v => (v.length >= 3 && v.length <= 255 ) || 'Name must be at least 3 characters long',
 		],
 		usernameRules: [
 			v => !!v || 'This field is required',
-			v => v.length >= 8 || 'Username must be at least 8 characters long'
+			v => (v.length >= 8 && v.length <= 25 ) || 'Username must be between 8 and 25 characters long',
+			v => !(/[^a-zA-Z0-9]+/.test(v)) || 'Username can contain only letters and numbers'
 		],
 		emailRules: [
 			v => !!v || 'This field is required',
