@@ -61,7 +61,7 @@ export default {
 	isBlocked,
 	syncLocation,
 	getLocationFromIp,
-	getFullPath: file => isExternal(file) ? file : `${process.env.URL}/uploads/${file ? file : 'default.jpg'}`,
+	getFullPath: file => isExternal(file) ? file : `${process.env.URL}/uploads/${file ? file : 'default.png'}`,
 	formatTime (date) {
 		const when = moment(getDate(date))
 		const now = moment()

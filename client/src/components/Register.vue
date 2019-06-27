@@ -5,10 +5,10 @@
 		<v-form v-model="valid" class="my-4">
 			<v-text-field color="primary" class="my-3" validate-on-blur v-model="firstname" :rules="rules.name" label="First name" required ></v-text-field>
 			<v-text-field color="primary" class="my-3" validate-on-blur v-model="lastname" :rules="rules.name" label="Last name" required ></v-text-field>
-			<v-text-field color="primary" class="my-3" validate-on-blur v-model="username" :rules="rules.username" :counter="10" label="Username" required ></v-text-field>
+			<v-text-field color="primary" class="my-3" validate-on-blur v-model="username" :rules="rules.username" :counter="25" label="Username" required ></v-text-field>
 			<v-text-field color="primary" class="my-3" validate-on-blur v-model="email" :rules="rules.email" label="E-mail" required ></v-text-field>
-			<v-text-field color="primary" class="my-3" validate-on-blur v-model="password" :counter="12" :rules="rules.password" label="Password" required :append-icon="showPass ? 'visibility' : 'visibility_off'" :type="showPass ? 'text' : 'password'" @click:append="showPass = !showPass"></v-text-field>
-			<v-text-field @keyup.13="registerUser" color="primary" class="my-3" validate-on-blur v-model="passwordConfirm" :counter="12" label="Confirm Password" required :append-icon="showConfPass ? 'visibility' : 'visibility_off'" :type="showConfPass ? 'text' : 'password'" @click:append="showConfPass = !showConfPass" :error-messages="passwordMatch()"></v-text-field>
+			<v-text-field color="primary" class="my-3" validate-on-blur v-model="password" :rules="rules.password" label="Password" required :append-icon="showPass ? 'visibility' : 'visibility_off'" :type="showPass ? 'text' : 'password'" @click:append="showPass = !showPass"></v-text-field>
+			<v-text-field @keyup.13="registerUser" color="primary" class="my-3" validate-on-blur v-model="passwordConfirm" label="Confirm Password" required :append-icon="showConfPass ? 'visibility' : 'visibility_off'" :type="showConfPass ? 'text' : 'password'" @click:append="showConfPass = !showConfPass" :error-messages="passwordMatch()"></v-text-field>
 			<v-btn block large depressed color="primary" @click="registerUser" :disabled="!valid" class="mt-5 white--text">Submit</v-btn>
 			<v-layout row justify-end>
 				<v-btn flat color="primary" dark to="/login">Have an account? Login</v-btn>
@@ -45,11 +45,14 @@ export default {
 		},
 		rules: {
 			name: [
-				v => !!v || 'This field is required'
+				v => !!v || 'This field is required',
+				v => !(/[^a-zA-Z \-]+/.test(v)) || 'Name can contain only letters',
+				v => (v.length >= 3 && v.length <= 255 ) || 'Name must be at least 3 characters long',
 			],
 			username: [
 				v => !!v || 'This field is required',
-				v => v.length >= 8 || 'Username must be at least 8 characters long'
+				v => (v.length >= 8 && v.length <= 25 ) || 'Username must be between 8 and 25 characters long',
+				v => !(/[^a-zA-Z0-9]+/.test(v)) || 'Username can contain only letters and numbers'
 			],
 			email: [
 				v => !!v || 'This field is required',
