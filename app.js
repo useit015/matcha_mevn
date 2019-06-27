@@ -10,7 +10,6 @@ const app = express()
 const passport = require('passport')
 const pool = require('./utility/database')
 const ejs = require('ejs')
-const mkdirp = require('mkdirp')
 
 app.use(passport.initialize())
 
@@ -26,9 +25,8 @@ app.use('/api/action', require('./routes/api/actions'))
 app.use('/api/chat', require('./routes/api/chat'))
 app.use('/api/notif', require('./routes/api/notif'))
 app.use('/api/users', require('./routes/api/users'))
+app.use('/uploads', express.static(`${__dirname}/uploads`))
 app.use(express.static(`${__dirname}/public`))
-
-mkdirp('./public/uploads/', function(err) {  })
 
 app.get(/.*/, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')))
 
@@ -70,9 +68,6 @@ io.on('connection', socket => {
 		io.emit('online', Object.keys(users))
 		console.log('users are', users)
 	})
-	socket.on('logoutCheck', id => {
-		if (!Object.keys(users).includes(id.toString())) io.emit('out', id)
-	})
 	socket.on('logout', id => {
 		try {
 			const sql = `UPDATE users SET status = NOW() WHERE id = ?`
@@ -81,7 +76,7 @@ io.on('connection', socket => {
 			throw new Error(err)
 		}
 		delete users[id]
-		io.emit('online', Object.keys(users))
+		io.emit('out', Object.keys(users))
 	})
 	socket.on('disconnect', () => {
 		for (let key of Object.keys(users)) {

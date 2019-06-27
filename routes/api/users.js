@@ -234,12 +234,17 @@ router.post('/update', auth, async (req, res) => {
 		return res.json({ msg:'Gender is invalid' })
 	if (!validateInput(req.body.looking, 'looking'))
 		return res.json({ msg:'Looking is invalid' })
+	const tagList = req.body.tags.split(',')
+	if (tagList.length > 20) return res.json({ msg:'Too many tags' })
+	for (const iterator of tagList) {
+		if (iterator.length > 25)
+			return res.json({ msg:'Tags are invalid' })
+	}
 	try {
 		let sql, result
 		sql = `SELECT * FROM users WHERE id = ?`
 		result = await pool.query(sql, [req.user.id])
 		if (result.length) {
-			// ! MUST VALIDATE INPUT !!!!
 			const user = {
 				first_name: req.body.first_name,
 				last_name: req.body.last_name,
@@ -338,7 +343,7 @@ router.post('/image', [auth, upload.single('image')], async (req, res) => {
 	if (!req.user.id) return res.json({ msg: 'Not logged in' })
 	try {
 		const base64Data = req.body.image.replace(/^data:image\/png;base64,/, '')
-		const uploadDir = `${dirname(dirname(__dirname))}/public/uploads/`
+		const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
 		const imgName = `${req.user.id}-${randomHex()}.png`
 		let sql = `SELECT * FROM images WHERE user_id = ? AND cover = 0`
 		let result = await pool.query(sql, [req.user.id])
@@ -365,7 +370,7 @@ router.post('/image/cover', [auth, upload.single('image')], async (req, res) => 
 		if (result.length) {
 			if (!isExternal(result[0].name)) {
 				try {
-					unlinkAsync(resolve(dirname(dirname(__dirname)), 'public/uploads', result[0].name))
+					unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
 				} catch (err) {
 					throw new Error(err)
 				}
@@ -373,7 +378,7 @@ router.post('/image/cover', [auth, upload.single('image')], async (req, res) => 
 			sql = `DELETE FROM images WHERE id = ? AND user_id = ?`
 			await pool.query(sql, [result[0].id, req.user.id])
 		}
-		const uploadDir = `${dirname(dirname(__dirname))}/public/uploads/`
+		const uploadDir = `${dirname(dirname(__dirname))}/uploads/`
 		const imgName = `${req.user.id}-${randomHex()}.png`
 		await writeFileAsync(uploadDir + imgName, req.file.buffer, 'base64')
 		sql = `INSERT INTO images (user_id, name, cover) VALUES (?, ?, 1)`
@@ -394,7 +399,7 @@ router.post('/image/del', auth, async (req, res) => {
 		if (result.length) {
 			if (!isExternal(result[0].name)) {
 				try {
-					unlinkAsync(resolve(dirname(dirname(__dirname)), 'public/uploads', result[0].name))
+					unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
 				} catch (err) {
 					throw new Error(err)
 				}
