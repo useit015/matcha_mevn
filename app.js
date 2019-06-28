@@ -37,7 +37,6 @@ const io = socketIo(server, { pingInterval: 10, pingTimeout: 4000 })
 let users = {}
 
 io.on('connection', socket => {
-	console.log('New client connected --> ', socket.id)
 	socket.on('chat', data => {
 		const id = users[data.id_to]
 		if (id) io.sockets.connected[id].emit('chat', data)
@@ -47,7 +46,6 @@ io.on('connection', socket => {
 		if (id) io.sockets.connected[id].emit('typing', data)
 	})
 	socket.on('seenConvo', data => {
-		console.log('i am in seenConvo and i got this -> ', data)
 		const id = users[data.user]
 		if (id) io.sockets.connected[id].emit('seenConvo', data.convo)
 	})
@@ -66,14 +64,13 @@ io.on('connection', socket => {
 	socket.on('auth', id => {
 		users[id] = socket.id
 		io.emit('online', Object.keys(users))
-		console.log('users are', users)
 	})
 	socket.on('logout', id => {
 		try {
 			const sql = `UPDATE users SET status = NOW() WHERE id = ?`
 			pool.query(sql, [id])
 		} catch (err) {
-			throw new Error(err)
+			console.log('Got error here -->', err)
 		}
 		delete users[id]
 		io.emit('out', Object.keys(users))
@@ -85,11 +82,10 @@ io.on('connection', socket => {
 					const sql = `UPDATE users SET status = NOW() WHERE id = ?`
 					pool.query(sql, [key])
 				} catch (err) {
-					throw new Error(err)
+					console.log('Got error here -->', err)
 				}
 				delete users[key]
 				io.emit('online', Object.keys(users))
-				console.log('Client disconnected --> ', socket.id)
 				socket.disconnect()
 			}
 		}

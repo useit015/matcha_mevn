@@ -12,7 +12,7 @@ router.post('/position', auth, async (req, res) => {
 		if (!result.affectedRows) return res.json({ msg: 'Oups something went wrong'})
 		res.json({ ok: true })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -46,7 +46,7 @@ router.post('/block', auth, async (req, res) => {
 			res.json({ msg: 'User already Blocked' })
 		}
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -59,7 +59,7 @@ router.post('/unblock', auth, async (req, res) => {
 		if (!result.affectedRows) return res.json({ msg: 'Cannot unblock user' })
 		res.json({ ok: true })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -75,7 +75,7 @@ router.post('/report', auth, async (req, res) => {
 			res.json({ msg: 'Cannot report user' })
 		}
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -128,7 +128,7 @@ router.post('/match', auth, async (req, res) => {
 			}
 		}
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 

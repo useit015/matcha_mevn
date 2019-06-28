@@ -50,7 +50,7 @@ router.get('/all', auth, async (req, res) => {
 		})
 		res.json(result)
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -70,7 +70,7 @@ router.post('/single', auth, async (req, res) => {
 					AND id_conversation = ? AND id_from != ?`
 		await pool.query(sql, [req.body.id, req.user.id])
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -84,7 +84,7 @@ router.post('/update', auth, async (req, res) => {
 		await pool.query(sql, [req.body.id, req.user.id])
 		res.json({ ok: true})
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -111,7 +111,7 @@ router.post('/send', auth, async (req, res) => {
 		await pool.query(sql, [msg.date, result.insertId, msg.id_conversation])
 		res.json({ ok:true })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 

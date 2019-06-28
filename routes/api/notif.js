@@ -15,7 +15,7 @@ router.post('/add', auth, async (req, res) => {
 		await pool.query(sql, data)
 		res.json({ ok: true})
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -23,28 +23,42 @@ router.get('/all', auth, async (req, res) => {
 	if (!req.user.id) res.json({ msg: 'not logged in' })
 	try {
 		const sql = `SELECT
+						notifications.id,
 						notifications.id_from as id_from,
 						notifications.created_at as date,
 						notifications.is_read as is_read,
 						notifications.type as type,
 						users.username as username,
-						images.name as profile_image
+						images.name as profile_image,
+						images.profile as profile,
+						images.cover as cover
 					FROM notifications
 					INNER JOIN users
 					ON notifications.id_from = users.id
-					INNER JOIN images
+					LEFT JOIN images
 					ON notifications.id_from = images.user_id
 					where notifications.id_to = ?
-					AND images.profile = 1 
 					AND users.id NOT IN (
 						SELECT blocker FROM blocked WHERE blocked = ? 
 						UNION 
 						SELECT blocked FROM blocked WHERE blocker = ?
 					)`
-		const result = await pool.query(sql, [req.user.id, req.user.id, req.user.id])
+		let result = await pool.query(sql, [req.user.id, req.user.id, req.user.id])
+		result = result.filter((cur, i) => {
+			for (let index = 0; index < result.length; index++) {
+				if (i != index && result[index].id == cur.id) {
+					return cur.profile 
+				}
+			}
+			return true
+		}).map(cur => {
+			if (cur.cover)
+				cur.profile_image = ''
+				return cur
+		})
 		res.json(result)
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -55,7 +69,7 @@ router.get('/update', auth, async (req, res) => {
 		await pool.query(sql, [req.user.id])
 		res.json({ ok: true})
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 

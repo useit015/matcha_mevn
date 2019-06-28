@@ -101,7 +101,7 @@ router.get('/isloggedin', auth, async (req, res) => {
 		user.token = await sign(payload, process.env.SECRET, tokenExp)
 		res.json(user)
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -126,10 +126,10 @@ router.post('/login', async (req, res) => {
 			user.token = await sign(payload, process.env.SECRET, tokenExp)
 			res.json(user)
 		} catch (err) {
-			throw new Error(err)
+			return res.json({ msg: 'Fatal error', err })
 		}
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -152,7 +152,7 @@ router.get('/verify/:key', async (req, res) => {
 		const token = await sign(payload, process.env.SECRET, tokenExp)
 		res.render('verify', { token })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -168,7 +168,7 @@ router.post('/rcheck', auth, async (req, res) => {
 		if (!result.affectedRows) return res.json({ msg: 'Oups something went wrong' })
 		res.json({ ok: true })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -183,7 +183,7 @@ router.post('/forgot', async (req, res) => {
 		sendMail(req.body.email, key, 'recover')
 		res.json({ ok: true })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -198,7 +198,7 @@ router.get('/recover/:key', async (req, res) => {
 		const token = await sign(payload, process.env.SECRET, tokenExp)
 		res.render('recover', { token, key })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -212,7 +212,7 @@ router.post('/kcheck', auth, async (req, res) => {
 		if (!result.length) return res.json({ msg: 'Invalid key' })
 		res.json({ ok: true })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -223,7 +223,7 @@ router.get('/kdestroy', auth, async (req, res) => {
 		const result = await pool.query(sql, [req.user.id])
 		res.json({ ok: true })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 

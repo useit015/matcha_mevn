@@ -67,7 +67,7 @@ router.get('/getmatches', auth, async (req, res) => {
 		})
 		res.json([...following, ...followers])
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -117,7 +117,7 @@ router.get('/gethistory', auth, async (req, res) => {
 		})
 		res.json([...visitors, ...visited])
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -128,7 +128,7 @@ router.get('/getblocked', auth, async (req, res) => {
 		const blacklist = await pool.query(sql, [req.user.id, req.user.id])
 		res.json(blacklist)
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -139,7 +139,7 @@ router.get('/gettags', auth, async (req, res) => {
 		const result = await pool.query(sql)
 		res.json(result.map(cur => cur.value))
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -176,7 +176,7 @@ router.post('/add', async (req, res) => {
 		}
 		res.json({ msg: 'Username or Email already in use'})
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -279,7 +279,7 @@ router.post('/update', auth, async (req, res) => {
 						const sql = `INSERT INTO tags (value) VALUES (?)`
 						await pool.query(sql, [cur])
 					} catch (err) {
-						throw new Error(err)
+						return res.json({ msg: 'Fatal error', err })
 					}
 				}
 			})
@@ -287,7 +287,7 @@ router.post('/update', auth, async (req, res) => {
 			res.json({ ok: false, status: 'User not found' })
 		}
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -311,7 +311,7 @@ router.post('/email', auth, async (req, res) => {
 		if (!result.affectedRows) return res.json({ msg: 'Oups something went wrong' })
 		res.json({ ok: true })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -335,7 +335,7 @@ router.post('/password', auth, async (req, res) => {
 		if (!result.affectedRows) return res.json({ msg: 'Oups something went wrong' })
 		res.json({ ok: true })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -358,7 +358,7 @@ router.post('/image', [auth, upload.single('image')], async (req, res) => {
 			res.json({ msg: 'User already has 5 photos' })
 		}
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -372,7 +372,7 @@ router.post('/image/cover', [auth, upload.single('image')], async (req, res) => 
 				try {
 					unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
 				} catch (err) {
-					throw new Error(err)
+					return res.json({ msg: 'Fatal error', err })
 				}
 			}
 			sql = `DELETE FROM images WHERE id = ? AND user_id = ?`
@@ -386,7 +386,7 @@ router.post('/image/cover', [auth, upload.single('image')], async (req, res) => 
 		if (!result.affectedRows) return res.json({ msg: 'Oups.. Something went wrong!'})
 		res.json({ ok: true, status: 'Image Updated', name: imgName, id: result.insertId, user_id: req.user.id })
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -401,7 +401,7 @@ router.post('/image/del', auth, async (req, res) => {
 				try {
 					unlinkAsync(resolve(dirname(dirname(__dirname)), 'uploads', result[0].name))
 				} catch (err) {
-					throw new Error(err)
+					return res.json({ msg: 'Fatal error', err })
 				}
 			}
 			sql = `DELETE FROM images WHERE id = ? AND user_id = ?`
@@ -415,7 +415,7 @@ router.post('/image/del', auth, async (req, res) => {
 		}
 		res.json({ msg: 'Oups something went wrong'})
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -437,7 +437,15 @@ router.post('/show', auth, async (req, res) => {
 			const tags = a.split(',')
 			return userTags.split(',').filter(val => -1 !== tags.indexOf(val)).length
 		}
-		result = result.filter(cur => {
+		result = result.map(cur => {
+			delete cur.password
+			delete cur.vkey
+			delete cur.rkey
+			delete cur.verified
+			delete cur.email
+			delete cur.google_id
+			return cur
+		}).filter(cur => {
 			if (!req.body.filter)
 				return true
 			if (user.looking == 'both')
@@ -460,7 +468,7 @@ router.post('/show', auth, async (req, res) => {
 		})
 		res.json(result)
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -474,6 +482,12 @@ router.get('/show/:id', auth, async (req, res) => {
 		const result = await pool.query(sql, [req.params.id, req.user.id, req.user.id, req.params.id])
 		if (result.length) {
 			const user = result[0]
+			delete user.password
+			delete user.vkey
+			delete user.rkey
+			delete user.verified
+			delete user.email
+			delete user.google_id
 			sql = `SELECT * FROM images WHERE user_id = ?`
 			user.images = await pool.query(sql, [user.id])
 			sql = `INSERT INTO history (visitor, visited) VALUES (?, ?)`
@@ -485,7 +499,7 @@ router.get('/show/:id', auth, async (req, res) => {
 			res.json({msg:'User doesnt exist'})
 		}
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 
@@ -503,7 +517,7 @@ router.post('/blacklisted', auth, async (req, res) => {
 			list: result
 		})
 	} catch (err) {
-		throw new Error(err)
+		return res.json({ msg: 'Fatal error', err })
 	}
 })
 

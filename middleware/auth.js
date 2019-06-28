@@ -8,10 +8,12 @@ const auth = async (req, res, next) => {
 		const decoded = jwt.verify(token, process.env.SECRET)
 		req.user = decoded
 		if (decoded.id) {
-			const sql = `SELECT * FROM users WHERE id = ?`
-			const result = await pool.query(sql, [decoded.id])
-			if (result.length) {
-				req.user = result[0]
+			try {
+				const sql = `SELECT * FROM users WHERE id = ?`
+				const result = await pool.query(sql, [decoded.id])
+				if (result.length) req.user = result[0]
+			} catch (err) {
+				console.log('Got error here -->', err)
 			}
 		}
 		next()
