@@ -19,7 +19,7 @@ Vue.use(vueResource)
 const SocketInstance = io(`${process.env.URL}`);
 
 Vue.use(new vueIo({
-	debug: true,
+	debug: false,
 	connection: SocketInstance,
 	vuex: {
 		store,

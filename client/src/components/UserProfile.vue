@@ -196,10 +196,10 @@ export default {
 			}
 		},
 		likedBy () {
-				for (let match of this.followers)
-					if (match.id == this.user.id)
-						return true 
-				return false
+			for (let match of this.followers)
+				if (match.id == this.user.id)
+					return true 
+			return false
 		},
 		profileImage () {
 			return this.getFullPath(this.getProfileImage())
@@ -273,6 +273,12 @@ export default {
 				if (Array.isArray(this.blocked) && this.blocked.includes(id)) {
 					this.$router.push('/')
 				}
+			}
+		},
+		blockedBy: {
+			immediate: true,
+			handler () {
+				const id = Number(this.$route.params.id)
 				if (Array.isArray(this.blockedBy) && this.blockedBy.includes(id)) {
 					this.$router.push('/')
 				}
@@ -405,8 +411,7 @@ export default {
 			if (!res.body.msg) {
 				this.reportDialog = false
 				this.showAlert('green', 'User reported successfuly', this)
-			}
-			else {
+			} else {
 				this.showAlert('red', res.body.msg, this)
 			}
 		}
