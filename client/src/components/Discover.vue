@@ -284,7 +284,7 @@ export default {
 			})
 		},
 		isComplet () {
-			return this.user.gender && this.user.gender.length && this.user.looking && this.user.biography && this.user.tags && this.user.images.length
+			return this.user.gender && this.user.gender.length && this.user.looking && this.user.biography && this.user.tags && this.user.images.length && this.user.city && this.user.country && this.user.postal_code
 		}
 	}
 }
