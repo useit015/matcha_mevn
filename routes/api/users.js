@@ -237,7 +237,7 @@ router.post('/update', auth, async (req, res) => {
 	if (req.body.tags)
 		const tagList = req.body.tags.split(',')
 	else
-		tagList = []
+		const tagList = []
 	if (tagList.length > 20) return res.json({ msg:'Too many tags' })
 	for (const iterator of tagList) {
 		if (iterator.length > 25)
