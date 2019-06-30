@@ -234,6 +234,8 @@ router.post('/update', auth, async (req, res) => {
 		return res.json({ msg:'Gender is invalid' })
 	if (!validateInput(req.body.looking, 'looking'))
 		return res.json({ msg:'Looking is invalid' })
+	if (res.body.birthdate && new Date(res.body.birthdate) >= new Date().getTime())
+		return res.json({ msg:'Birthdate is invalid' })
 	const tagList = req.body.tags.split(',')
 	if (tagList.length > 20) return res.json({ msg:'Too many tags' })
 	for (const iterator of tagList) {
