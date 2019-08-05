@@ -4,6 +4,7 @@
 	"description": "matcha love finding app",
 	"main": "app.js",
 	"scripts": {
+		"start": "node app.js"
 		"dev": "git pull && nodemon app.js"
 	},
 	"author": "onahiz",
