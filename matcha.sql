@@ -20,25 +20,25 @@ SET time_zone = "+00:00";
 -- Database: `matcha`
 --
 
--- DELIMITER $$
--- --
--- -- Procedures
--- --
--- CREATE DEFINER=`F0ikPUDx5Z`@` remotemysql.com` PROCEDURE `CALC_RATING` (OUT `visites` INT, OUT `likes` INT, OUT `reported` INT, IN `id_user` INT)  SQL SECURITY INVOKER
---     COMMENT 'Calculate the user''s rating'
--- BEGIN
--- 	SELECT count(*) INTO likes FROM matcha.matches WHERE matched = id_user;
---     SELECT count(*) INTO visites FROM matcha.history WHERE visited = id_user;
---     SELECT reports INTO reported FROM matcha.users WHERE id = id_user;
--- END$$
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CALC_RATING` (OUT `visites` INT, OUT `likes` INT, OUT `reported` INT, IN `id_user` INT)  SQL SECURITY INVOKER
+    COMMENT 'Calculate the user''s rating'
+BEGIN
+	SELECT count(*) INTO likes FROM matcha.matches WHERE matched = id_user;
+    SELECT count(*) INTO visites FROM matcha.history WHERE visited = id_user;
+    SELECT reports INTO reported FROM matcha.users WHERE id = id_user;
+END$$
 
--- --
--- -- Functions
--- --
--- CREATE DEFINER=`F0ikPUDx5Z`@` remotemysql.com` FUNCTION `GET_RATING` (`id_user` INT) RETURNS DOUBLE BEGIN
--- 	CALL `CALC_RATING`(@visit, @like, @reports, id_user);
---     RETURN @like / 20  + @visit / 100 - @reports / 250;
--- END$$
+--
+-- Functions
+--
+CREATE DEFINER=`root`@`localhost` FUNCTION `GET_RATING` (`id_user` INT) RETURNS DOUBLE BEGIN
+	CALL `CALC_RATING`(@visit, @like, @reports, id_user);
+    RETURN @like / 20  + @visit / 100 - @reports / 250;
+END$$
 
 DELIMITER ;
 
