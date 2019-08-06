@@ -16,7 +16,7 @@ Vue.use(Vuetify, {
 
 Vue.use(vueResource)
 
-const SocketInstance = io(`${process.env.URL}`);
+const SocketInstance = io(location.origin.replace(/^http/, 'ws'));
 
 Vue.use(new vueIo({
 	debug: false,
