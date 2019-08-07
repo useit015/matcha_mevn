@@ -33,7 +33,7 @@ passport.use(
 	new GoogleStrategy({
 		clientID: process.env.OAUTH_ID,
 		clientSecret: process.env.OAUTH_PASS,
-		callbackURL: 'http://useit015.me/auth/google/redirect'
+		callbackURL: 'https://matcha1337.herokuapp.com/auth/google/redirect'
 	}, async (accessToken, refreshToken, profile, done) => {
 		try {
 			let user, sql, result
